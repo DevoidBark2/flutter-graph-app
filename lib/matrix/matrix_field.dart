@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 
 class MatrixField extends StatelessWidget {
   final TextEditingController controller;
+  final TextInputAction action;
   const MatrixField({
     Key? key,
     required this.controller,
+    required this.action
   }) : super(key: key);
 
   @override
@@ -15,6 +17,7 @@ class MatrixField extends StatelessWidget {
       child: TextField(
         textAlign: TextAlign.center,
         controller: controller,
+        textInputAction: action,
         decoration: const InputDecoration(
           border: OutlineInputBorder(),
         ),

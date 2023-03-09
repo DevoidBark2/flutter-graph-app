@@ -1,8 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:test_project/graph/graph.dart';
 import 'package:test_project/graph/graph_view.dart';
-import '../graph/node.dart';
 import 'matrix.dart';
 import 'matrix_field.dart';
 
@@ -22,10 +20,6 @@ class _MatrixPageState extends State<MatrixPage> {
   final controllers = <List<TextEditingController>>[];
   late final rows = widget.matrix.rows;
   late final columns = widget.matrix.columns;
-  var nodeA = NodeGraph('A', 1);
-  var nodeB = NodeGraph('B', 2);
-  var nodeC = NodeGraph('C', 3);
-  var nodeD = NodeGraph('D', 4);
 
   @override
   void initState() {
@@ -75,6 +69,7 @@ class _MatrixPageState extends State<MatrixPage> {
                       height: controllers.length > 5 ? 40 : controllers.length > 6 ? 20 : 50,
                       width: controllers.length > 5 ? 40 : controllers.length > 6 ? 20 : 50,
                       child: MatrixField(
+                        action: (index2  == controllers.length -1 && index1 == controllers.length -1) ? TextInputAction.done : TextInputAction.next,
                         controller: controllers[index1][index2],
                       ),
                     ),
@@ -94,7 +89,7 @@ class _MatrixPageState extends State<MatrixPage> {
                   builder: (context) {
                     return Scaffold(
                       appBar: AppBar(),
-                      body: GraphView(controllers: controllers),
+                      body: GraphView(controllers:controllers),
                     );
                   },
                 ),
