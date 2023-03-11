@@ -118,20 +118,18 @@ class OpenPainter extends CustomPainter {
               // }
               // else{
               //   //рисуем стрелку
+              // path.moveTo(points[i].dx - 20, points[i].dy - 20);
+              // path.lineTo(points[i].dx - 20,points[i].dy - 20);
+              //
+              // // path.moveTo(points[i].dx +50, points[i].dy + 50);
+              // path.lineTo(points[i].dx -15, points[i].dy +30);
+              //
+              // // path.moveTo(points[i].dx -15, points[i].dy +30);
+              // // path.lineTo(points[i].dx -100, points[i].dy -100);
+              // path.close();
+              // canvas.drawPath(path,paint4);
               // }
-                matrix[j][i] = 0;
-            //
-            // path.moveTo(points[i].dx - 20, points[i].dy - 20);
-            // path.lineTo(points[i].dx - 20,points[i].dy - 20);
-            //
-            // // path.moveTo(points[i].dx +50, points[i].dy + 50);
-            // path.lineTo(points[i].dx -15, points[i].dy +30);
-            //
-            // // path.moveTo(points[i].dx -15, points[i].dy +30);
-            // // path.lineTo(points[i].dx -100, points[i].dy -100);
-            // path.close();
-            // canvas.drawPath(path,paint4);
-
+              matrix[j][i] = 0;
           }
         }
         canvas.drawPoints(PointMode.points, points, paint1);

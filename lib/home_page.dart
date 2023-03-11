@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'matrix/matrix.dart';
 import 'matrix/matrix_option.dart';
 
@@ -9,7 +8,6 @@ class HomePage extends StatefulWidget {
   @override
   State<HomePage> createState() => _HomePageState();
 }
-
 
 class _HomePageState extends State<HomePage> {
 

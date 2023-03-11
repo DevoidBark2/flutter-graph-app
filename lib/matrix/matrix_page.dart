@@ -1,6 +1,8 @@
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:test_project/graph/graph_view.dart';
+import 'package:test_project/home_page.dart';
 import 'matrix.dart';
 import 'matrix_field.dart';
 
@@ -25,6 +27,7 @@ class _MatrixPageState extends State<MatrixPage> {
   void initState() {
     super.initState();
     createControllers();
+
   }
 
   void createControllers() {
@@ -53,6 +56,13 @@ class _MatrixPageState extends State<MatrixPage> {
 
   @override
   Widget build(BuildContext context) {
+    var mat = List.generate(controllers.length, (row) => List.generate(controllers.length ,(column) => int.tryParse(controllers[row][column].text)));
+    if (kDebugMode) {
+      print(mat);
+    }
+    bool checkMatrix(){
+      return true;
+    }
     return Center(
       child: Column(
         children: [
@@ -78,23 +88,19 @@ class _MatrixPageState extends State<MatrixPage> {
               ),
             ),
           ),
-          // TextButton(
-          //   onPressed: printMatrix,
-          //   child: const Text('View Graph'),
-          // )
           InkWell(
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) {
-                    return Scaffold(
-                      appBar: AppBar(),
-                      body: GraphView(controllers:controllers),
-                    );
-                  },
-                ),
-              );
-            },
+            onTap: checkMatrix() == true ? () => Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                  return Scaffold(
+                    appBar: AppBar(),
+                    body: GraphView(controllers:controllers),
+                  );
+                })
+            ) : () => Navigator.of(context).pop(MaterialPageRoute(builder: (context) {
+                  return Scaffold(
+                    appBar: AppBar(),
+                    body: const HomePage(),
+                  );
+                })),
             child: Container(
               height: 50,
               width: 100,
