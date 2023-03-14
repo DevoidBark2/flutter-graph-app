@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -23,10 +24,10 @@ class _GraphViewState extends State<GraphView> {
       child: SizedBox(
         width: 300,
         height: 300,
-          child: CustomPaint(
-            painter: OpenPainter(matrix: m),
-          ),
-      ),
+        child: CustomPaint(
+          painter: OpenPainter(matrix: m),
+        ),
+      )
     );
   }
 }
@@ -46,55 +47,59 @@ class OpenPainter extends CustomPainter {
       ..strokeWidth = 2;
 
     var paint3 =  Paint()
-      ..color = const Color(0xffef0037)//rounded points
-      ..strokeWidth = 2
+      ..color = const Color(0xffb69d9d)//rounded points
+      ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
     // var paint4 =  Paint()
     //   ..color = const Color(0xffef0037)//rounded points
     //   ..strokeWidth = 10;
 
     final List<Offset> points = [];
-    for(var i =0; i < matrix.length;i++){
-      if(matrix.length == 4){
-        if(i == 0){
-          points.add(const Offset(75, 75));
-        }
-        if(i == 1){
-          points.add(const Offset(225, 75));
-        }
-        if(i == 2){
-          points.add(const Offset(75, 225));
-        }
-        if(i == 3){
-          points.add(const Offset(225, 225));
-        }
-      }
-      if(matrix.length == 5){
-        if(i == 0){
-          points.add(const Offset(150, 50));
-        }
-        if(i == 1){
-          points.add(const Offset(50, 150));
-        }
-        if(i == 2){
-          points.add(const Offset(250, 150));
-        }
-        if(i == 3){
-          points.add(const Offset(100, 250));
-        }
-        if(i == 4){
-          points.add(const Offset(200, 250));
-        }
-      }
-      if(matrix.length == 2){
-        if(i == 0){
-          points.add(const Offset(75, 75));
-        }
-        if(i == 1){
-          points.add(const Offset(225, 75));
-        }
-      }
+    canvas.drawCircle(Offset(size.width / 2, size.height / 2), 140, paint3);
+    final dlina = matrix.length; // 3  2   4
+    final segment = 360 / dlina; //120 180 90
 
+    for(var i =0; i < dlina;i++){
+      // if(matrix.length == 4){
+      //   if(i == 0){
+      //     points.add(const Offset(75, 75));
+      //   }
+      //   if(i == 1){
+      //     points.add(const Offset(225, 75));
+      //   }
+      //   if(i == 2){
+      //     points.add(const Offset(75, 225));
+      //   }
+      //   if(i == 3){
+      //     points.add(const Offset(225, 225));
+      //   }
+      // }
+      // if(matrix.length == 5){
+      //   if(i == 0){
+      //     points.add(const Offset(150, 50));
+      //   }
+      //   if(i == 1){
+      //     points.add(const Offset(50, 150));
+      //   }
+      //   if(i == 2){
+      //     points.add(const Offset(250, 150));
+      //   }
+      //   if(i == 3){
+      //     points.add(const Offset(100, 250));
+      //   }
+      //   if(i == 4){
+      //     points.add(const Offset(200, 250));
+      //   }
+      // }
+      // if(matrix.length == 2){
+      //   if(i == 0){
+      //     points.add(const Offset(75, 75));
+      //   }
+      //   if(i == 1){
+      //     points.add(const Offset(225, 75));
+      //   }
+      // }
+      points.add(Offset((150 + 140 * cos(segment + segment * i)),(150 + 140 * sin(segment + segment * i))));
     }
 
 
@@ -141,8 +146,6 @@ class OpenPainter extends CustomPainter {
         }
       }
     }
-
-
   }
 
   @override
