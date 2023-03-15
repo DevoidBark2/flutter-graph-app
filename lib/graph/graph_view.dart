@@ -1,33 +1,100 @@
 import 'dart:math';
 import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class GraphView extends StatefulWidget {
   final List<List<TextEditingController>> controllers;
-
-
   const GraphView({Key? key, required this.controllers}): super(key: key);
-
   @override
   State<GraphView> createState() => _GraphViewState();
 }
 
-
 class _GraphViewState extends State<GraphView> {
   late final matrixF = widget.controllers;
+  var N = 0;
+  var count = 0;
+  bool completeGraph(){
+    var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
+    for(var i = 0; i < matrix.length; i++){
+      for(var j = 0; j < matrix.length;j++){
+        if(i == j){
+          continue;
+        }
+        if(matrix[i][j] == 0){
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  void countOfRibs(){
+    var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
+    for(var i = 0; i < matrix.length; i++){
+      for(var j = 0; j < matrix.length;j++){
+        if(matrix[i][j] != 0){
+          count++;
+        }
+      }
+    }
+    N = count ~/ 2;
+  }
+  bool emptyGraph(){
+    var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
+    var count = 0;
+    for(var i = 0; i < matrix.length; i++){
+      for(var j = 0; j < matrix.length;j++){
+        count += matrix[i][j]!;
+      }
+    }
+    if(count == 0){
+      return true;
+    }
+    else{
+      return false;
+    }
+  }
+  @override
+  void initState() {
+    super.initState();
+    countOfRibs();
+  }
+
   @override
   Widget build(BuildContext context) {
-    var m = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
-    return Center(
-      child: SizedBox(
-        width: 300,
-        height: 300,
-        child: CustomPaint(
-          painter: OpenPainter(matrix: m),
-        ),
-      )
+    var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 20),
+      child: Column(
+        children: [
+          SizedBox(
+            width: 300,
+            height: 300,
+            child: CustomPaint(
+              painter: OpenPainter(matrix: matrix),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 10),
+                  child: Text('Количество ребер: $N')
+              ),
+              Padding(
+                  padding: const EdgeInsets.only(left: 10),
+                  child: completeGraph() == true ? const Text('Полный граф') : const Text('Не полный граф')
+              ),
+              Padding(
+                  padding: const EdgeInsets.only(left: 10),
+                  child: emptyGraph() == true ? const Text('Пустой граф: Да') : const Text('Пустой граф: Нет')
+              ),
+            ],
+          )
+        ],
+      ),
     );
   }
 }
@@ -82,7 +149,6 @@ class OpenPainter extends CustomPainter {
                //  TextPainter tp = TextPainter(text: span, textAlign: TextAlign.left, textDirection: TextDirection.ltr);
                //  tp.layout();
                //  tp.paint(canvas, Offset(points[i].dx + 20.0, points[j].dy + 20.0));
-
               canvas.drawLine(points[i], points[j], paint2);
               // if(matrix[j][i] > 0){
               //   matrix[j][i] = 0;
@@ -105,7 +171,6 @@ class OpenPainter extends CustomPainter {
         }
       }
     }
-
 
     // рисование вершин
     if(points.length > 6){

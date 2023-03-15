@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
         appBar: AppBar(
           title: const Text('Graph'),
         ),
-        body: const HomePage(),
+        body: const Center(child: HomePage()),
       ),
       debugShowCheckedModeBanner: false,
     );

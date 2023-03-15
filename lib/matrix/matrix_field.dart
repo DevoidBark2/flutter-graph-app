@@ -11,17 +11,14 @@ class MatrixField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 50,
-      width: 50,
-      child: TextField(
+    return TextField(
         textAlign: TextAlign.center,
         controller: controller,
         textInputAction: action,
+        autofocus: true,
         decoration: const InputDecoration(
-          border: OutlineInputBorder(),
+          border: OutlineInputBorder()
         ),
-      ),
-    );
+      );
   }
 }
