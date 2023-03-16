@@ -104,15 +104,12 @@ class OpenPainter extends CustomPainter {
   OpenPainter({Key? key, required this.matrix});
   @override
   void paint(Canvas canvas, Size size) {
+
+
     var paint1 = Paint()
       ..color = const Color(0xff63aa65)
       ..strokeCap = StrokeCap.round //rounded points
       ..strokeWidth = 30;
-
-    var paintForPoint = Paint()
-      ..color = const Color(0xff63aa65)
-      ..strokeCap = StrokeCap.round //rounded points
-      ..strokeWidth = 25;
 
     var paint2 = Paint()
       ..color = const Color(0xffef0037)//rounded points
@@ -127,15 +124,15 @@ class OpenPainter extends CustomPainter {
     //   ..strokeWidth = 10;
 
     final List<Offset> points = [];
-    canvas.drawCircle(Offset(size.width / 2, size.height / 2), 140, paint3);
-
     final segment = 360 / matrix.length;
+
+    //рисование точек
     for(var i =0; i < matrix.length;i++){
       final angle = 2 * pi * (i / matrix.length) + segment;
       points.add(Offset((cos(angle) * 140 + (size.width / 2)), (sin(angle) * 140 + (size.width / 2))));
     }
 
-
+    //основной цикл полного рисования(петли, веса и т.д.)
     for(var i =0;i < matrix.length  ;i++){
       for(var j = 0;j < matrix.length;j++){
         if(matrix[i][j] != 0){
@@ -143,13 +140,22 @@ class OpenPainter extends CustomPainter {
             Offset ofs = Offset(points[i].dx, points[i].dy - 15);
             canvas.drawCircle(ofs,20.0, paint3);
           }
-          else{  // рисует просто линия
-               //рисует вес графа
-               //  TextSpan span = TextSpan(style: const TextStyle(color: Colors.black,fontWeight: FontWeight.bold), text: "${matrix[i][j]}");
-               //  TextPainter tp = TextPainter(text: span, textAlign: TextAlign.left, textDirection: TextDirection.ltr);
-               //  tp.layout();
-               //  tp.paint(canvas, Offset(points[i].dx + 20.0, points[j].dy + 20.0));
-              canvas.drawLine(points[i], points[j], paint2);
+          else{
+                // рисует просто линия
+                canvas.drawLine(points[i], points[j], paint2);
+
+                TextSpan span = TextSpan(style: const TextStyle(color: Colors.black,fontWeight: FontWeight.bold), text: "${matrix[i][j]}");
+                TextPainter tp = TextPainter(text: span, textAlign: TextAlign.left, textDirection: TextDirection.ltr);
+                tp.layout();
+                //рисует вес графа
+                if(matrix.length % 2 == 0){
+                  var del = 1/3; // делим отрезок в отношении 1/3
+                  tp.paint(canvas, Offset(((points[i].dx + del * points[j].dx) / (1 + del)), ((points[i].dy + del * points[j].dy) / (1 + del))));
+                }else{
+                  // иначе делим в нормальном отношении 1/2
+                  tp.paint(canvas, Offset(((points[i].dx + points[j].dx) / 2), ((points[i].dy + points[j].dy) / 2)));
+                }
+
               // if(matrix[j][i] > 0){
               //   matrix[j][i] = 0;
               // }
@@ -173,11 +179,8 @@ class OpenPainter extends CustomPainter {
     }
 
     // рисование вершин
-    if(points.length > 6){
-      canvas.drawPoints(PointMode.points, points, paintForPoint);
-    }
-    else{
-      canvas.drawPoints(PointMode.points, points, paint1);
+    for(var i = 0;i < matrix.length;i++) {
+      canvas.drawCircle(points[i], 15, paint1);
     }
 
     // рисование индекса вершины
@@ -187,7 +190,6 @@ class OpenPainter extends CustomPainter {
       tp.layout();
       tp.paint(canvas, Offset(points[i].dx -5.0, points[i].dy - 8.0));
     }
-
   }
 
   @override

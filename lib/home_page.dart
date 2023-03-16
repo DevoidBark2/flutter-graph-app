@@ -21,9 +21,10 @@ class _HomePageState extends State<HomePage> {
             children: <Widget>[
               MatrixOption(matrix: Matrix(2, 2)),
               MatrixOption(matrix: Matrix(3, 3)),
-              MatrixOption(matrix: Matrix(6, 6)),
               MatrixOption(matrix: Matrix(4, 4)),
               MatrixOption(matrix: Matrix(5, 5)),
+              MatrixOption(matrix: Matrix(6, 6)),
+              MatrixOption(matrix: Matrix(7, 7)),
             ],
           ),
         ),
