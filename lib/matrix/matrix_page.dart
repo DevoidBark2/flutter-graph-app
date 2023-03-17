@@ -49,10 +49,10 @@ class _MatrixPageState extends State<MatrixPage> {
   //   }
   //   super.dispose();
   // }
-
+  bool isCheckedWeight = false;
+  bool isCheckedOriented = false;
   @override
   Widget build(BuildContext context) {
-
     bool checkMatrix(controllers){
       var mat = List.generate(controllers.length, (row) => List.generate(controllers.length ,(column) => int.tryParse(controllers[row][column].text)));
       for(var i = 0; i < mat.length; i++){
@@ -64,7 +64,17 @@ class _MatrixPageState extends State<MatrixPage> {
       }
       return true;
     }
-
+    Color getColor(Set<MaterialState> states) {
+      const Set<MaterialState> interactiveStates = <MaterialState>{
+        MaterialState.pressed,
+        MaterialState.hovered,
+        MaterialState.focused,
+      };
+      if (states.any(interactiveStates.contains)) {
+        return Colors.blue;
+      }
+      return Colors.red;
+    }
     return SingleChildScrollView(
       child: Center(
         child: SizedBox(
@@ -93,13 +103,43 @@ class _MatrixPageState extends State<MatrixPage> {
                   ),
                 ),
               ),
+              Row(
+                children: [
+                  const Text('Взвешенный да/нет'),
+                  Checkbox(
+                    checkColor: Colors.white,
+                    fillColor:MaterialStateProperty.resolveWith(getColor),
+                    value: isCheckedWeight,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        isCheckedWeight = value!;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  const Text('Орграф да/нет'),
+                  Checkbox(
+                    checkColor: Colors.white,
+                    fillColor:MaterialStateProperty.resolveWith(getColor),
+                    value: isCheckedOriented,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        isCheckedOriented = value!;
+                      });
+                    },
+                  ),
+                ],
+              ),
               InkWell(
                 onTap: () => checkMatrix(controllers) == true
                     ?
                 Navigator.push(context,MaterialPageRoute(builder: (context) {
                   return Scaffold(
                     appBar: AppBar(),
-                    body: GraphView(controllers:controllers),
+                    body: GraphView(controllers:controllers,isCheckedWeight: isCheckedWeight,isCheckedOriented: isCheckedOriented),
                   );
                 }))
                     :

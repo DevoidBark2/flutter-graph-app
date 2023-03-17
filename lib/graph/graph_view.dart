@@ -5,13 +5,17 @@ import 'package:flutter/material.dart';
 
 class GraphView extends StatefulWidget {
   final List<List<TextEditingController>> controllers;
-  const GraphView({Key? key, required this.controllers}): super(key: key);
+  final bool isCheckedWeight;
+  final bool isCheckedOriented;
+  const GraphView({Key? key, required this.controllers,required this.isCheckedWeight,required this.isCheckedOriented}): super(key: key);
   @override
   State<GraphView> createState() => _GraphViewState();
 }
 
 class _GraphViewState extends State<GraphView> {
   late final matrixF = widget.controllers;
+  late final isCheckedWeight = widget.isCheckedWeight;
+  late final isCheckedOriented = widget.isCheckedOriented;
   var N = 0;
   var count = 0;
   bool completeGraph(){
@@ -91,6 +95,14 @@ class _GraphViewState extends State<GraphView> {
                   padding: const EdgeInsets.only(left: 10),
                   child: emptyGraph() == true ? const Text('Пустой граф: Да') : const Text('Пустой граф: Нет')
               ),
+              Padding(
+                  padding: const EdgeInsets.only(left: 10),
+                  child: Text('$isCheckedWeight')
+              ),
+              Padding(
+                  padding: const EdgeInsets.only(left: 10),
+                  child: Text('$isCheckedOriented')
+              ),
             ],
           )
         ],
@@ -104,7 +116,6 @@ class OpenPainter extends CustomPainter {
   OpenPainter({Key? key, required this.matrix});
   @override
   void paint(Canvas canvas, Size size) {
-
 
     var paint1 = Paint()
       ..color = const Color(0xff63aa65)
@@ -124,11 +135,10 @@ class OpenPainter extends CustomPainter {
     //   ..strokeWidth = 10;
 
     final List<Offset> points = [];
-    final segment = 360 / matrix.length;
 
     //рисование точек
     for(var i =0; i < matrix.length;i++){
-      final angle = 2 * pi * (i / matrix.length) + segment;
+      final angle = 2 * pi * (i / matrix.length) + (360 / matrix.length);
       points.add(Offset((cos(angle) * 140 + (size.width / 2)), (sin(angle) * 140 + (size.width / 2))));
     }
 
