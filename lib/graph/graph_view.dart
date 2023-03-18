@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class GraphView extends StatefulWidget {
@@ -18,6 +17,8 @@ class _GraphViewState extends State<GraphView> {
   late final isCheckedOriented = widget.isCheckedOriented;
   var N = 0;
   var count = 0;
+  List<int> num = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];
+
   bool completeGraph(){
     var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
     for(var i = 0; i < matrix.length; i++){
@@ -32,7 +33,6 @@ class _GraphViewState extends State<GraphView> {
     }
     return true;
   }
-
   void countOfRibs(){
     var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
     for(var i = 0; i < matrix.length; i++){
@@ -59,51 +59,56 @@ class _GraphViewState extends State<GraphView> {
       return false;
     }
   }
+
   @override
   void initState() {
     super.initState();
     countOfRibs();
   }
-
   @override
   Widget build(BuildContext context) {
     var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 20),
-      child: Column(
+    return Stack(
+        fit: StackFit.expand,
         children: [
-          SizedBox(
-            width: 300,
-            height: 300,
-            child: CustomPaint(
-              painter: OpenPainter(matrix: matrix,isCheckedWeight: isCheckedWeight,isCheckedOriented: isCheckedOriented),
+          InteractiveViewer(
+            minScale: 0.3,
+            maxScale: 10.5,
+            boundaryMargin: const EdgeInsets.all(double.infinity),
+            child: SizedBox(
+              width: 400,
+              height: 400,
+              child: CustomPaint(
+                painter: OpenPainter(matrix: matrix,isCheckedWeight: isCheckedWeight,isCheckedOriented: isCheckedOriented),
+              ),
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 10),
-                  child: Text('Количество ребер: $N')
+          Positioned(
+            child: DraggableScrollableSheet(
+              initialChildSize: 0.1,
+              minChildSize: 0.1,
+              builder: (context,controller) => Container(
+                decoration: BoxDecoration(
+                  color:Colors.amberAccent,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    controller: controller,
+                    itemCount: num.length,
+                    itemBuilder: (context,index){
+                      return Text('$index');
+                    },
+                  ),
+                )
               ),
-              Padding(
-                  padding: const EdgeInsets.only(left: 10),
-                  child: completeGraph() == true ? const Text('Полный граф') : const Text('Не полный граф')
-              ),
-              Padding(
-                  padding: const EdgeInsets.only(left: 10),
-                  child: emptyGraph() == true ? const Text('Пустой граф: Да') : const Text('Пустой граф: Нет')
-              ),
-              Padding(
-                  padding: const EdgeInsets.only(left: 10),
-                  child: isCheckedWeight == true ? Text('$isCheckedWeight') : const Text('')
-              ),
-            ],
+            ),
           )
         ],
-      ),
-    );
+      );
   }
 }
 
@@ -115,35 +120,17 @@ class OpenPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     var path = Path();
-    var paint1 = Paint()
-      ..color = const Color(0xff63aa65)
-      ..strokeCap = StrokeCap.round //rounded points
-      ..strokeWidth = 30;
-
-    var paint2 = Paint()
-      ..color = const Color(0xffef0037)//rounded points
-      ..strokeWidth = 2;
-
-    var paint3 =  Paint()
-      ..color = const Color(0xffb69d9d)//rounded points
-      ..strokeWidth = 1
-      ..style = PaintingStyle.stroke;
-    var paint4 =  Paint()
-      ..color = const Color(0xff000000)//rounded points
-      ..strokeWidth = 10
-      ..style = PaintingStyle.stroke;
     final List<Offset> points = [];
-    var paint5 =  Paint()
-      ..color = const Color(0xffb69d9d)//rounded points
-      ..strokeWidth = 1
-      ..style = PaintingStyle.stroke;
+    var paint1 = Paint()..color = const Color(0xff63aa65)..strokeCap = StrokeCap.round..strokeWidth = 30;
+    var paint2 = Paint()..color = const Color(0xffef0037)..strokeWidth = 2;
+    var paint3 =  Paint()..color = const Color(0xffb69d9d)..strokeWidth = 1..style = PaintingStyle.stroke;
+    var paint4 =  Paint()..color = const Color(0xff000000)..strokeWidth = 10..style = PaintingStyle.stroke;
+
     //рисование точек
     for(var i =0; i < matrix.length;i++){
       final angle = 2 * pi * (i / matrix.length) + (360 / matrix.length);
       points.add(Offset((cos(angle) * 140 + (size.width / 2)), (sin(angle) * 140 + (size.width / 2))));
     }
-
-    canvas.drawCircle(Offset(150,150), 140, paint5);
 
     //основной цикл полного рисования(петли, веса и т.д.)
     for(var i =0;i < matrix.length  ;i++){
@@ -184,14 +171,6 @@ class OpenPainter extends CustomPainter {
                 path.close();
                 canvas.drawPath(path, paint4);
               }
-
-              // if(matrix[j][i]! > 0){
-              //   matrix[j][i] = 0;
-              // }
-              // else{
-              //   //рисуем стрелку
-              //
-              // }
               matrix[j][i] = 0;
           }
         }
