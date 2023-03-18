@@ -133,12 +133,17 @@ class OpenPainter extends CustomPainter {
       ..strokeWidth = 20
       ..style = PaintingStyle.stroke;
     final List<Offset> points = [];
-
+    var paint5 =  Paint()
+      ..color = const Color(0xffb69d9d)//rounded points
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
     //рисование точек
     for(var i =0; i < matrix.length;i++){
       final angle = 2 * pi * (i / matrix.length) + (360 / matrix.length);
       points.add(Offset((cos(angle) * 140 + (size.width / 2)), (sin(angle) * 140 + (size.width / 2))));
     }
+
+    canvas.drawCircle(Offset(150,150), 140, paint5);
 
     //основной цикл полного рисования(петли, веса и т.д.)
     for(var i =0;i < matrix.length  ;i++){
@@ -169,20 +174,18 @@ class OpenPainter extends CustomPainter {
                 final dX = points[j].dx - points[i].dx;
                 final dY = points[j].dy - points[i].dy;
                 final angle = atan2(dX, dY);
-                const arrowSize = 15;
-                const arrowAngle=  45 * pi/180;
+                const arrowSize = 1;
+                const arrowAngle=  45 * pi/360;
                 //path.moveTo(((points[i].dx + points[j].dx) / 2), ((points[i].dy + points[j].dy) / 2));
                 // path.lineTo((points[i].dx + points[j].dx) / 3,(points[i].dy + points[j].dy) / 3);
                 // // path.lineTo(100,0);
                 // path.close();
+                // path.moveTo(points[j].dx, points[j].dy);
+                path.moveTo(points[j].dx - arrowSize * sin(angle - arrowAngle), points[j].dy - arrowSize * cos(angle - arrowAngle));
 
-
-                path.moveTo(points[j].dx - arrowSize * cos(angle - arrowAngle),
-                    points[j].dy - arrowSize * sin(angle - arrowAngle));
                 path.lineTo(points[j].dx, points[j].dy);
 
-                path.lineTo(points[j].dx - arrowSize * cos(angle + arrowAngle),
-                    points[j].dy - arrowSize * sin(angle + arrowAngle));
+                path.lineTo(points[j].dx - arrowSize * sin(angle + arrowAngle),points[j].dy - arrowSize * cos(angle + arrowAngle));
 
                 path.close();
                 canvas.drawPath(path, paint4);
