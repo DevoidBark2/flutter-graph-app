@@ -1,12 +1,12 @@
 import 'dart:math';
 import 'dart:ui';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class GraphView extends StatefulWidget {
   final List<List<TextEditingController>> controllers;
   final bool isCheckedWeight;
   final bool isCheckedOriented;
+
   const GraphView({Key? key, required this.controllers,required this.isCheckedWeight,required this.isCheckedOriented}): super(key: key);
   @override
   State<GraphView> createState() => _GraphViewState();
@@ -77,7 +77,7 @@ class _GraphViewState extends State<GraphView> {
             width: 300,
             height: 300,
             child: CustomPaint(
-              painter: OpenPainter(matrix: matrix),
+              painter: OpenPainter(matrix: matrix,isCheckedWeight: isCheckedWeight,isCheckedOriented: isCheckedOriented),
             ),
           ),
           Column(
@@ -97,11 +97,7 @@ class _GraphViewState extends State<GraphView> {
               ),
               Padding(
                   padding: const EdgeInsets.only(left: 10),
-                  child: Text('$isCheckedWeight')
-              ),
-              Padding(
-                  padding: const EdgeInsets.only(left: 10),
-                  child: Text('$isCheckedOriented')
+                  child: isCheckedWeight == true ? Text('$isCheckedWeight') : const Text('')
               ),
             ],
           )
@@ -113,10 +109,12 @@ class _GraphViewState extends State<GraphView> {
 
 class OpenPainter extends CustomPainter {
   final List<List<int?>> matrix;
-  OpenPainter({Key? key, required this.matrix});
+  final bool isCheckedWeight;
+  final bool isCheckedOriented;
+  OpenPainter({Key? key, required this.matrix,required this.isCheckedWeight,required this.isCheckedOriented});
   @override
   void paint(Canvas canvas, Size size) {
-
+    var path = Path();
     var paint1 = Paint()
       ..color = const Color(0xff63aa65)
       ..strokeCap = StrokeCap.round //rounded points
@@ -130,10 +128,10 @@ class OpenPainter extends CustomPainter {
       ..color = const Color(0xffb69d9d)//rounded points
       ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
-    // var paint4 =  Paint()
-    //   ..color = const Color(0xffef0037)//rounded points
-    //   ..strokeWidth = 10;
-
+    var paint4 =  Paint()
+      ..color = const Color(0xffef0097)//rounded points
+      ..strokeWidth = 20
+      ..style = PaintingStyle.stroke;
     final List<Offset> points = [];
 
     //рисование точек
@@ -153,34 +151,49 @@ class OpenPainter extends CustomPainter {
           else{
                 // рисует просто линия
                 canvas.drawLine(points[i], points[j], paint2);
-
                 TextSpan span = TextSpan(style: const TextStyle(color: Colors.black,fontWeight: FontWeight.bold), text: "${matrix[i][j]}");
                 TextPainter tp = TextPainter(text: span, textAlign: TextAlign.left, textDirection: TextDirection.ltr);
                 tp.layout();
                 //рисует вес графа
-                if(matrix.length % 2 == 0){
-                  var del = 1/3; // делим отрезок в отношении 1/3
-                  tp.paint(canvas, Offset(((points[i].dx + del * points[j].dx) / (1 + del)), ((points[i].dy + del * points[j].dy) / (1 + del))));
-                }else{
-                  // иначе делим в нормальном отношении 1/2
-                  tp.paint(canvas, Offset(((points[i].dx + points[j].dx) / 2), ((points[i].dy + points[j].dy) / 2)));
+                if(isCheckedWeight){
+                  if(matrix.length % 2 == 0){
+                    var del = 1/3; // делим отрезок в отношении 1/3
+                    tp.paint(canvas, Offset(((points[i].dx + del * points[j].dx) / (1 + del)), ((points[i].dy + del * points[j].dy) / (1 + del))));
+                  }else{
+                    // иначе делим в нормальном отношении 1/2
+                    tp.paint(canvas, Offset(((points[i].dx + points[j].dx) / 2), ((points[i].dy + points[j].dy) / 2)));
+                  }
                 }
 
-              // if(matrix[j][i] > 0){
+              if(isCheckedOriented){
+                final dX = points[j].dx - points[i].dx;
+                final dY = points[j].dy - points[i].dy;
+                final angle = atan2(dX, dY);
+                const arrowSize = 15;
+                const arrowAngle=  45 * pi/180;
+                //path.moveTo(((points[i].dx + points[j].dx) / 2), ((points[i].dy + points[j].dy) / 2));
+                // path.lineTo((points[i].dx + points[j].dx) / 3,(points[i].dy + points[j].dy) / 3);
+                // // path.lineTo(100,0);
+                // path.close();
+
+
+                path.moveTo(points[j].dx - arrowSize * cos(angle - arrowAngle),
+                    points[j].dy - arrowSize * sin(angle - arrowAngle));
+                path.lineTo(points[j].dx, points[j].dy);
+
+                path.lineTo(points[j].dx - arrowSize * cos(angle + arrowAngle),
+                    points[j].dy - arrowSize * sin(angle + arrowAngle));
+
+                path.close();
+                canvas.drawPath(path, paint4);
+              }
+
+              // if(matrix[j][i]! > 0){
               //   matrix[j][i] = 0;
               // }
               // else{
               //   //рисуем стрелку
-              // path.moveTo(points[i].dx - 20, points[i].dy - 20);
-              // path.lineTo(points[i].dx - 20,points[i].dy - 20);
               //
-              // // path.moveTo(points[i].dx +50, points[i].dy + 50);
-              // path.lineTo(points[i].dx -15, points[i].dy +30);
-              //
-              // // path.moveTo(points[i].dx -15, points[i].dy +30);
-              // // path.lineTo(points[i].dx -100, points[i].dy -100);
-              // path.close();
-              // canvas.drawPath(path,paint4);
               // }
               matrix[j][i] = 0;
           }
@@ -190,6 +203,7 @@ class OpenPainter extends CustomPainter {
 
     // рисование вершин
     for(var i = 0;i < matrix.length;i++) {
+      //в дальнейшем тут надо будет при условии рисовать вершины разных цветов
       canvas.drawCircle(points[i], 15, paint1);
     }
 
