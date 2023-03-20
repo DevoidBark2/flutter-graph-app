@@ -1,11 +1,12 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:test_project/graph/graph_view.dart';
 import 'matrix.dart';
 import 'matrix_field.dart';
+import "package:collection/collection.dart";
 
 class MatrixPage extends StatefulWidget {
   final Matrix matrix;
-
   const MatrixPage({
     Key? key,
     required this.matrix,
@@ -53,16 +54,56 @@ class _MatrixPageState extends State<MatrixPage> {
   bool isCheckedOriented = false;
   @override
   Widget build(BuildContext context) {
+
     bool checkMatrix(controllers){
+      bool isCheckedValidMatrix = true;
       var mat = List.generate(controllers.length, (row) => List.generate(controllers.length ,(column) => int.tryParse(controllers[row][column].text)));
+      List<List<int?>> result = List.generate(mat[0].length, (i) => List.filled(mat.length, 0));
+      for (int i = 0; i < mat.length; i++) {
+        for (int j = 0; j < mat[0].length; j++) {
+          result[j][i] = mat[i][j];
+        }
+      }
       for(var i = 0; i < mat.length; i++){
-        for(var j = 0; j < mat.length; j++){
-          if(mat[i][j] == null){
+          for(var j = 0; j < mat.length; j++){
+            if(mat[i][j] == null){
+              isCheckedValidMatrix = false;
+              break;
+            }
+          }
+      }
+      if(isCheckedValidMatrix){
+        if(const DeepCollectionEquality().equals(mat, result)){
+          if(isCheckedOriented){
+            return false;
+          }else{
+            return true;
+          }
+        }else{
+          if(isCheckedOriented){
+            //здесь нужно еще раз проходится по матрице,случай на фото!!!!
+            //идти по матрице под главное диогонали и смотреть чтобы были нули!!!!
+            // for (int i = 0, j = 1; i<mat.length&&j<mat[0].length;i++, j++){
+            //   if (kDebugMode) {
+            //     print(mat[i][j]);
+            //   }
+            // }
+            for(int i = 0;i < mat.length;i++){
+              for(int j = 0; j < i; j++){
+                if (mat[i][j] != 0) {
+                  return false;
+                }
+              }
+            }
+            return true;
+          }else{
             return false;
           }
         }
       }
-      return true;
+      else{
+        return false;
+      }
     }
     Color getColor(Set<MaterialState> states) {
       const Set<MaterialState> interactiveStates = <MaterialState>{
@@ -75,6 +116,7 @@ class _MatrixPageState extends State<MatrixPage> {
       }
       return Colors.red;
     }
+
     return SingleChildScrollView(
       child: Center(
         child: SizedBox(
@@ -164,16 +206,13 @@ class _MatrixPageState extends State<MatrixPage> {
                     );
                   },
                 ),
-                child: Align(
-                  alignment: Alignment.bottomRight,
-                  child: Container(
+                child: Container(
                     height: 50,
                     width: 100,
                     margin: const EdgeInsets.all(5),
                     color: Colors.orange,
                     child: const Center(child: Text('View Graph')),
                   ),
-                ),
               ),
             ],
           ),

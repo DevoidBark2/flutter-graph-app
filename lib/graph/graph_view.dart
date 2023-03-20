@@ -17,7 +17,7 @@ class _GraphViewState extends State<GraphView> {
   late final isCheckedOriented = widget.isCheckedOriented;
   var N = 0;
   var count = 0;
-  List<int> num = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];
+  List<Object> num = ["Свойства",1,2,3,4,5,6,7,8,9,10,11,12,13,14];
 
   bool completeGraph(){
     var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
@@ -86,8 +86,8 @@ class _GraphViewState extends State<GraphView> {
           ),
           Positioned(
             child: DraggableScrollableSheet(
-              initialChildSize: 0.1,
-              minChildSize: 0.1,
+              initialChildSize: 0.07,
+              minChildSize: 0.07,
               builder: (context,controller) => Container(
                 decoration: BoxDecoration(
                   color:Colors.amberAccent,
@@ -100,7 +100,7 @@ class _GraphViewState extends State<GraphView> {
                     controller: controller,
                     itemCount: num.length,
                     itemBuilder: (context,index){
-                      return Text('$index');
+                      return index == 0 ? Text('${num[index]}',textAlign: TextAlign.center) : Text("${num[index]}");
                     },
                   ),
                 )
