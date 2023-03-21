@@ -10,16 +10,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       title: 'Graph App',
-      theme: ThemeData(
-        primarySwatch: Colors.amber,
-      ),
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Graph'),
-        ),
-        body: const Center(child: HomePage()),
+        body: HomePage(),
       ),
       debugShowCheckedModeBanner: false,
     );

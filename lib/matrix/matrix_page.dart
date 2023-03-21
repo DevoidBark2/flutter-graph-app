@@ -20,6 +20,7 @@ class _MatrixPageState extends State<MatrixPage> {
   final controllers = <List<TextEditingController>>[];
   late final rows = widget.matrix.rows;
   late final columns = widget.matrix.columns;
+  late bool colorGraph = false;
 
   @override
   void initState() {
@@ -32,14 +33,6 @@ class _MatrixPageState extends State<MatrixPage> {
       controllers.add(List.generate(columns, (index) => TextEditingController(text: '')));
     }
   }
-
-  // void printMatrix() {
-  //   final strings = <List<String>>[];
-  //   for (var controllerRow in controllers) {
-  //     final row = controllerRow.map((e) => e.text).toList();
-  //     strings.add(row);
-  //   }
-  // }
 
   // @override
   // void dispose() {
@@ -180,7 +173,8 @@ class _MatrixPageState extends State<MatrixPage> {
                     ?
                 Navigator.push(context,MaterialPageRoute(builder: (context) {
                   return Scaffold(
-                    appBar: AppBar(),
+                    appBar: AppBar(
+                    ),
                     body: GraphView(controllers:controllers,isCheckedWeight: isCheckedWeight,isCheckedOriented: isCheckedOriented),
                   );
                 }))

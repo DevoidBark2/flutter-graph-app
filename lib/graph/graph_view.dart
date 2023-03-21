@@ -16,8 +16,7 @@ class _GraphViewState extends State<GraphView> {
   late final isCheckedWeight = widget.isCheckedWeight;
   late final isCheckedOriented = widget.isCheckedOriented;
   var N = 0;
-  var count = 0;
-  List<Object> num = ["Свойства",1,2,3,4,5,6,7,8,9,10,11,12,13,14];
+
 
   bool completeGraph(){
     var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
@@ -33,17 +32,13 @@ class _GraphViewState extends State<GraphView> {
     }
     return true;
   }
+
   void countOfRibs(){
     var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
-    for(var i = 0; i < matrix.length; i++){
-      for(var j = 0; j < matrix.length;j++){
-        if(matrix[i][j] != 0){
-          count++;
-        }
-      }
-    }
-    N = count ~/ 2;
+    var count = matrix.length;
+    N = (count* (count - 1)) ~/ 2;
   }
+
   bool emptyGraph(){
     var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
     var count = 0;
@@ -67,8 +62,8 @@ class _GraphViewState extends State<GraphView> {
   }
   @override
   Widget build(BuildContext context) {
+    List<Object> num = ["Свойства","Кол-во ребер: $N",2,3,4,5,6,7,8,9,10,11,12,13,14];
     var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
-
     return Stack(
         fit: StackFit.expand,
         children: [
@@ -86,8 +81,8 @@ class _GraphViewState extends State<GraphView> {
           ),
           Positioned(
             child: DraggableScrollableSheet(
-              initialChildSize: 0.07,
-              minChildSize: 0.07,
+              initialChildSize: 0.2,
+              minChildSize: 0.2,
               builder: (context,controller) => Container(
                 decoration: BoxDecoration(
                   color:Colors.amberAccent,
@@ -126,7 +121,7 @@ class OpenPainter extends CustomPainter {
     var paint3 =  Paint()..color = const Color(0xffb69d9d)..strokeWidth = 1..style = PaintingStyle.stroke;
     var paint4 =  Paint()..color = const Color(0xff000000)..strokeWidth = 10..style = PaintingStyle.stroke;
 
-    //рисование точек
+    //добавление вершин
     for(var i =0; i < matrix.length;i++){
       final angle = 2 * pi * (i / matrix.length) + (360 / matrix.length);
       points.add(Offset((cos(angle) * 140 + (size.width / 2)), (sin(angle) * 140 + (size.width / 2))));
