@@ -52,6 +52,8 @@ class _MatrixPageState extends State<MatrixPage> {
       bool isCheckedValidMatrix = true;
       var mat = List.generate(controllers.length, (row) => List.generate(controllers.length ,(column) => int.tryParse(controllers[row][column].text)));
       List<List<int?>> result = List.generate(mat[0].length, (i) => List.filled(mat.length, 0));
+
+      //транспонированная матрица
       for (int i = 0; i < mat.length; i++) {
         for (int j = 0; j < mat[0].length; j++) {
           result[j][i] = mat[i][j];
@@ -76,11 +78,7 @@ class _MatrixPageState extends State<MatrixPage> {
           if(isCheckedOriented){
             //здесь нужно еще раз проходится по матрице,случай на фото!!!!
             //идти по матрице под главное диогонали и смотреть чтобы были нули!!!!
-            // for (int i = 0, j = 1; i<mat.length&&j<mat[0].length;i++, j++){
-            //   if (kDebugMode) {
-            //     print(mat[i][j]);
-            //   }
-            // }
+
             for(int i = 0;i < mat.length;i++){
               for(int j = 0; j < i; j++){
                 if (mat[i][j] != 0) {

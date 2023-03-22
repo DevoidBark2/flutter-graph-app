@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class GraphView extends StatefulWidget {
   final List<List<TextEditingController>> controllers;
@@ -16,8 +17,10 @@ class _GraphViewState extends State<GraphView> {
   late final isCheckedWeight = widget.isCheckedWeight;
   late final isCheckedOriented = widget.isCheckedOriented;
   var N = 0;
+  var storage = SharedPreferences.getInstance();
 
-
+  var colorVertices = 0;
+  var colorEdges = 0;
   bool completeGraph(){
     var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
     for(var i = 0; i < matrix.length; i++){
@@ -55,11 +58,32 @@ class _GraphViewState extends State<GraphView> {
     }
   }
 
+  // void getIColor() async{
+  //   var storage = await SharedPreferences.getInstance();
+  //   setState(() {
+  //     colorRibs = storage.getInt("index") ?? 0;
+  //   });
+  // }
+  void getColorVertices() async{
+    var storage = await SharedPreferences.getInstance();
+    setState(() {
+      colorVertices = storage.getInt("colorVertices") ?? 0xfffcba03;
+    });
+  }
+  void getColorEdges() async{
+    var storage = await SharedPreferences.getInstance();
+    setState(() {
+      colorEdges = storage.getInt("colorEdges") ?? 0xfffcba03;
+    });
+  }
   @override
   void initState() {
     super.initState();
     countOfRibs();
+    getColorVertices();
+    getColorEdges();
   }
+
   @override
   Widget build(BuildContext context) {
     List<Object> num = ["Свойства","Кол-во ребер: $N",2,3,4,5,6,7,8,9,10,11,12,13,14];
@@ -75,14 +99,14 @@ class _GraphViewState extends State<GraphView> {
               width: 400,
               height: 400,
               child: CustomPaint(
-                painter: OpenPainter(matrix: matrix,isCheckedWeight: isCheckedWeight,isCheckedOriented: isCheckedOriented),
+                painter: OpenPainter(matrix: matrix,isCheckedWeight: isCheckedWeight,isCheckedOriented: isCheckedOriented,colorVertices:colorVertices,colorEdges:colorEdges),
               ),
             ),
           ),
           Positioned(
             child: DraggableScrollableSheet(
-              initialChildSize: 0.2,
-              minChildSize: 0.2,
+              initialChildSize: 0.07,
+              minChildSize: 0.07,
               builder: (context,controller) => Container(
                 decoration: BoxDecoration(
                   color:Colors.amberAccent,
@@ -111,13 +135,18 @@ class OpenPainter extends CustomPainter {
   final List<List<int?>> matrix;
   final bool isCheckedWeight;
   final bool isCheckedOriented;
-  OpenPainter({Key? key, required this.matrix,required this.isCheckedWeight,required this.isCheckedOriented});
+  final int colorVertices;
+  final int colorEdges;
+  OpenPainter({Key? key, required this.matrix,required this.isCheckedWeight,required this.isCheckedOriented,required this.colorVertices,required this.colorEdges});
   @override
   void paint(Canvas canvas, Size size) {
     var path = Path();
     final List<Offset> points = [];
-    var paint1 = Paint()..color = const Color(0xff63aa65)..strokeCap = StrokeCap.round..strokeWidth = 30;
-    var paint2 = Paint()..color = const Color(0xffef0037)..strokeWidth = 2;
+
+    var paint1 = Paint()..color = Color(colorVertices)..strokeCap = StrokeCap.round..strokeWidth = 30; //!!!!!!!!!!!!!!!!!
+
+
+    var paint2 = Paint()..color = Color(colorEdges)..strokeWidth = 2;
     var paint3 =  Paint()..color = const Color(0xffb69d9d)..strokeWidth = 1..style = PaintingStyle.stroke;
     var paint4 =  Paint()..color = const Color(0xff000000)..strokeWidth = 10..style = PaintingStyle.stroke;
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:test_project/screens/draw_screen.dart';
 import 'package:test_project/screens/drawing_screen.dart';
 import 'package:test_project/screens/profile_screen.dart';
+import 'package:test_project/screens/settings_screen.dart';
 import 'package:test_project/screens/theory_screen.dart';
 
 class HomePage extends StatefulWidget {
@@ -40,14 +41,9 @@ class _HomePageState extends State<HomePage> {
                 builder: (BuildContext context) {
                   return Scaffold(
                     appBar: AppBar(
-                      title: const Text('Next page'),
+                      title: const Text('Настройки'),
                     ),
-                    body: const Center(
-                      child: Text(
-                        'This is the next page',
-                        style: TextStyle(fontSize: 24),
-                      ),
-                    ),
+                    body: const SettingsScreen()
                   );
                 },
               ));
