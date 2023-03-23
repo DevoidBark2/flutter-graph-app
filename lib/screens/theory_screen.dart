@@ -5,6 +5,17 @@ class TheoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Text('Теория');
+    return Padding(
+      padding: EdgeInsets.all(10.0),
+      child: RichText(
+        text: TextSpan(
+          children: const <TextSpan>[
+            TextSpan(text: 'Граф', style: TextStyle(fontWeight: FontWeight.bold)),
+            TextSpan(text: " система объектов произвольной природы (вершин) и связок (ребер), соединяющих некоторые пары этих объектов.")
+          ],
+          style: DefaultTextStyle.of(context).style,
+        ),
+      ),
+    );
   }
 }

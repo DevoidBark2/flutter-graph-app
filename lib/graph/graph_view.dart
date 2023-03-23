@@ -17,8 +17,6 @@ class _GraphViewState extends State<GraphView> {
   late final isCheckedWeight = widget.isCheckedWeight;
   late final isCheckedOriented = widget.isCheckedOriented;
   var N = 0;
-  var storage = SharedPreferences.getInstance();
-
   var colorVertices = 0;
   var colorEdges = 0;
   bool completeGraph(){
@@ -58,12 +56,6 @@ class _GraphViewState extends State<GraphView> {
     }
   }
 
-  // void getIColor() async{
-  //   var storage = await SharedPreferences.getInstance();
-  //   setState(() {
-  //     colorRibs = storage.getInt("index") ?? 0;
-  //   });
-  // }
   void getColorVertices() async{
     var storage = await SharedPreferences.getInstance();
     setState(() {

@@ -64,7 +64,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const SizedBox(height: 15),
               Container(
                 height: 50,
-                color: Colors.green,
+                decoration: const BoxDecoration(
+                  color: Colors.green,
+                  borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                ),
                 child: ListView.builder(
                   shrinkWrap: true,
                   scrollDirection: Axis.horizontal,
@@ -81,7 +84,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             height: 50,
                             decoration: BoxDecoration(
                                 color: Color(color[index]),
-                                border: index == indexColorVertices ?  Border.all(color: Colors.orange) : Border.all(color: Colors.black),
+                                border: index == indexColorVertices ?  Border.all(color: Colors.orange,width: 2.0) : Border.all(color: Colors.black,width: 2.0),
                                 borderRadius: const BorderRadius.all(Radius.circular(16.0)),
                             ),
                           ),
@@ -91,13 +94,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ],
           ),
+          const SizedBox(height: 15),
           Column(
             children: [
               const Text('Цвет граней'),
               const SizedBox(height: 15),
               Container(
                 height: 50,
-                color: Colors.green,
+                decoration: const BoxDecoration(
+                  color: Colors.green,
+                  borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                ),
                 child: ListView.builder(
                   shrinkWrap: true,
                   scrollDirection: Axis.horizontal,
@@ -114,7 +121,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             height: 50,
                             decoration: BoxDecoration(
                               color: Color(color[index]),
-                              border: index == indexColorEdges ?  Border.all(color: Colors.orange) : Border.all(color: Colors.black),
+                              border: index == indexColorEdges ?  Border.all(color: Colors.orange,width: 2.0) : Border.all(color: Colors.black,width: 2.0),
                               borderRadius: const BorderRadius.all(Radius.circular(16.0)),
                             ),
                           ),
@@ -124,32 +131,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ],
           ),
-          // Column(
-          //   children: [
-          //     const Text('Цвет граней'),
-          //     SizedBox(
-          //       height: 50,
-          //       child: ListView.builder(
-          //         shrinkWrap: true,
-          //         scrollDirection: Axis.horizontal,
-          //         itemCount: colors.length,
-          //         itemBuilder: (BuildContext context, int index) =>
-          //             Padding(
-          //               padding: const EdgeInsets.only(right: 5.0),
-          //               child: Container(
-          //                 width: 50,
-          //                 height: 50,
-          //                 decoration: BoxDecoration(
-          //                     color: colors[index],
-          //                     border: Border.all(color: Colors.black),
-          //                     borderRadius: const BorderRadius.all(Radius.circular(16.0)),
-          //                 ),
-          //               ),
-          //             ),
-          //       ),
-          //     ),
-          //   ],
-          // )
         ],
       ),
     );
