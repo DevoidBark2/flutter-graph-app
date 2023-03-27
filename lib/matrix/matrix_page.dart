@@ -170,11 +170,7 @@ class _MatrixPageState extends State<MatrixPage> {
                 onTap: () => checkMatrix(controllers) == true
                     ?
                 Navigator.push(context,MaterialPageRoute(builder: (context) {
-                  return Scaffold(
-                    appBar: AppBar(
-                    ),
-                    body: GraphView(controllers:controllers,isCheckedWeight: isCheckedWeight,isCheckedOriented: isCheckedOriented),
-                  );
+                  return GraphView(controllers:controllers,isCheckedWeight: isCheckedWeight,isCheckedOriented: isCheckedOriented);
                 }))
                     :
                 showModalBottomSheet<void>(

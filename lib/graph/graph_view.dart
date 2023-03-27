@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -19,6 +20,7 @@ class _GraphViewState extends State<GraphView> {
   var N = 0;
   var colorVertices = 0;
   var colorEdges = 0;
+  String count = '';
   bool completeGraph(){
     var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
     for(var i = 0; i < matrix.length; i++){
@@ -68,6 +70,18 @@ class _GraphViewState extends State<GraphView> {
       colorEdges = storage.getInt("colorEdges") ?? 0xfffcba03;
     });
   }
+  void printOneText(){
+    var mat = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
+    setState(() {
+      count = mat[0].toString();
+    });
+  }
+  void printTwoText(){
+    var mat = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
+    setState(() {
+      count = mat[1].toString();
+    });
+  }
   @override
   void initState() {
     super.initState();
@@ -80,9 +94,12 @@ class _GraphViewState extends State<GraphView> {
   Widget build(BuildContext context) {
     List<Object> num = ["Свойства","Кол-во ребер: $N",2,3,4,5,6,7,8,9,10,11,12,13,14];
     var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
-    return Stack(
+    return Scaffold(
+      appBar: AppBar(),
+      body: Stack(
         fit: StackFit.expand,
         children: [
+          Text(count),
           InteractiveViewer(
             minScale: 0.3,
             maxScale: 10.5,
@@ -100,26 +117,48 @@ class _GraphViewState extends State<GraphView> {
               initialChildSize: 0.07,
               minChildSize: 0.07,
               builder: (context,controller) => Container(
-                decoration: BoxDecoration(
-                  color:Colors.amberAccent,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    controller: controller,
-                    itemCount: num.length,
-                    itemBuilder: (context,index){
-                      return index == 0 ? Text('${num[index]}',textAlign: TextAlign.center) : Text("${num[index]}");
-                    },
+                  decoration: BoxDecoration(
+                    color:Colors.amberAccent,
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                )
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      controller: controller,
+                      itemCount: num.length,
+                      itemBuilder: (context,index){
+                        return index == 0 ? Text('${num[index]}',textAlign: TextAlign.center) : Text("${num[index]}");
+                      },
+                    ),
+                  )
               ),
             ),
           )
         ],
-      );
+      ),
+      endDrawer: Drawer(
+        width: 250,
+          child:ListView(
+            children: [
+              ListTile(
+                title: const Text('Поиск кратчайшего пути Дейкстры'),
+                onTap: (){
+                  printOneText();
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: const Text('Найти Эйлеров цикл'),
+                onTap: (){
+                  printTwoText();
+                  Navigator.pop(context);
+                },
+              )
+            ],
+          )
+      ),
+    );
   }
 }
 
