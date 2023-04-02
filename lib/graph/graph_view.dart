@@ -1,3 +1,4 @@
+import 'dart:core';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,24 @@ class GraphView extends StatefulWidget {
   State<GraphView> createState() => _GraphViewState();
 }
 
+class Edge {
+  int a, b, w;
+  Edge(this.a, this.b, this.w);
+}
+
+List<Edge> getEdgesFromMatrix(List<List<int?>> matrix) {
+  List<Edge> edges = [];
+  int n = matrix.length;
+  for (int i = 0; i < n; i++) {
+    for (int j = i + 1; j < n; j++) {
+      if (matrix[i][j] != 0) {
+        edges.add(Edge(i+1, j+1, matrix[i][j]!));
+      }
+    }
+  }
+  return edges;
+}
+
 class _GraphViewState extends State<GraphView> {
   late final matrixF = widget.controllers;
   late final isCheckedWeight = widget.isCheckedWeight;
@@ -21,43 +40,44 @@ class _GraphViewState extends State<GraphView> {
   var colorVertices = 0;
   var colorEdges = 0;
   String count = '';
-  bool completeGraph(){
-    var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
-    for(var i = 0; i < matrix.length; i++){
-      for(var j = 0; j < matrix.length;j++){
-        if(i == j){
-          continue;
-        }
-        if(matrix[i][j] == 0){
-          return false;
-        }
-      }
-    }
-    return true;
-  }
+  String error = '';
+  List<List<int?>> algoritmMatrix = [];
+  late var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
 
+  // bool completeGraph(){
+  //   var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
+  //   for(var i = 0; i < matrix.length; i++){
+  //     for(var j = 0; j < matrix.length;j++){
+  //       if(i == j){
+  //         continue;
+  //       }
+  //       if(matrix[i][j] == 0){
+  //         return false;
+  //       }
+  //     }
+  //   }
+  //   return true;
+  // }
+  // bool emptyGraph(){
+  //   var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
+  //   var count = 0;
+  //   for(var i = 0; i < matrix.length; i++){
+  //     for(var j = 0; j < matrix.length;j++){
+  //       count += matrix[i][j]!;
+  //     }
+  //   }
+  //   if(count == 0){
+  //     return true;
+  //   }
+  //   else{
+  //     return false;
+  //   }
+  // }
   void countOfRibs(){
     var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
     var count = matrix.length;
     N = (count* (count - 1)) ~/ 2;
   }
-
-  bool emptyGraph(){
-    var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
-    var count = 0;
-    for(var i = 0; i < matrix.length; i++){
-      for(var j = 0; j < matrix.length;j++){
-        count += matrix[i][j]!;
-      }
-    }
-    if(count == 0){
-      return true;
-    }
-    else{
-      return false;
-    }
-  }
-
   void getColorVertices() async{
     var storage = await SharedPreferences.getInstance();
     setState(() {
@@ -70,18 +90,40 @@ class _GraphViewState extends State<GraphView> {
       colorEdges = storage.getInt("colorEdges") ?? 0xfffcba03;
     });
   }
+
+
   void printOneText(){
-    var mat = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
-    setState(() {
-      count = mat[0].toString();
-    });
+    if(isCheckedWeight == false){
+        error = 'Граф должен быть взвешенный';
+    }else{
+      var mat = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
+      List<Edge> edges = getEdgesFromMatrix(mat);
+      List<Edge> result = [];
+      List<int> treeIds = List<int>.generate(mat.length+1, (int index) => index);
+      edges.sort((a, b) => a.w - b.w); // сортируем ребра по весу
+
+      for (Edge edge in edges) {
+        if (treeIds[edge.a] != treeIds[edge.b]) {
+          result.add(edge);
+          int oldId = treeIds[edge.b], newId = treeIds[edge.a];
+          for (int i = 1; i <= mat.length; i++) {
+            if (treeIds[i] == oldId) treeIds[i] = newId;
+          }
+        }
+      }
+      List<List<int>> newMatrix = List.generate(mat.length, (i) => List.filled(mat.length, 0));
+      for (Edge edge in result) {
+        newMatrix[edge.a - 1][edge.b - 1] = edge.w;
+        newMatrix[edge.b - 1][edge.a - 1] = edge.w;
+      }
+      setState(() {
+        algoritmMatrix = matrix;
+        matrix = newMatrix;
+      });
+    }
+
   }
-  void printTwoText(){
-    var mat = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
-    setState(() {
-      count = mat[1].toString();
-    });
-  }
+
   @override
   void initState() {
     super.initState();
@@ -93,7 +135,6 @@ class _GraphViewState extends State<GraphView> {
   @override
   Widget build(BuildContext context) {
     List<Object> num = ["Свойства","Кол-во ребер: $N",2,3,4,5,6,7,8,9,10,11,12,13,14];
-    var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
     return Scaffold(
       appBar: AppBar(),
       body: Stack(
@@ -108,7 +149,7 @@ class _GraphViewState extends State<GraphView> {
               width: 400,
               height: 400,
               child: CustomPaint(
-                painter: OpenPainter(matrix: matrix,isCheckedWeight: isCheckedWeight,isCheckedOriented: isCheckedOriented,colorVertices:colorVertices,colorEdges:colorEdges),
+                painter: OpenPainter(matrix: matrix, algoritmMatrix:algoritmMatrix, isCheckedWeight: isCheckedWeight,isCheckedOriented: isCheckedOriented,colorVertices:colorVertices,colorEdges:colorEdges),
               ),
             ),
           ),
@@ -142,18 +183,22 @@ class _GraphViewState extends State<GraphView> {
           child:ListView(
             children: [
               ListTile(
-                title: const Text('Поиск кратчайшего пути Дейкстры'),
+                title: const Text('Алгоритм Крускала'),
                 onTap: (){
                   printOneText();
+                  // error != '' ? final snackBar = SnackBar(
+                  //   content: const Text('Yay! A SnackBar!'),
+                  //   action: SnackBarAction(
+                  //     label: 'Undo',
+                  //     onPressed: () {
+                  //       // Some code to undo the change.
+                  //     },
+                  //   ),
+                  // );
+                  // ScaffoldMessenger.of(context).showSnackBar(snackBar);
                   Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: const Text('Найти Эйлеров цикл'),
-                onTap: (){
-                  printTwoText();
-                  Navigator.pop(context);
-                },
+
+                }
               )
             ],
           )
@@ -164,20 +209,27 @@ class _GraphViewState extends State<GraphView> {
 
 class OpenPainter extends CustomPainter {
   final List<List<int?>> matrix;
+  final List<List<int?>> algoritmMatrix;
   final bool isCheckedWeight;
   final bool isCheckedOriented;
   final int colorVertices;
   final int colorEdges;
-  OpenPainter({Key? key, required this.matrix,required this.isCheckedWeight,required this.isCheckedOriented,required this.colorVertices,required this.colorEdges});
+  OpenPainter({Key? key,
+    required this.matrix,
+    required this.algoritmMatrix,
+    required this.isCheckedWeight,
+    required this.isCheckedOriented,
+    required this.colorVertices,
+    required this.colorEdges
+  });
   @override
   void paint(Canvas canvas, Size size) {
     var path = Path();
     final List<Offset> points = [];
 
-    var paint1 = Paint()..color = Color(colorVertices)..strokeCap = StrokeCap.round..strokeWidth = 30; //!!!!!!!!!!!!!!!!!
+    var drawPoints = Paint()..color = Color(colorVertices)..strokeCap = StrokeCap.round..strokeWidth = 30; //!!!!!!!!!!!!!!!!!
+    var drawLines = Paint()..color = Color(colorEdges)..strokeWidth = 2;
 
-
-    var paint2 = Paint()..color = Color(colorEdges)..strokeWidth = 2;
     var paint3 =  Paint()..color = const Color(0xffb69d9d)..strokeWidth = 1..style = PaintingStyle.stroke;
     var paint4 =  Paint()..color = const Color(0xff000000)..strokeWidth = 10..style = PaintingStyle.stroke;
 
@@ -186,7 +238,8 @@ class OpenPainter extends CustomPainter {
       final angle = 2 * pi * (i / matrix.length) + (360 / matrix.length);
       points.add(Offset((cos(angle) * 140 + (size.width / 2)), (sin(angle) * 140 + (size.width / 2))));
     }
-
+    print(algoritmMatrix);
+    print(matrix);
     //основной цикл полного рисования(петли, веса и т.д.)
     for(var i =0;i < matrix.length  ;i++){
       for(var j = 0;j < matrix.length;j++){
@@ -197,7 +250,7 @@ class OpenPainter extends CustomPainter {
           }
           else{
                 // рисует просто линия
-                canvas.drawLine(points[i], points[j], paint2);
+                canvas.drawLine(points[i], points[j], drawLines);
                 TextSpan span = TextSpan(style: const TextStyle(color: Colors.black,fontWeight: FontWeight.bold), text: "${matrix[i][j]}");
                 TextPainter tp = TextPainter(text: span, textAlign: TextAlign.left, textDirection: TextDirection.ltr);
                 tp.layout();
@@ -235,7 +288,7 @@ class OpenPainter extends CustomPainter {
     // рисование вершин
     for(var i = 0;i < matrix.length;i++) {
       //в дальнейшем тут надо будет при условии рисовать вершины разных цветов
-      canvas.drawCircle(points[i], 15, paint1);
+      canvas.drawCircle(points[i], 15, drawPoints);
     }
 
     // рисование индекса вершины
