@@ -19,7 +19,9 @@ class MatrixOption extends StatelessWidget {
             MaterialPageRoute(
               builder: (context) {
                 return Scaffold(
-                  appBar: AppBar(),
+                  appBar: AppBar(
+                    title: const Text('Ввод матрицы'),
+                  ),
                   body: MatrixPage(matrix: matrix),
                 );
               },

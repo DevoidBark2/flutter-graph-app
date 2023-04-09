@@ -31,7 +31,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Graph Application'),
+        title: const Text('Graph View'),
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.menu),
@@ -54,7 +54,7 @@ class _HomePageState extends State<HomePage> {
       body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.bookmark_added_sharp), label: 'Home',backgroundColor: Colors.pink),
+          BottomNavigationBarItem(icon: Icon(Icons.bookmark_added_sharp), label: 'Главная',backgroundColor: Colors.pink),
           BottomNavigationBarItem(icon: Icon(Icons.draw_sharp), label: 'Рисование',backgroundColor: Colors.pink),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Профиль',backgroundColor: Colors.pink),
           BottomNavigationBarItem(icon: Icon(Icons.draw_sharp), label: 'Рисование(другое)',backgroundColor: Colors.pink)

@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -10,7 +9,7 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  List<int> color = [0xfffcba03,0xff8cfc03,0xff0320fc,0xfffc03df,0xfffc031c,0xffc6fc03];
+  List<int> color = [0xfffcba03,0xff8cfc03,0xff0320fc,0xfffc03df,0xfffc031c,0xffc6fc03,0xffff6a00];
   int indexColorVertices = 0;
   int indexColorEdges = 0;
   @override
@@ -56,7 +55,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       padding: const EdgeInsets.all(10.0),
       child: Column(
         textDirection: TextDirection.ltr,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Column(
             children: [
@@ -74,14 +73,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   itemCount: color.length,
                   itemBuilder: (BuildContext context, int index) =>
                       Padding(
-                        padding: const EdgeInsets.all(11.5),
+                        padding: const EdgeInsets.all(5.5),
                         child: GestureDetector(
                           onTap: (){
                             setIndexColorVertices(index);
                           },
                           child: Container(
-                            width: 50,
-                            height: 50,
+                            width: index == indexColorVertices ? 60 : 50,
+                            height: index == indexColorVertices ? 60 : 50,
                             decoration: BoxDecoration(
                                 color: Color(color[index]),
                                 border: index == indexColorVertices ?  Border.all(color: Colors.orange,width: 2.0) : Border.all(color: Colors.black,width: 2.0),
@@ -111,14 +110,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   itemCount: color.length,
                   itemBuilder: (BuildContext context, int index) =>
                       Padding(
-                        padding: const EdgeInsets.all(11.5),
+                        padding: const EdgeInsets.all(5.5),
                         child: GestureDetector(
                           onTap: (){
                             setIndexColorEdges(index);
                           },
                           child: Container(
-                            width: 50,
-                            height: 50,
+                            width: index == indexColorEdges ? 60 : 50,
+                            height: index == indexColorEdges ? 60 : 50,
                             decoration: BoxDecoration(
                               color: Color(color[index]),
                               border: index == indexColorEdges ?  Border.all(color: Colors.orange,width: 2.0) : Border.all(color: Colors.black,width: 2.0),
@@ -131,6 +130,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ],
           ),
+          const SizedBox(height: 15),
         ],
       ),
     );

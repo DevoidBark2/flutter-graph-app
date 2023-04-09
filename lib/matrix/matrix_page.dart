@@ -96,6 +96,7 @@ class _MatrixPageState extends State<MatrixPage> {
         return false;
       }
     }
+
     Color getColor(Set<MaterialState> states) {
       const Set<MaterialState> interactiveStates = <MaterialState>{
         MaterialState.pressed,
@@ -124,8 +125,8 @@ class _MatrixPageState extends State<MatrixPage> {
                       controllers[index1].length,
                           (index2) => Center(
                         child: SizedBox(
-                          height: controllers.length > 9 ? 30 : controllers.length > 6 ? 40 : controllers.length > 5 ? 45 : 50,
-                          width: controllers.length > 9 ? 30 : controllers.length > 6 ? 40 : controllers.length > 5 ? 45 : 50,
+                          height: controllers.length > 7 ? 30 : controllers.length > 6 ? 40 : controllers.length > 5 ? 45 : 50,
+                          width: controllers.length > 7 ? 30 : controllers.length > 6 ? 40 : controllers.length > 5 ? 45 : 50,
                           child: MatrixField(
                             action: (index2  == controllers.length -1 && index1 == controllers.length -1) ? TextInputAction.done : TextInputAction.next,
                             controller: controllers[index1][index2],

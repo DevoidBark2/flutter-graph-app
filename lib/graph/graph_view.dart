@@ -134,7 +134,7 @@ class _GraphViewState extends State<GraphView> {
 
   @override
   Widget build(BuildContext context) {
-    List<Object> num = ["Свойства","Кол-во ребер: $N",2,3,4,5,6,7,8,9,10,11,12,13,14];
+    List<Object> num = ["Свойства","Кол-во ребер: $N"];
     return Scaffold(
       appBar: AppBar(),
       body: Stack(
@@ -155,8 +155,8 @@ class _GraphViewState extends State<GraphView> {
           ),
           Positioned(
             child: DraggableScrollableSheet(
-              initialChildSize: 0.07,
-              minChildSize: 0.07,
+              initialChildSize: 0.08,
+              minChildSize: 0.08,
               builder: (context,controller) => Container(
                   decoration: BoxDecoration(
                     color:Colors.amberAccent,
