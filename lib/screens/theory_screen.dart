@@ -18,11 +18,6 @@ class TheoryScreen extends StatelessWidget {
               style: DefaultTextStyle.of(context).style,
             ),
           ),
-          const Image(
-            image: AssetImage('images/diagram.png'),
-            width: 200,
-            height: 200,
-          )
         ]
       ),
     );

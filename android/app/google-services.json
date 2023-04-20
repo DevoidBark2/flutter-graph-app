@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "924338993109",
+    "project_id": "flutter-graph-app-2023",
+    "storage_bucket": "flutter-graph-app-2023.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:924338993109:android:53bc418c6aaacd8ad5af5c",
+        "android_client_info": {
+          "package_name": "com.example.test_project"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "924338993109-3n62in90nusrae23rbsm4ajviqauidt7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAUpaf5rYDMr7-zCad-WYIUyKNdamJixJA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "924338993109-3n62in90nusrae23rbsm4ajviqauidt7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -238,8 +238,7 @@ class OpenPainter extends CustomPainter {
       final angle = 2 * pi * (i / matrix.length) + (360 / matrix.length);
       points.add(Offset((cos(angle) * 140 + (size.width / 2)), (sin(angle) * 140 + (size.width / 2))));
     }
-    print(algoritmMatrix);
-    print(matrix);
+
     //основной цикл полного рисования(петли, веса и т.д.)
     for(var i =0;i < matrix.length  ;i++){
       for(var j = 0;j < matrix.length;j++){

@@ -100,61 +100,78 @@ class _DrawScreenState extends State<DrawScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          const Text('Введите матрицу'),
-          const SizedBox(
-            height: 50,
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  textAlign: TextAlign.center,
-                  controller: _row,
-                  decoration: const InputDecoration(
-                      border: OutlineInputBorder()
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Text('Введите матрицу'),
+            const SizedBox(
+              height: 50,
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    textAlign: TextAlign.center,
+                    controller: _row,
+                    decoration: const InputDecoration(
+                        border: OutlineInputBorder()
+                    ),
                   ),
                 ),
-              ),
-              const Text('*',style: TextStyle(fontSize: 30.0),),
-              Expanded(
-                child: TextField(
-                  textAlign: TextAlign.center,
-                  controller: _column,
-                  decoration: const InputDecoration(
-                      border: OutlineInputBorder()
+                const Text('*',style: TextStyle(fontSize: 30.0),),
+                Expanded(
+                  child: TextField(
+                    textAlign: TextAlign.center,
+                    controller: _column,
+                    decoration: const InputDecoration(
+                        border: OutlineInputBorder()
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(
-            height: 50,
-          ),
-          ElevatedButton(
-              onPressed: (){
-                    handleInput(_row, _column) == 1
-                    ? Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                        return Scaffold(
-                          appBar: AppBar(
-                            title: const Text('Ввод матрицы'),
+              ],
+            ),
+            const SizedBox(
+              height: 50,
+            ),
+            ElevatedButton(
+                onPressed: (){
+                      handleInput(_row, _column) == 1
+                      ? Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                          return Scaffold(
+                            appBar: AppBar(
+                              title: const Text('Ввод матрицы'),
+                            ),
+                            body: MatrixPage(matrix: Matrix(int.parse(_row.text),int.parse(_column.text))),
+                          );
+                        }))
+                      : handleInput(_row, _column) == 2
+                      ? showModalBottomSheet<void>(context: context, builder: (BuildContext context) {return Container(
+                        height: 200,
+                        color: Colors.amber,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              const Text('К сожалению, для матрицы 10 на 10 и больше,вы не сможете построить.Приносим свои извинения'),
+                              ElevatedButton(
+                                child: const Text('Закрыть'),
+                                onPressed: () => Navigator.pop(context),
+                              ),
+                            ],
                           ),
-                          body: MatrixPage(matrix: Matrix(int.parse(_row.text),int.parse(_column.text))),
-                        );
-                      }))
-                    : handleInput(_row, _column) == 2
-                    ? showModalBottomSheet<void>(context: context, builder: (BuildContext context) {return Container(
+                        ),
+                      );})
+                      : showModalBottomSheet<void>(context: context, builder: (BuildContext context) {return Container(
                       height: 200,
                       color: Colors.amber,
                       child: Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
-                            const Text('К сожалению, для матрицы 10 на 10 и больше,вы не сможете построить.Приносим свои извинения'),
+                            const Text('Не верный ввод!'),
                             ElevatedButton(
                               child: const Text('Закрыть'),
                               onPressed: () => Navigator.pop(context),
@@ -162,27 +179,12 @@ class _DrawScreenState extends State<DrawScreen> {
                           ],
                         ),
                       ),
-                    );})
-                    : showModalBottomSheet<void>(context: context, builder: (BuildContext context) {return Container(
-                    height: 200,
-                    color: Colors.amber,
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          const Text('Не верный ввод!'),
-                          ElevatedButton(
-                            child: const Text('Закрыть'),
-                            onPressed: () => Navigator.pop(context),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );});
-              },
-              child: const Text('Далее')
-          )
-        ],
+                    );});
+                },
+                child: const Text('Далее')
+            )
+          ],
+        ),
       ),
     );
   }
