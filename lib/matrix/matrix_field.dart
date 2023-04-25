@@ -19,6 +19,6 @@ class MatrixField extends StatelessWidget {
         decoration: const InputDecoration(
           border: OutlineInputBorder()
         ),
-      );
+    );
   }
 }

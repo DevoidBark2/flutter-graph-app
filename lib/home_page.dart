@@ -55,34 +55,14 @@ class _HomePageState extends State<HomePage> {
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.bookmark_added_sharp), label: 'Главная',backgroundColor: Colors.pink),
-          BottomNavigationBarItem(icon: Icon(Icons.draw_sharp), label: 'Рисование',backgroundColor: Colors.pink),
+          BottomNavigationBarItem(icon: Icon(Icons.draw_sharp), label: 'Визуализация',backgroundColor: Colors.pink),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Профиль',backgroundColor: Colors.pink),
-          BottomNavigationBarItem(icon: Icon(Icons.draw_sharp), label: 'Рисование(другое)',backgroundColor: Colors.pink)
+          BottomNavigationBarItem(icon: Icon(Icons.draw_sharp), label: 'Рисование',backgroundColor: Colors.pink)
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.amber[800],
+        selectedItemColor: Colors.amber,
         onTap: _onItemTapped,
       ),
     );
   }
 }
-
-
-
-// class HomePage extends StatelessWidget{
-//   const HomePage({Key? key}) : super(key: key);
-//   @override
-//   Widget build(BuildContext context) {
-//     return const Column(
-//       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//       children: <Widget>[
-//         MatrixOption(matrix: Matrix(2, 2)),
-//         MatrixOption(matrix: Matrix(3, 3)),
-//         MatrixOption(matrix: Matrix(4, 4)),
-//         MatrixOption(matrix: Matrix(5, 5)),
-//         MatrixOption(matrix: Matrix(6, 6)),
-//         MatrixOption(matrix: Matrix(7, 7)),
-//       ],
-//     );
-//   }
-// }

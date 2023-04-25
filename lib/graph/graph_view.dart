@@ -78,19 +78,19 @@ class _GraphViewState extends State<GraphView> {
     var count = matrix.length;
     N = (count* (count - 1)) ~/ 2;
   }
+
   void getColorVertices() async{
     var storage = await SharedPreferences.getInstance();
     setState(() {
-      colorVertices = storage.getInt("colorVertices") ?? 0xfffcba03;
+      colorVertices = storage.getInt("indexColorVertices") ?? 0xfffcba03;
     });
   }
   void getColorEdges() async{
     var storage = await SharedPreferences.getInstance();
     setState(() {
-      colorEdges = storage.getInt("colorEdges") ?? 0xfffcba03;
+      colorEdges = storage.getInt("indexColorEdges") ?? 0xfffcba03;
     });
   }
-
 
   void printOneText(){
     if(isCheckedWeight == false){
