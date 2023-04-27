@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:test_project/screens/draw_screen.dart';
-import 'package:test_project/screens/drawing_screen.dart';
 import 'package:test_project/screens/profile_screen.dart';
 import 'package:test_project/screens/settings_screen.dart';
-import 'package:test_project/screens/theory_screen.dart';
+import 'package:test_project/screens/main_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -16,10 +15,9 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
   static const List<Widget> _widgetOptions = <Widget>[
-    TheoryScreen(),
+    MainScreen(),
     DrawScreen(),
     ProfileScreen(),
-    DrawingScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -54,13 +52,12 @@ class _HomePageState extends State<HomePage> {
       body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.bookmark_added_sharp), label: 'Главная',backgroundColor: Colors.pink),
-          BottomNavigationBarItem(icon: Icon(Icons.draw_sharp), label: 'Визуализация',backgroundColor: Colors.pink),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Профиль',backgroundColor: Colors.pink),
-          BottomNavigationBarItem(icon: Icon(Icons.draw_sharp), label: 'Рисование',backgroundColor: Colors.pink)
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Главная'),
+          BottomNavigationBarItem(icon: Icon(Icons.draw_rounded), label: 'Визуализация'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Профиль'),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.amber,
+        selectedItemColor: Colors.blue,
         onTap: _onItemTapped,
       ),
     );

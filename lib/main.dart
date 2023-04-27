@@ -13,10 +13,18 @@ class MyApp extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: 'Graph App',
-      home: Scaffold(
+      home: const Scaffold(
         body: HomePage(),
+      ),
+      theme: ThemeData(
+        fontFamily: 'Georgia',
+        textTheme: const TextTheme(
+          displayLarge: TextStyle(fontSize: 52.0, fontWeight: FontWeight.bold),
+          titleLarge: TextStyle(fontSize: 20.0, fontStyle: FontStyle.italic,fontWeight: FontWeight.bold),
+          bodyMedium: TextStyle(fontSize: 14.0, fontFamily: 'Georgia'),
+        ),
       ),
       debugShowCheckedModeBanner: false,
     );

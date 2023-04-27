@@ -13,8 +13,8 @@ class MatrixOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      child: InkWell(
-        onTap: () {
+      child: ElevatedButton(
+        onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) {

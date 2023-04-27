@@ -10,10 +10,6 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  // List<int> color = [0xfffcba03,0xff8cfc03,0xff0320fc,0xfffc03df,0xfffc031c,0xffc6fc03,0xffff6a00];
-  // int indexColorVertices = 0;
-  // int indexColorEdges = 0;
-  // Color selectedColor = Colors.red;
   int selectedColorVertices = Colors.red.value;
   int selectedColorEdges = Colors.green.value;
   @override
@@ -72,145 +68,104 @@ class _SettingsScreenState extends State<SettingsScreen> {
           textDirection: TextDirection.ltr,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-                height: 100,
-                width: 100,
-                color:Color(selectedColorEdges)
-            ),
-            ElevatedButton(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: const Text('Выберите цвет'),
-                      content: SingleChildScrollView(
-                        child: ColorPicker(
-                          pickerColor: Color(selectedColorEdges),
-                          onColorChanged: changeColorEdges,
-                          pickerAreaHeightPercent: 0.5,
-                        ),
-                      ),
-                      actions: [
-                        ElevatedButton(
-                          child: const Text('OK'),
-                          onPressed: () => Navigator.of(context).pop(),
-                        ),
-                      ],
+            const Text('Цвет граней',style: TextStyle(fontWeight: FontWeight.w500)),
+            const SizedBox(height: 10),
+            Row(
+              children: <Widget>[
+                Container(
+                    height: 50,
+                    width: 100,
+                    decoration: BoxDecoration(
+                      color:Color(selectedColorEdges),
+                      border: Border.all(
+                        color: Colors.black,
+                        width: 1
+                      )
+                    )
+                ),
+                const Expanded(child: SizedBox(width: 100,)),
+                ElevatedButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('Выберите цвет'),
+                          content: SingleChildScrollView(
+                            child: ColorPicker(
+                              pickerColor: Color(selectedColorEdges),
+                              onColorChanged: changeColorEdges,
+                              pickerAreaHeightPercent: 0.5,
+                            ),
+                          ),
+                          actions: [
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.lightGreen
+                              ),
+                              child: const Text('OK'),
+                              onPressed: () => Navigator.of(context).pop(),
+                            ),
+                          ],
+                        );
+                      },
                     );
                   },
-                );
-              },
-              child: const Text('Выбрать цвет'),
+                  child: const Text('Выбрать цвет'),
+                ),
+              ],
             ),
-            Container(
-              height: 100,
-              width: 100,
-              color:Color(selectedColorVertices)
-            ),
-            ElevatedButton(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: const Text('Выберите цвет'),
-                      content: SingleChildScrollView(
-                        child: ColorPicker(
-                          pickerColor: Color(selectedColorVertices),
-                          onColorChanged: changeColorVertices,
-                          pickerAreaHeightPercent: 0.5,
-                        ),
-                      ),
-                      actions: [
-                        ElevatedButton(
-                          child: const Text('OK'),
-                          onPressed: () => Navigator.of(context).pop(),
-                        ),
-                      ],
+            const SizedBox(height: 10,),
+            const Text('Цвет вершин',style: TextStyle(fontWeight: FontWeight.w500)),
+            const SizedBox(height: 10),
+            Row(
+              children: <Widget>[
+                Container(
+                    height: 50,
+                    width: 100,
+                    decoration: BoxDecoration(
+                        color:Color(selectedColorVertices),
+                        border: Border.all(
+                            color: Colors.black,
+                            width: 1
+                        )
+                    )
+                ),
+                const Expanded(child: SizedBox(width: 100,)),
+                ElevatedButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('Выберите цвет'),
+                          content: SingleChildScrollView(
+                            child: ColorPicker(
+                              pickerColor: Color(selectedColorVertices),
+                              onColorChanged: changeColorVertices,
+                              pickerAreaHeightPercent: 0.5,
+                            ),
+                          ),
+                          actions: [
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.lightGreen
+                              ),
+                              child: const Text('OK'),
+                              onPressed: () => Navigator.of(context).pop(),
+                            ),
+                          ],
+                        );
+                      },
                     );
                   },
-                );
-              },
-              child: const Text('Выбрать цвет'),
-            ),
+                  child: const Text('Выбрать цвет'),
+                ),
+              ],
+            )
           ],
         ),
       )
     );
   }
 }
-
-
-// Column(
-//   children: [
-//     const Text('Цвет вершин',style: TextStyle(fontWeight: FontWeight.w600)),
-//     const SizedBox(height: 15),
-//     Container(
-//       height: 50,
-//       decoration: const BoxDecoration(
-//         color: Colors.green,
-//       ),
-//       child: ListView.builder(
-//         shrinkWrap: true,
-//         scrollDirection: Axis.horizontal,
-//         itemCount: color.length,
-//         itemBuilder: (BuildContext context, int index) =>
-//             Padding(
-//               padding: const EdgeInsets.all(7.5),
-//               child: GestureDetector(
-//                 onTap: (){
-//                   setColorVertices(index);
-//                 },
-//                 child: Container(
-//                   width: 50,
-//                   height: 50,
-//                   decoration: BoxDecoration(
-//                     color: Color(color[index]),
-//                     border: index == indexColorVertices ?  Border.all(color: Colors.orange,width: 2.0) : Border.all(color: Colors.black,width: 2.0),
-//                     borderRadius: const BorderRadius.all(Radius.circular(16.0)),
-//                   ),
-//                 ),
-//               ),
-//             ),
-//       ),
-//     ),
-//   ],
-// ),
-// const SizedBox(height: 15),
-// Column(
-//   children: [
-//     const Text('Цвет граней',style: TextStyle(fontWeight: FontWeight.w600)),
-//     const SizedBox(height: 15),
-//     Container(
-//       height: 50,
-//       decoration: const BoxDecoration(
-//         color: Colors.green,
-//       ),
-//       child: ListView.builder(
-//         shrinkWrap: true,
-//         scrollDirection: Axis.horizontal,
-//         itemCount: color.length,
-//         itemBuilder: (BuildContext context, int index) =>
-//             Padding(
-//               padding: const EdgeInsets.all(7.5),
-//               child: GestureDetector(
-//                 onTap: (){
-//                   setColorEdges(index);
-//                 },
-//                 child: Container(
-//                   width: 50,
-//                   height: 50,
-//                   decoration: BoxDecoration(
-//                     color: Color(color[index]),
-//                     border: index == indexColorEdges ?  Border.all(color: Colors.orange,width: 2.0) : Border.all(color: Colors.black,width: 2.0),
-//                     borderRadius: const BorderRadius.all(Radius.circular(16.0)),
-//                   ),
-//                 ),
-//               ),
-//             ),
-//       ),
-//     ),
-//   ],
-// ),
-// const SizedBox(height: 15),

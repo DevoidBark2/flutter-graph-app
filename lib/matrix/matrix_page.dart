@@ -1,4 +1,5 @@
-import 'package:flutter/foundation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:test_project/graph/graph_view.dart';
 import 'matrix.dart';
@@ -22,10 +23,30 @@ class _MatrixPageState extends State<MatrixPage> {
   late final columns = widget.matrix.columns;
   late bool colorGraph = false;
 
+  Map<String,dynamic>? currentUserData;
+  Future<Map<String, dynamic>?> getCurrentUserData() async {
+    try {
+      User? currentUser = FirebaseAuth.instance.currentUser;
+      String? userId = currentUser?.uid;
+      DocumentSnapshot userData = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+      return userData.data() as Map<String, dynamic>;
+    } catch (e) {
+      print('Ошибка при получении данных текущего пользователя: $e');
+      return null;
+    }
+  }
+
+  Future<void> getUser() async {
+    Map<String, dynamic>? userData = await getCurrentUserData();
+    setState(() {
+      currentUserData = userData;
+    });
+  }
   @override
   void initState() {
     super.initState();
     createControllers();
+    getUser();
   }
 
   void createControllers() {
@@ -34,17 +55,34 @@ class _MatrixPageState extends State<MatrixPage> {
     }
   }
 
-  // @override
-  // void dispose() {
-  //   for (var controllerRow in controllers) {
-  //     for (final c in controllerRow) {
-  //       c.dispose();
-  //     }
-  //   }
-  //   super.dispose();
-  // }
+  @override
+  void dispose() {
+    for (var controllerRow in controllers) {
+      for (final c in controllerRow) {
+        c.dispose();
+      }
+    }
+    super.dispose();
+  }
   bool isCheckedWeight = false;
   bool isCheckedOriented = false;
+
+  Future<void> setDataUserGraph(String data) async {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    String? userId = currentUser?.uid;
+    // Получаем ссылку на коллекцию "userData" для текущего пользователя
+    final userRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('userData');
+
+    // Создаем новый документ с данными и добавляем его в коллекцию "userData"
+    await userRef.add({
+      'data': data,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -52,7 +90,9 @@ class _MatrixPageState extends State<MatrixPage> {
       bool isCheckedValidMatrix = true;
       var mat = List.generate(controllers.length, (row) => List.generate(controllers.length ,(column) => int.tryParse(controllers[row][column].text)));
       List<List<int?>> result = List.generate(mat[0].length, (i) => List.filled(mat.length, 0));
-
+      if(currentUserData != null){
+        setDataUserGraph(mat.toString());
+      }
       //транспонированная матрица
       for (int i = 0; i < mat.length; i++) {
         for (int j = 0; j < mat[0].length; j++) {
@@ -199,8 +239,8 @@ class _MatrixPageState extends State<MatrixPage> {
                     height: 50,
                     width: 100,
                     margin: const EdgeInsets.all(5),
-                    color: Colors.orange,
-                    child: const Center(child: Text('View Graph')),
+                    color: Colors.blue,
+                    child: const Center(child: Text('Отобразить', style: TextStyle(color: Colors.white),)),
                   ),
               ),
             ],
@@ -210,15 +250,3 @@ class _MatrixPageState extends State<MatrixPage> {
     );
   }
 }
-// onTap: checkMatrix(controllers) == true ? () => Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-// return Scaffold(
-// appBar: AppBar(),
-// body: GraphView(controllers:controllers),
-// );
-// })
-// ) : () => Navigator.of(context).pop(MaterialPageRoute(builder: (context) {
-// return Scaffold(
-// appBar: AppBar(),
-// body: const HomePage(),
-// );
-// })),

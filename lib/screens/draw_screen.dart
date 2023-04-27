@@ -12,6 +12,11 @@ class DrawScreen extends StatefulWidget {
 class _DrawScreenState extends State<DrawScreen> {
   final _row = TextEditingController();
 
+  @override
+  void dispose() {
+    _row.dispose();
+    super.dispose();
+  }
   int handleInput(TextEditingController row){
     var a = int.tryParse(row.text);
     if(a == null){
@@ -117,4 +122,3 @@ class _DrawScreenState extends State<DrawScreen> {
     );
   }
 }
-

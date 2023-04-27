@@ -82,13 +82,13 @@ class _GraphViewState extends State<GraphView> {
   void getColorVertices() async{
     var storage = await SharedPreferences.getInstance();
     setState(() {
-      colorVertices = storage.getInt("indexColorVertices") ?? 0xfffcba03;
+      colorVertices = storage.getInt("indexColorVertices") ?? Colors.red.value;
     });
   }
   void getColorEdges() async{
     var storage = await SharedPreferences.getInstance();
     setState(() {
-      colorEdges = storage.getInt("indexColorEdges") ?? 0xfffcba03;
+      colorEdges = storage.getInt("indexColorEdges") ?? Colors.red.value;
     });
   }
 
@@ -197,7 +197,6 @@ class _GraphViewState extends State<GraphView> {
                   // );
                   // ScaffoldMessenger.of(context).showSnackBar(snackBar);
                   Navigator.pop(context);
-
                 }
               )
             ],
