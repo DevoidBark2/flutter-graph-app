@@ -22,8 +22,10 @@ class _MatrixPageState extends State<MatrixPage> {
   late final rows = widget.matrix.rows;
   late final columns = widget.matrix.columns;
   late bool colorGraph = false;
-
+  bool isCheckedWeight = false;
+  bool isCheckedOriented = false;
   Map<String,dynamic>? currentUserData;
+
   Future<Map<String, dynamic>?> getCurrentUserData() async {
     try {
       User? currentUser = FirebaseAuth.instance.currentUser;
@@ -35,20 +37,18 @@ class _MatrixPageState extends State<MatrixPage> {
       return null;
     }
   }
-
   Future<void> getUser() async {
     Map<String, dynamic>? userData = await getCurrentUserData();
     setState(() {
       currentUserData = userData;
     });
   }
-  @override
-  void initState() {
-    super.initState();
-    createControllers();
-    getUser();
+  Future<void> setDataUserGraph(String data) async {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    String? userId = currentUser?.uid;
+    final userRef = FirebaseFirestore.instance.collection('users').doc(userId).collection('userData');
+    await userRef.add({'data': data, 'timestamp': FieldValue.serverTimestamp()});
   }
-
   void createControllers() {
     for (var i = 0; i < rows; i++) {
       controllers.add(List.generate(columns, (index) => TextEditingController(text: '')));
@@ -64,186 +64,196 @@ class _MatrixPageState extends State<MatrixPage> {
     }
     super.dispose();
   }
-  bool isCheckedWeight = false;
-  bool isCheckedOriented = false;
-
-  Future<void> setDataUserGraph(String data) async {
-    User? currentUser = FirebaseAuth.instance.currentUser;
-    String? userId = currentUser?.uid;
-    // Получаем ссылку на коллекцию "userData" для текущего пользователя
-    final userRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .collection('userData');
-
-    // Создаем новый документ с данными и добавляем его в коллекцию "userData"
-    await userRef.add({
-      'data': data,
-      'timestamp': FieldValue.serverTimestamp(),
-    });
+  Color getColor(Set<MaterialState> states) {
+    const Set<MaterialState> interactiveStates = <MaterialState>{
+      MaterialState.pressed,
+      MaterialState.hovered,
+      MaterialState.focused,
+    };
+    if (states.any(interactiveStates.contains)) {
+      return Colors.blue;
+    }
+    return Colors.blue;
   }
 
-  @override
-  Widget build(BuildContext context) {
+  bool checkMatrix(controllers){
+    bool isCheckedValidMatrix = true;
+    var mat = List.generate(controllers.length, (row) => List.generate(controllers.length ,(column) => int.tryParse(controllers[row][column].text)));
+    List<List<int?>> result = List.generate(mat[0].length, (i) => List.filled(mat.length, 0));
 
-    bool checkMatrix(controllers){
-      bool isCheckedValidMatrix = true;
-      var mat = List.generate(controllers.length, (row) => List.generate(controllers.length ,(column) => int.tryParse(controllers[row][column].text)));
-      List<List<int?>> result = List.generate(mat[0].length, (i) => List.filled(mat.length, 0));
-      if(currentUserData != null){
-        setDataUserGraph(mat.toString());
+    //сохранение графа в бд
+   // if(currentUserData != null){
+    //  setDataUserGraph(mat.toString());
+    //}
+
+    for(var i = 0; i < mat.length; i++){
+      for(var j = 0; j < mat.length; j++){
+        if(mat[i][j] == null){
+          isCheckedValidMatrix = false;
+          break;
+        }
       }
-      //транспонированная матрица
+    }
+    if(!isCheckedValidMatrix){
+      return false;
+    }else{
+      //транспанированная матрица
       for (int i = 0; i < mat.length; i++) {
         for (int j = 0; j < mat[0].length; j++) {
           result[j][i] = mat[i][j];
         }
       }
-      for(var i = 0; i < mat.length; i++){
-          for(var j = 0; j < mat.length; j++){
-            if(mat[i][j] == null){
-              isCheckedValidMatrix = false;
-              break;
-            }
-          }
-      }
-      if(isCheckedValidMatrix){
-        if(const DeepCollectionEquality().equals(mat, result)){
-          if(isCheckedOriented){
-            return false;
-          }else{
-            return true;
-          }
-        }else{
-          if(isCheckedOriented){
-            //здесь нужно еще раз проходится по матрице,случай на фото!!!!
-            //идти по матрице под главное диогонали и смотреть чтобы были нули!!!!
 
-            for(int i = 0;i < mat.length;i++){
-              for(int j = 0; j < i; j++){
-                if (mat[i][j] != 0) {
-                  return false;
-                }
-              }
-            }
-            return true;
-          }else{
-            return false;
-          }
-        }
+      if(const DeepCollectionEquality().equals(mat, result)){
+        isCheckedOriented = false;
       }
       else{
-        return false;
+        isCheckedOriented = true;
       }
+      return true;
     }
+    // if(isCheckedValidMatrix){
+    //   if(const DeepCollectionEquality().equals(mat, result)){
+    //     if(isCheckedOriented){
+    //       return false;
+    //     }else{
+    //       return true;
+    //     }
+    //   }else{
+    //     if(isCheckedOriented){
+    //       //здесь нужно еще раз проходится по матрице,случай на фото!!!!
+    //       //идти по матрице под главное диогонали и смотреть чтобы были нули!!!!
+    //
+    //       for(int i = 0;i < mat.length;i++){
+    //         for(int j = 0; j < i; j++){
+    //           if (mat[i][j] != 0) {
+    //             return false;
+    //           }
+    //         }
+    //       }
+    //       return true;
+    //     }else{
+    //       return false;
+    //     }
+    //   }
+    // }
+    // else{
+    //   return false;
+    // }
+  }
 
-    Color getColor(Set<MaterialState> states) {
-      const Set<MaterialState> interactiveStates = <MaterialState>{
-        MaterialState.pressed,
-        MaterialState.hovered,
-        MaterialState.focused,
-      };
-      if (states.any(interactiveStates.contains)) {
-        return Colors.blue;
-      }
-      return Colors.red;
-    }
+  @override
+  void initState() {
+    super.initState();
+    createControllers();
+    getUser();
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Center(
         child: SizedBox(
           height: 500,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                children: List.generate(
-                  controllers.length,
-                      (index1) => Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(
-                      controllers[index1].length,
-                          (index2) => Center(
-                        child: SizedBox(
-                          height: controllers.length > 7 ? 30 : controllers.length > 6 ? 40 : controllers.length > 5 ? 45 : 50,
-                          width: controllers.length > 7 ? 30 : controllers.length > 6 ? 40 : controllers.length > 5 ? 45 : 50,
-                          child: MatrixField(
-                            action: (index2  == controllers.length -1 && index1 == controllers.length -1) ? TextInputAction.done : TextInputAction.next,
-                            controller: controllers[index1][index2],
+          child: Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  children: List.generate(
+                    controllers.length,
+                        (index1) => Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
+                        controllers[index1].length,
+                            (index2) => Center(
+                          child: Padding(
+                            padding: controllers.length > 8 ? const EdgeInsets.all(1.0) :
+                                     controllers.length > 7 ? const EdgeInsets.all(1.0) :
+                                     controllers.length > 6 ? const EdgeInsets.all(2.0) :
+                                     controllers.length > 5 ? const EdgeInsets.all(4.0) :
+                                     const EdgeInsets.all(7.0),
+                            child: SizedBox(
+                              height: controllers.length > 8 ? 32 : controllers.length > 7 ? 35 : controllers.length > 6 ? 40 : controllers.length > 5 ? 45 : 50,
+                              width: controllers.length > 8 ? 32 : controllers.length > 7 ? 35 : controllers.length > 6 ? 40 : controllers.length > 5 ? 45 : 50,
+                              child: MatrixField(
+                                action: (index2  == controllers.length -1 && index1 == controllers.length -1) ? TextInputAction.done : TextInputAction.next,
+                                controller: controllers[index1][index2],
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              Row(
-                children: [
-                  const Text('Взвешенный да/нет'),
-                  Checkbox(
-                    checkColor: Colors.white,
-                    fillColor:MaterialStateProperty.resolveWith(getColor),
-                    value: isCheckedWeight,
-                    onChanged: (bool? value) {
-                      setState(() {
-                        isCheckedWeight = value!;
-                      });
-                    },
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  const Text('Орграф да/нет'),
-                  Checkbox(
-                    checkColor: Colors.white,
-                    fillColor:MaterialStateProperty.resolveWith(getColor),
-                    value: isCheckedOriented,
-                    onChanged: (bool? value) {
-                      setState(() {
-                        isCheckedOriented = value!;
-                      });
-                    },
-                  ),
-                ],
-              ),
-              InkWell(
-                onTap: () => checkMatrix(controllers) == true
-                    ?
-                Navigator.push(context,MaterialPageRoute(builder: (context) {
-                  return GraphView(controllers:controllers,isCheckedWeight: isCheckedWeight,isCheckedOriented: isCheckedOriented);
-                }))
-                    :
-                showModalBottomSheet<void>(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return Container(
-                      height: 200,
-                      color: Colors.amber,
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            const Text('Не верный ввод!'),
-                            ElevatedButton(
-                              child: const Text('Закрыть'),
-                              onPressed: () => Navigator.pop(context),
-                            ),
-                          ],
+                Column(
+                  children: [
+                    Row(
+                      children: [
+                        const SizedBox( width:233,child: Text('Взвешенный граф')),
+                        Checkbox(
+                          checkColor: Colors.white,
+                          fillColor:MaterialStateProperty.resolveWith(getColor),
+                          value: isCheckedWeight,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              isCheckedWeight = value!;
+                            });
+                          },
                         ),
-                      ),
-                    );
-                  },
+                      ],
+                    ),
+                    // Row(
+                    //   children: [
+                    //     const SizedBox( width:233,child: Text('Орентированный граф')),
+                    //     Checkbox(
+                    //       checkColor: Colors.white,
+                    //       fillColor:MaterialStateProperty.resolveWith(getColor),
+                    //       value: isCheckedOriented,
+                    //       onChanged: (bool? value) {
+                    //         setState(() {
+                    //           isCheckedOriented = value!;
+                    //         });
+                    //       },
+                    //     ),
+                    //   ],
+                    // ),
+                  ],
                 ),
-                child: Container(
-                    height: 50,
-                    width: 100,
-                    margin: const EdgeInsets.all(5),
-                    color: Colors.blue,
-                    child: const Center(child: Text('Отобразить', style: TextStyle(color: Colors.white),)),
+                ElevatedButton(
+                  onPressed: () => checkMatrix(controllers) == true
+                      ?
+                  Navigator.push(context,MaterialPageRoute(builder: (context) {
+                    return GraphView(controllers:controllers,isCheckedWeight: isCheckedWeight,isCheckedOriented: isCheckedOriented);
+                  }))
+                      :
+                  showModalBottomSheet<void>(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return Container(
+                        height: 200,
+                        color: Colors.amber,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              const Text('Не верный ввод!'),
+                              ElevatedButton(
+                                child: const Text('Закрыть'),
+                                onPressed: () => Navigator.pop(context),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
-              ),
-            ],
+                    child: const Text('Отобразить')
+                ),
+              ],
+            ),
           ),
         ),
       ),

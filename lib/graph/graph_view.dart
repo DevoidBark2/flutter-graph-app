@@ -14,24 +14,6 @@ class GraphView extends StatefulWidget {
   State<GraphView> createState() => _GraphViewState();
 }
 
-class Edge {
-  int a, b, w;
-  Edge(this.a, this.b, this.w);
-}
-
-List<Edge> getEdgesFromMatrix(List<List<int?>> matrix) {
-  List<Edge> edges = [];
-  int n = matrix.length;
-  for (int i = 0; i < n; i++) {
-    for (int j = i + 1; j < n; j++) {
-      if (matrix[i][j] != 0) {
-        edges.add(Edge(i+1, j+1, matrix[i][j]!));
-      }
-    }
-  }
-  return edges;
-}
-
 class _GraphViewState extends State<GraphView> {
   late final matrixF = widget.controllers;
   late final isCheckedWeight = widget.isCheckedWeight;
@@ -39,7 +21,6 @@ class _GraphViewState extends State<GraphView> {
   var N = 0;
   var colorVertices = 0;
   var colorEdges = 0;
-  String count = '';
   String error = '';
   List<List<int?>> algoritmMatrix = [];
   late var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
@@ -73,11 +54,11 @@ class _GraphViewState extends State<GraphView> {
   //     return false;
   //   }
   // }
-  void countOfRibs(){
-    var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
-    var count = matrix.length;
-    N = (count* (count - 1)) ~/ 2;
-  }
+  // void countOfRibs(){
+  //   // var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
+  //   var count = matrix.length;
+  //   N = (count* (count - 1)) ~/ 2;
+  // }
 
   void getColorVertices() async{
     var storage = await SharedPreferences.getInstance();
@@ -92,26 +73,27 @@ class _GraphViewState extends State<GraphView> {
     });
   }
 
-  void printOneText(){
+  void kruskalAlgorithm(){
+    print(matrix);
     if(isCheckedWeight == false){
         error = 'Граф должен быть взвешенный';
     }else{
-      var mat = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
-      List<Edge> edges = getEdgesFromMatrix(mat);
+      //var mat = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
+      List<Edge> edges = getEdgesFromMatrix(matrix);
       List<Edge> result = [];
-      List<int> treeIds = List<int>.generate(mat.length+1, (int index) => index);
+      List<int> treeIds = List<int>.generate(matrix.length+1, (int index) => index);
       edges.sort((a, b) => a.w - b.w); // сортируем ребра по весу
 
       for (Edge edge in edges) {
         if (treeIds[edge.a] != treeIds[edge.b]) {
           result.add(edge);
           int oldId = treeIds[edge.b], newId = treeIds[edge.a];
-          for (int i = 1; i <= mat.length; i++) {
+          for (int i = 1; i <= matrix.length; i++) {
             if (treeIds[i] == oldId) treeIds[i] = newId;
           }
         }
       }
-      List<List<int>> newMatrix = List.generate(mat.length, (i) => List.filled(mat.length, 0));
+      List<List<int>> newMatrix = List.generate(matrix.length, (i) => List.filled(matrix.length, 0));
       for (Edge edge in result) {
         newMatrix[edge.a - 1][edge.b - 1] = edge.w;
         newMatrix[edge.b - 1][edge.a - 1] = edge.w;
@@ -121,26 +103,23 @@ class _GraphViewState extends State<GraphView> {
         matrix = newMatrix;
       });
     }
-
   }
 
   @override
   void initState() {
     super.initState();
-    countOfRibs();
     getColorVertices();
     getColorEdges();
   }
 
   @override
   Widget build(BuildContext context) {
-    List<Object> num = ["Свойства","Кол-во ребер: $N"];
+    List<Object> num = ["Свойства"];
     return Scaffold(
       appBar: AppBar(),
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Text(count),
           InteractiveViewer(
             minScale: 0.3,
             maxScale: 10.5,
@@ -155,8 +134,8 @@ class _GraphViewState extends State<GraphView> {
           ),
           Positioned(
             child: DraggableScrollableSheet(
-              initialChildSize: 0.08,
-              minChildSize: 0.08,
+              initialChildSize: 0.07,
+              minChildSize: 0.07,
               builder: (context,controller) => Container(
                   decoration: BoxDecoration(
                     color:Colors.amberAccent,
@@ -185,7 +164,7 @@ class _GraphViewState extends State<GraphView> {
               ListTile(
                 title: const Text('Алгоритм Крускала'),
                 onTap: (){
-                  printOneText();
+                  kruskalAlgorithm();
                   // error != '' ? final snackBar = SnackBar(
                   //   content: const Text('Yay! A SnackBar!'),
                   //   action: SnackBarAction(
@@ -204,6 +183,24 @@ class _GraphViewState extends State<GraphView> {
       ),
     );
   }
+}
+
+class Edge {
+  int a, b, w;
+  Edge(this.a, this.b, this.w);
+}
+
+List<Edge> getEdgesFromMatrix(List<List<int?>> matrix) {
+  List<Edge> edges = [];
+  int n = matrix.length;
+  for (int i = 0; i < n; i++) {
+    for (int j = i + 1; j < n; j++) {
+      if (matrix[i][j] != 0) {
+        edges.add(Edge(i+1, j+1, matrix[i][j]!));
+      }
+    }
+  }
+  return edges;
 }
 
 class OpenPainter extends CustomPainter {
@@ -255,7 +252,8 @@ class OpenPainter extends CustomPainter {
                 //рисует вес графа
                 if(isCheckedWeight){
                   if(matrix.length % 2 == 0){
-                    var del = 1/3; // делим отрезок в отношении 1/3
+                    // делим отрезок в отношении 1/3
+                    var del = 1/3;
                     tp.paint(canvas, Offset(((points[i].dx + del * points[j].dx) / (1 + del)), ((points[i].dy + del * points[j].dy) / (1 + del))));
                   }else{
                     // иначе делим в нормальном отношении 1/2
@@ -263,21 +261,75 @@ class OpenPainter extends CustomPainter {
                   }
                 }
 
-              if(isCheckedOriented){
+              // if(isCheckedOriented){
+              //   if(points[i] != points[j]){
+              //     var del = 19/2;
+              //     final targetPoint = Offset(((points[i].dx + del * points[j].dx) / (1 + del)), ((points[i].dy + del * points[j].dy) / (1 + del)));
+              //     final dX = targetPoint.dx - points[i].dx;
+              //     final dY = targetPoint.dy - points[i].dy;
+              //     final angle = atan2(dX, dY);
+              //     const arrowSize = 5;
+              //     const arrowAngle=  30 * pi/360;
+              //     path.moveTo(targetPoint.dx - arrowSize * sin(angle - arrowAngle), targetPoint.dy - arrowSize * cos(angle - arrowAngle));
+              //     path.lineTo(targetPoint.dx, targetPoint.dy);
+              //     path.lineTo(targetPoint.dx - arrowSize * sin(angle + arrowAngle),targetPoint.dy - arrowSize * cos(angle + arrowAngle));
+              //     path.close();
+              //     canvas.drawPath(path, paint4);
+              //   }
+              // }
+              //   if(isCheckedOriented){
+              //     if(points[i] != points[j]){
+              //       var del = 19/2;
+              //       final targetPoint = Offset(((points[i].dx + del * points[j].dx) / (1 + del)), ((points[i].dy + del * points[j].dy) / (1 + del)));
+              //       final dX = targetPoint.dx - points[i].dx;
+              //       final dY = targetPoint.dy - points[i].dy;
+              //       final angle = atan2(dX, dY);
+              //       const arrowSize = 5;
+              //       const arrowAngle=  30 * pi/360;
+              //       bool isBidirectional = false; // флаг для проверки наличия обратного ребра
+              //       for(int k = 0; k < matrix[j].length; k++){
+              //         if(matrix[j][k] == i){ // если есть обратное ребро
+              //           isBidirectional = true;
+              //           break;
+              //         }
+              //       }
+              //       if(isBidirectional){ // если ребро не двустороннее
+              //         path.moveTo(targetPoint.dx - arrowSize * sin(angle - arrowAngle), targetPoint.dy - arrowSize * cos(angle - arrowAngle));
+              //         path.lineTo(targetPoint.dx, targetPoint.dy);
+              //         path.lineTo(targetPoint.dx - arrowSize * sin(angle + arrowAngle),targetPoint.dy - arrowSize * cos(angle + arrowAngle));
+              //         path.close();
+              //         canvas.drawPath(path, paint4);
+              //       }
+              //     }
+              //   }
                 var del = 19/2;
-                final targetPoint = Offset(((points[i].dx + del * points[j].dx) / (1 + del)), ((points[i].dy + del * points[j].dy) / (1 + del)));
-                final dX = targetPoint.dx - points[i].dx;
-                final dY = targetPoint.dy - points[i].dy;
-                final angle = atan2(dX, dY);
-                const arrowSize = 5;
+                      final targetPoint = Offset(((points[i].dx + del * points[j].dx) / (1 + del)), ((points[i].dy + del * points[j].dy) / (1 + del)));
+                      final dX = targetPoint.dx - points[i].dx;
+                      final dY = targetPoint.dy - points[i].dy;
+                      final angle = atan2(dX, dY);
+                      const arrowSize = 5;
                 const arrowAngle=  30 * pi/360;
-                path.moveTo(targetPoint.dx - arrowSize * sin(angle - arrowAngle), targetPoint.dy - arrowSize * cos(angle - arrowAngle));
-                path.lineTo(targetPoint.dx, targetPoint.dy);
-                path.lineTo(targetPoint.dx - arrowSize * sin(angle + arrowAngle),targetPoint.dy - arrowSize * cos(angle + arrowAngle));
-                path.close();
-                canvas.drawPath(path, paint4);
-              }
-              matrix[j][i] = 0;
+                bool isBidirectional = false; // флаг для проверки наличия обратного ребра
+                for(int k = 0; k < matrix[j].length; k++){
+                  if(matrix[j][k] == i){ // если есть обратное ребро
+                    isBidirectional = true;
+                    break;
+                  }
+                }
+                for(int k = 0; k < matrix[i].length; k++){
+                  if(matrix[i][k] == j){ // если есть обратное ребро
+                    isBidirectional = true;
+                    break;
+                  }
+                }
+                if(!isBidirectional){ // если ребро не двустороннее
+                  path.moveTo(targetPoint.dx - arrowSize * sin(angle - arrowAngle), targetPoint.dy - arrowSize * cos(angle - arrowAngle));
+                  path.lineTo(targetPoint.dx, targetPoint.dy);
+                  path.lineTo(targetPoint.dx - arrowSize * sin(angle + arrowAngle),targetPoint.dy - arrowSize * cos(angle + arrowAngle));
+                  path.close();
+                  canvas.drawPath(path, paint4);
+                }
+              // matrix[j][i] = 0;
           }
         }
       }

@@ -6,7 +6,7 @@ class MatrixField extends StatelessWidget {
   const MatrixField({
     Key? key,
     required this.controller,
-    required this.action
+    required this.action,
   }) : super(key: key);
 
   @override
@@ -15,9 +15,10 @@ class MatrixField extends StatelessWidget {
         textAlign: TextAlign.center,
         controller: controller,
         textInputAction: action,
-        autofocus: true,
+        keyboardType: TextInputType.number,
         decoration: const InputDecoration(
-          border: OutlineInputBorder()
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.all(5.0)
         ),
     );
   }

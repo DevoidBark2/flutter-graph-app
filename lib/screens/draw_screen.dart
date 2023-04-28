@@ -12,21 +12,10 @@ class DrawScreen extends StatefulWidget {
 class _DrawScreenState extends State<DrawScreen> {
   final _row = TextEditingController();
 
-  @override
-  void dispose() {
-    _row.dispose();
-    super.dispose();
-  }
   int handleInput(TextEditingController row){
     var a = int.tryParse(row.text);
-    if(a == null){
+    if(a == null || a == 0 || a > 9) {
       return 0;
-    }
-    if(a == 0){
-      return 0;
-    }
-    if(a > 9){
-      return 2;
     }
     return 1;
   }
@@ -35,87 +24,85 @@ class _DrawScreenState extends State<DrawScreen> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(15.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text('Введите матрицу'),
-            const SizedBox(
-              height: 30,
-            ),
-            Row(
+            Column(
               children: [
-                Expanded(
-                  child: TextField(
-                    textAlign: TextAlign.center,
-                    controller: _row,
-                    decoration: const InputDecoration(
-                        border: OutlineInputBorder()
-                    ),
-                  )
-                ),
-                const Text('*',style: TextStyle(fontSize: 30.0),),
-                Expanded(
-                  child: TextField(
-                    textAlign: TextAlign.center,
-                    controller: _row,
-                    decoration: const InputDecoration(
-                        border: OutlineInputBorder()
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(
-              height: 30,
-            ),
-            ElevatedButton(
-                onPressed: (){
-                      handleInput(_row) == 1
-                      ? Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                          return Scaffold(
-                            appBar: AppBar(
-                              title: const Text('Ввод матрицы'),
-                            ),
-                            body: MatrixPage(matrix: Matrix(int.parse(_row.text),int.parse(_row.text))),
-                          );
-                        }))
-                      : handleInput(_row) == 2
-                      ? showModalBottomSheet<void>(context: context, builder: (BuildContext context) {return Container(
-                        height: 200,
-                        color: Colors.amber,
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: <Widget>[
-                              const Text('Матрицы 10x10 и больше еще в разработке!'),
-                              ElevatedButton(
-                                child: const Text('Закрыть'),
-                                onPressed: () => Navigator.pop(context),
-                              ),
-                            ],
+                const Text('Введите матрицу',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w600)),
+                const SizedBox(height: 30),
+                Row(
+                  children: [
+                    Expanded(
+                        child: TextField(
+                          textAlign: TextAlign.center,
+                          controller: _row,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                              border: OutlineInputBorder()
                           ),
-                        ),
-                      );})
-                      : showModalBottomSheet<void>(context: context, builder: (BuildContext context) {return Container(
-                      height: 200,
-                      color: Colors.amber,
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            const Text('Не верный ввод!'),
-                            ElevatedButton(
-                              child: const Text('Закрыть'),
-                              onPressed: () => Navigator.pop(context),
-                            ),
-                          ],
+                        )
+                    ),
+                    const SizedBox(width: 25.0),
+                    const Padding(padding:EdgeInsets.only(top: 20.0),child: Text('*',style: TextStyle(fontSize: 40.0),)),
+                    const SizedBox(width: 25.0),
+                    Expanded(
+                      child: TextField(
+                        textAlign: TextAlign.center,
+                        controller: _row,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                            border: OutlineInputBorder()
                         ),
                       ),
-                    );});
-                },
-                child: const Text('Далее')
-            )
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 30),
+                ElevatedButton(
+                    onPressed: (){
+                      handleInput(_row) == 1
+                          ? Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                        return Scaffold(
+                          appBar: AppBar(
+                            title: const Text('Ввод матрицы'),
+                          ),
+                          body: MatrixPage(matrix: Matrix(int.parse(_row.text),int.parse(_row.text))),
+                        );
+                      }))
+                          : showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
+                            return Container(
+                                height: 200,
+                                color: const Color(0xffa4a6db),
+                                child: Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                    children: <Widget>[
+                                    Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        const Text('Не верный ввод!'),
+                                        ElevatedButton(
+                                          child: const Text('Закрыть'),
+                                          onPressed: () => {
+                                            Navigator.pop(context)
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                      const Text('Максимальный размер вводимой матрицы 9х9!',style: TextStyle(fontWeight:FontWeight.w600,fontSize: 9.0,color: Colors.black))
+                                    ],
+                          ),
+                        ),
+                      );}
+                      );
+                    },
+                    child: const Text('Продолжить')
+                )
+              ],
+            ),
+            const SizedBox(height: 225.0,),
+            const Text('Максимальный размер вводимой матрицы 9х9!',style: TextStyle(fontWeight:FontWeight.w600,fontSize: 9.0,color: Color(0xffdc9256)))
           ],
         ),
       ),

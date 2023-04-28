@@ -201,7 +201,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Map<String, dynamic>? userData = await getCurrentUserData();
     setState(() {
       currentUserData = userData;
-      print(currentUserData);
     });
   }
 
@@ -211,6 +210,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       graphsUser = userData;
     });
   }
+
 
   void updateUserData(String newFirstName,String newSecondName,String newEmail) async {
     final navigator = Navigator.of(context);
@@ -224,6 +224,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       'email':newEmail
     });
     navigator.pop();
+    currentUserData = null;
     setState(() {});
   }
   @override
@@ -450,47 +451,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             appBar: AppBar(title: const Text('Обновить данные'),),
                             body:  Form(
                             key: formTwoKey,
-                            child: Column(
-                              children: [
-                                TextFormField(
-                                  keyboardType: TextInputType.emailAddress,
-                                  autocorrect: false,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(),
-                                    hintText: 'Введите имя',
+                            child: SingleChildScrollView(
+                              child: Column(
+                                children: [
+                                  TextFormField(
+                                    keyboardType: TextInputType.emailAddress,
+                                    autocorrect: false,
+                                    decoration: const InputDecoration(
+                                      border: OutlineInputBorder(),
+                                      hintText: 'Введите имя',
+                                    ),
+                                    controller: firstNameController1,
                                   ),
-                                  controller: firstNameController1,
-                                ),
-                                const SizedBox(height: 5),
-                                TextFormField(
-                                  keyboardType: TextInputType.emailAddress,
-                                  autocorrect: false,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(),
-                                    hintText: 'Введите фамилию',
+                                  const SizedBox(height: 5),
+                                  TextFormField(
+                                    keyboardType: TextInputType.emailAddress,
+                                    autocorrect: false,
+                                    decoration: const InputDecoration(
+                                      border: OutlineInputBorder(),
+                                      hintText: 'Введите фамилию',
+                                    ),
+                                    controller: lastNameController2,
                                   ),
-                                  controller: lastNameController2,
-                                ),
-                                const SizedBox(height: 5),
-                                TextFormField(
-                                  keyboardType: TextInputType.emailAddress,
-                                  autocorrect: false,
-                                  controller: emailController,
-                                  validator: (email) =>
-                                  email != null && !EmailValidator.validate(email)
-                                      ? 'Введите правильный Email'
-                                      : null,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(),
-                                    hintText: 'Введите Email',
+                                  const SizedBox(height: 5),
+                                  TextFormField(
+                                    keyboardType: TextInputType.emailAddress,
+                                    autocorrect: false,
+                                    controller: emailController,
+                                    validator: (email) =>
+                                    email != null && !EmailValidator.validate(email)
+                                        ? 'Введите правильный Email'
+                                        : null,
+                                    decoration: const InputDecoration(
+                                      border: OutlineInputBorder(),
+                                      hintText: 'Введите Email',
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 10),
-                                ElevatedButton(
-                                  onPressed:() => updateUserData(firstNameController1.text,lastNameController2.text,emailController.text),
-                                  child: const Center(child: Text('Обновить данные')),
-                                ),
-                              ],
+                                  const SizedBox(height: 10),
+                                  ElevatedButton(
+                                    onPressed:() => updateUserData(firstNameController1.text,lastNameController2.text,emailController.text),
+                                    child: const Center(child: Text('Обновить данные')),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                           );

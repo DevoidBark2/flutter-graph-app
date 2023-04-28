@@ -11,12 +11,12 @@ class InstructionScreen extends StatefulWidget {
 class _InstructionScreenState extends State<InstructionScreen> {
   @override
   Widget build(BuildContext context) {
-    return const SingleChildScrollView(
+    return SingleChildScrollView(
       child: Padding(
-        padding: EdgeInsets.all(10.0),
+        padding: const EdgeInsets.all(10.0),
         child: Column(
           children: [
-            BulletedList(
+            const BulletedList(
               listItems:[
                 Text('Вы можете посмотреть все ранее созданные вами графы в вашем Профиле.'),
                 Text('Сверху справа находятся Настройки, в которых вы сможете изменить цвет ребер и вершин'),
@@ -24,10 +24,10 @@ class _InstructionScreenState extends State<InstructionScreen> {
               listOrder: ListOrder.ordered,
               bulletType: BulletType.conventional,
             ),
-            SizedBox(height: 10),
-            Text('Инструкция',textAlign: TextAlign.center,style: TextStyle(fontWeight: FontWeight.w700,fontSize: 25)),
-            SizedBox(height: 10),
-            BulletedList(
+            const SizedBox(height: 10),
+            const Text('Инструкция',textAlign: TextAlign.center,style: TextStyle(fontWeight: FontWeight.w700,fontSize: 25)),
+            const SizedBox(height: 10),
+            const BulletedList(
               listItems:[
                 Text('Зайдите в пункт меню "Визуализация".'),
                 Text('Введите размер матрицы в любой из двух полей ввода и нажмите кнопку "Далее".'),
@@ -39,6 +39,23 @@ class _InstructionScreenState extends State<InstructionScreen> {
               ],
               listOrder: ListOrder.ordered,
               bulletType: BulletType.numbered,
+            ),
+            const Text('Примечания',textAlign: TextAlign.center,style: TextStyle(fontWeight: FontWeight.w700,fontSize: 25)),
+            BulletedList(
+              listItems:[
+                RichText(
+                  text: TextSpan(
+                    text: 'В окне ввода матрицы смежности значения',
+                    style: DefaultTextStyle.of(context).style,
+                    children: const <TextSpan>[
+                      TextSpan(text: ' на главной диагонали больше 0', style: TextStyle(fontWeight: FontWeight.w800)),
+                      TextSpan(text: ' означает присутствие петли у данной вершины.'),
+                    ],
+                  ),
+                ),
+              ],
+              listOrder: ListOrder.ordered,
+              bulletType: BulletType.conventional,
             ),
           ],
         ),
