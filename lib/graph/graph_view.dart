@@ -223,34 +223,35 @@ class OpenPainter extends CustomPainter {
     var path = Path();
     final List<Offset> points = [];
 
-    var drawPoints = Paint()..color = Color(colorVertices)..strokeCap = StrokeCap.round..strokeWidth = 30; //!!!!!!!!!!!!!!!!!
+    var drawPoints = Paint()..color = Color(colorVertices)..strokeCap = StrokeCap.round..strokeWidth = 30;
     var drawLines = Paint()..color = Color(colorEdges)..strokeWidth = 2;
 
     var paint3 =  Paint()..color = const Color(0xffb69d9d)..strokeWidth = 1..style = PaintingStyle.stroke;
     var paint4 =  Paint()..color = const Color(0xff000000)..strokeWidth = 10..style = PaintingStyle.stroke;
 
     //добавление вершин
-    for(var i =0; i < matrix.length;i++){
+    for(var i = 0; i < matrix.length;i++){
       final angle = 2 * pi * (i / matrix.length) + (360 / matrix.length);
       points.add(Offset((cos(angle) * 140 + (size.width / 2)), (sin(angle) * 140 + (size.width / 2))));
     }
 
     //основной цикл полного рисования(петли, веса и т.д.)
-    for(var i =0;i < matrix.length  ;i++){
-      for(var j = 0;j < matrix.length;j++){
+    for(var i = 0; i < matrix.length;i++){
+      for(var j = 0; j < matrix.length;j++){
         if(matrix[i][j] != 0){
           if(i == j){ // рисует петлю
             Offset ofs = Offset(points[i].dx, points[i].dy - 15);
             canvas.drawCircle(ofs,20.0, paint3);
           }
           else{
-                // рисует просто линия
+                // рисует ребро
                 canvas.drawLine(points[i], points[j], drawLines);
-                TextSpan span = TextSpan(style: const TextStyle(color: Colors.black,fontWeight: FontWeight.bold), text: "${matrix[i][j]}");
-                TextPainter tp = TextPainter(text: span, textAlign: TextAlign.left, textDirection: TextDirection.ltr);
-                tp.layout();
+
                 //рисует вес графа
                 if(isCheckedWeight){
+                  TextSpan span = TextSpan(style: const TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 17), text: "${matrix[i][j]}");
+                  TextPainter tp = TextPainter(text: span, textAlign: TextAlign.left, textDirection: TextDirection.ltr);
+                  tp.layout();
                   if(matrix.length % 2 == 0){
                     // делим отрезок в отношении 1/3
                     var del = 1/3;
@@ -261,88 +262,63 @@ class OpenPainter extends CustomPainter {
                   }
                 }
 
-              // if(isCheckedOriented){
-              //   if(points[i] != points[j]){
-              //     var del = 19/2;
-              //     final targetPoint = Offset(((points[i].dx + del * points[j].dx) / (1 + del)), ((points[i].dy + del * points[j].dy) / (1 + del)));
-              //     final dX = targetPoint.dx - points[i].dx;
-              //     final dY = targetPoint.dy - points[i].dy;
-              //     final angle = atan2(dX, dY);
-              //     const arrowSize = 5;
-              //     const arrowAngle=  30 * pi/360;
-              //     path.moveTo(targetPoint.dx - arrowSize * sin(angle - arrowAngle), targetPoint.dy - arrowSize * cos(angle - arrowAngle));
-              //     path.lineTo(targetPoint.dx, targetPoint.dy);
-              //     path.lineTo(targetPoint.dx - arrowSize * sin(angle + arrowAngle),targetPoint.dy - arrowSize * cos(angle + arrowAngle));
-              //     path.close();
-              //     canvas.drawPath(path, paint4);
-              //   }
-              // }
-              //   if(isCheckedOriented){
-              //     if(points[i] != points[j]){
-              //       var del = 19/2;
-              //       final targetPoint = Offset(((points[i].dx + del * points[j].dx) / (1 + del)), ((points[i].dy + del * points[j].dy) / (1 + del)));
-              //       final dX = targetPoint.dx - points[i].dx;
-              //       final dY = targetPoint.dy - points[i].dy;
-              //       final angle = atan2(dX, dY);
-              //       const arrowSize = 5;
-              //       const arrowAngle=  30 * pi/360;
-              //       bool isBidirectional = false; // флаг для проверки наличия обратного ребра
-              //       for(int k = 0; k < matrix[j].length; k++){
-              //         if(matrix[j][k] == i){ // если есть обратное ребро
-              //           isBidirectional = true;
-              //           break;
-              //         }
-              //       }
-              //       if(isBidirectional){ // если ребро не двустороннее
-              //         path.moveTo(targetPoint.dx - arrowSize * sin(angle - arrowAngle), targetPoint.dy - arrowSize * cos(angle - arrowAngle));
-              //         path.lineTo(targetPoint.dx, targetPoint.dy);
-              //         path.lineTo(targetPoint.dx - arrowSize * sin(angle + arrowAngle),targetPoint.dy - arrowSize * cos(angle + arrowAngle));
-              //         path.close();
-              //         canvas.drawPath(path, paint4);
-              //       }
-              //     }
-              //   }
-                var del = 19/2;
-                      final targetPoint = Offset(((points[i].dx + del * points[j].dx) / (1 + del)), ((points[i].dy + del * points[j].dy) / (1 + del)));
-                      final dX = targetPoint.dx - points[i].dx;
-                      final dY = targetPoint.dy - points[i].dy;
-                      final angle = atan2(dX, dY);
-                      const arrowSize = 5;
-                const arrowAngle=  30 * pi/360;
-                bool isBidirectional = false; // флаг для проверки наличия обратного ребра
-                for(int k = 0; k < matrix[j].length; k++){
-                  if(matrix[j][k] == i){ // если есть обратное ребро
-                    isBidirectional = true;
-                    break;
+                if(isCheckedOriented){
+                  if(points[i] != points[j]){
+                    var del = 19/2;
+                    final targetPoint = Offset(((points[i].dx + del * points[j].dx) / (1 + del)), ((points[i].dy + del * points[j].dy) / (1 + del)));
+                    final dX = targetPoint.dx - points[i].dx;
+                    final dY = targetPoint.dy - points[i].dy;
+                    final angle = atan2(dX, dY);
+                    const arrowSize = 5;
+                    const arrowAngle=  30 * pi/360;
+                    path.moveTo(targetPoint.dx - arrowSize * sin(angle - arrowAngle), targetPoint.dy - arrowSize * cos(angle - arrowAngle));
+                    path.lineTo(targetPoint.dx, targetPoint.dy);
+                    path.lineTo(targetPoint.dx - arrowSize * sin(angle + arrowAngle),targetPoint.dy - arrowSize * cos(angle + arrowAngle));
+                    path.close();
+                    canvas.drawPath(path, paint4);
                   }
                 }
-                for(int k = 0; k < matrix[i].length; k++){
-                  if(matrix[i][k] == j){ // если есть обратное ребро
-                    isBidirectional = true;
-                    break;
-                  }
-                }
-                if(!isBidirectional){ // если ребро не двустороннее
-                  path.moveTo(targetPoint.dx - arrowSize * sin(angle - arrowAngle), targetPoint.dy - arrowSize * cos(angle - arrowAngle));
-                  path.lineTo(targetPoint.dx, targetPoint.dy);
-                  path.lineTo(targetPoint.dx - arrowSize * sin(angle + arrowAngle),targetPoint.dy - arrowSize * cos(angle + arrowAngle));
-                  path.close();
-                  canvas.drawPath(path, paint4);
-                }
-              // matrix[j][i] = 0;
+                // if(isCheckedOriented){
+                //   if(points[i] != points[j]){
+                //     var del = 19/2;
+                //     final targetPoint = Offset(((points[i].dx + del * points[j].dx) / (1 + del)), ((points[i].dy + del * points[j].dy) / (1 + del)));
+                //     final dX = targetPoint.dx - points[i].dx;
+                //     final dY = targetPoint.dy - points[i].dy;
+                //     final angle = atan2(dX, dY);
+                //     const arrowSize = 5;
+                //     const arrowAngle=  30 * pi/360;
+                //
+                //     // проверяем наличие обратного ребра
+                //     bool isBidirectional = false;
+                //     for(int k = 0; k < matrix[j].length; k++){
+                //       if(matrix[j][k] == i){
+                //         isBidirectional = true;
+                //         break;
+                //       }
+                //       if(matrix[i][k] == j){
+                //         isBidirectional = true;
+                //         break;
+                //       }
+                //     }
+                //     if(!isBidirectional){
+                //       path.moveTo(targetPoint.dx - arrowSize * sin(angle - arrowAngle), targetPoint.dy - arrowSize * cos(angle - arrowAngle));
+                //       path.lineTo(targetPoint.dx, targetPoint.dy);
+                //       path.lineTo(targetPoint.dx - arrowSize * sin(angle + arrowAngle),targetPoint.dy - arrowSize * cos(angle + arrowAngle));
+                //       path.close();
+                //       canvas.drawPath(path, paint4);
+                //     }
+                //   }
+                // }
+                matrix[j][i] = 0;
           }
         }
       }
     }
 
-    // рисование вершин
+    // рисование вершин и индекса вершины
     for(var i = 0;i < matrix.length;i++) {
       //в дальнейшем тут надо будет при условии рисовать вершины разных цветов
       canvas.drawCircle(points[i], 15, drawPoints);
-    }
-
-    // рисование индекса вершины
-    for(var i =0;i < points.length;i++){
       TextSpan span = TextSpan(style: const TextStyle(color: Colors.black,fontWeight: FontWeight.bold), text: "${i + 1}");
       TextPainter tp = TextPainter(text: span, textAlign: TextAlign.left, textDirection: TextDirection.ltr);
       tp.layout();
