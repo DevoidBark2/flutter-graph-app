@@ -14,7 +14,7 @@ class _DrawScreenState extends State<DrawScreen> {
 
   int handleInput(TextEditingController row){
     var a = int.tryParse(row.text);
-    if(a == null || a == 0 || a > 9) {
+    if(a == null || a == 0) {
       return 0;
     }
     return 1;
@@ -90,19 +90,16 @@ class _DrawScreenState extends State<DrawScreen> {
                                         ),
                                       ],
                                     ),
-                                      const Text('Максимальный размер вводимой матрицы 9х9!',style: TextStyle(fontWeight:FontWeight.w600,fontSize: 9.0,color: Colors.black))
-                                    ],
+                                  ],
                           ),
                         ),
                       );}
                       );
                     },
                     child: const Text('Продолжить')
-                )
+                ),
               ],
-            ),
-            const SizedBox(height: 225.0,),
-            const Text('Максимальный размер вводимой матрицы 9х9!',style: TextStyle(fontWeight:FontWeight.w600,fontSize: 9.0,color: Color(0xffdc9256)))
+            )
           ],
         ),
       ),

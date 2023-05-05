@@ -97,7 +97,7 @@ class _MatrixPageState extends State<MatrixPage> {
     if(!isCheckedValidMatrix){
       return false;
     }else{
-      //транспанированная матрица
+
       for (int i = 0; i < mat.length; i++) {
         for (int j = 0; j < mat[0].length; j++) {
           result[j][i] = mat[i][j];
@@ -112,34 +112,6 @@ class _MatrixPageState extends State<MatrixPage> {
       }
       return true;
     }
-    // if(isCheckedValidMatrix){
-    //   if(const DeepCollectionEquality().equals(mat, result)){
-    //     if(isCheckedOriented){
-    //       return false;
-    //     }else{
-    //       return true;
-    //     }
-    //   }else{
-    //     if(isCheckedOriented){
-    //       //здесь нужно еще раз проходится по матрице,случай на фото!!!!
-    //       //идти по матрице под главное диогонали и смотреть чтобы были нули!!!!
-    //
-    //       for(int i = 0;i < mat.length;i++){
-    //         for(int j = 0; j < i; j++){
-    //           if (mat[i][j] != 0) {
-    //             return false;
-    //           }
-    //         }
-    //       }
-    //       return true;
-    //     }else{
-    //       return false;
-    //     }
-    //   }
-    // }
-    // else{
-    //   return false;
-    // }
   }
 
   @override
@@ -152,110 +124,98 @@ class _MatrixPageState extends State<MatrixPage> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: Center(
-        child: SizedBox(
-          height: 500,
-          child: Padding(
-            padding: const EdgeInsets.all(4.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  children: List.generate(
-                    controllers.length,
-                        (index1) => Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(
-                        controllers[index1].length,
-                            (index2) => Center(
-                          child: Padding(
-                            padding: controllers.length > 8 ? const EdgeInsets.all(1.0) :
-                                     controllers.length > 7 ? const EdgeInsets.all(1.0) :
-                                     controllers.length > 6 ? const EdgeInsets.all(2.0) :
-                                     controllers.length > 5 ? const EdgeInsets.all(4.0) :
-                                     const EdgeInsets.all(7.0),
-                            child: SizedBox(
-                              height: controllers.length > 8 ? 32 : controllers.length > 7 ? 35 : controllers.length > 6 ? 40 : controllers.length > 5 ? 45 : 50,
-                              width: controllers.length > 8 ? 32 : controllers.length > 7 ? 35 : controllers.length > 6 ? 40 : controllers.length > 5 ? 45 : 50,
-                              child: MatrixField(
-                                action: (index2  == controllers.length -1 && index1 == controllers.length -1) ? TextInputAction.done : TextInputAction.next,
-                                controller: controllers[index1][index2],
-                              ),
-                            ),
-                          ),
+      scrollDirection: Axis.horizontal,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: Center(
+      child: SizedBox(
+      child: Padding(
+          padding: const EdgeInsets.all(4.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            children: List.generate(
+              controllers.length,
+                  (index1) => Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  controllers[index1].length,
+                      (index2) => Center(
+                    child: Padding(
+                      padding: controllers.length > 8 ? const EdgeInsets.all(1.0) :
+                      controllers.length > 7 ? const EdgeInsets.all(1.0) :
+                      controllers.length > 6 ? const EdgeInsets.all(2.0) :
+                      controllers.length > 5 ? const EdgeInsets.all(3.0) :
+                      const EdgeInsets.all(6.0),
+                      child: SizedBox(
+                        height: controllers.length > 8 ? 32 : controllers.length > 7 ? 35 : controllers.length > 6 ? 40 : controllers.length > 5 ? 45 : 50,
+                        width: controllers.length > 8 ? 32 : controllers.length > 7 ? 35 : controllers.length > 6 ? 40 : controllers.length > 5 ? 45 : 50,
+                        child: MatrixField(
+                          action: (index2  == controllers.length -1 && index1 == controllers.length -1) ? TextInputAction.done : TextInputAction.next,
+                          controller: controllers[index1][index2],
                         ),
                       ),
                     ),
                   ),
                 ),
-                Column(
-                  children: [
-                    Row(
-                      children: [
-                        const SizedBox( width:233,child: Text('Взвешенный граф')),
-                        Checkbox(
-                          checkColor: Colors.white,
-                          fillColor:MaterialStateProperty.resolveWith(getColor),
-                          value: isCheckedWeight,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              isCheckedWeight = value!;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                    // Row(
-                    //   children: [
-                    //     const SizedBox( width:233,child: Text('Орентированный граф')),
-                    //     Checkbox(
-                    //       checkColor: Colors.white,
-                    //       fillColor:MaterialStateProperty.resolveWith(getColor),
-                    //       value: isCheckedOriented,
-                    //       onChanged: (bool? value) {
-                    //         setState(() {
-                    //           isCheckedOriented = value!;
-                    //         });
-                    //       },
-                    //     ),
-                    //   ],
-                    // ),
-                  ],
-                ),
-                ElevatedButton(
-                  onPressed: () => checkMatrix(controllers) == true
-                      ?
-                  Navigator.push(context,MaterialPageRoute(builder: (context) {
-                    return GraphView(controllers:controllers,isCheckedWeight: isCheckedWeight,isCheckedOriented: isCheckedOriented);
-                  }))
-                      :
-                  showModalBottomSheet<void>(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return Container(
-                        height: 200,
-                        color: Colors.amber,
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              const Text('Не верный ввод!'),
-                              ElevatedButton(
-                                child: const Text('Закрыть'),
-                                onPressed: () => Navigator.pop(context),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                    child: const Text('Отобразить')
-                ),
-              ],
+              ),
             ),
           ),
-        ),
+          Column(
+            children: [
+              Row(
+                children: [
+                  const SizedBox( width:233,child: Text('Взвешенный граф')),
+                  Checkbox(
+                    checkColor: Colors.white,
+                    fillColor:MaterialStateProperty.resolveWith(getColor),
+                    value: isCheckedWeight,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        isCheckedWeight = value!;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ElevatedButton(
+              onPressed: () => checkMatrix(controllers) == true
+                  ?
+              Navigator.push(context,MaterialPageRoute(builder: (context) {
+                return GraphView(controllers:controllers,isCheckedWeight: isCheckedWeight,isCheckedOriented: isCheckedOriented);
+              }))
+                  :
+              showModalBottomSheet<void>(
+                context: context,
+                builder: (BuildContext context) {
+                  return Container(
+                    height: 200,
+                    color: Colors.amber,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          const Text('Не верный ввод!'),
+                          ElevatedButton(
+                            child: const Text('Закрыть'),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+              child: const Text('Отобразить')
+          ),
+        ],
+      ),
+    ),
+    ),
+    ),
       ),
     );
   }

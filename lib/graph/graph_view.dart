@@ -19,6 +19,8 @@ class _GraphViewState extends State<GraphView> {
   late final isCheckedWeight = widget.isCheckedWeight;
   late final isCheckedOriented = widget.isCheckedOriented;
   var N = 0;
+  bool isHasEulerCycle = false;
+  String circle = '';
   var colorVertices = 0;
   var colorEdges = 0;
   String error = '';
@@ -77,7 +79,10 @@ class _GraphViewState extends State<GraphView> {
     print(matrix);
     if(isCheckedWeight == false){
         error = 'Граф должен быть взвешенный';
-    }else{
+    }else if(isCheckedOriented == true){
+      error="Граф не должен быть орентированный";
+    }
+    else{
       //var mat = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
       List<Edge> edges = getEdgesFromMatrix(matrix);
       List<Edge> result = [];
@@ -105,16 +110,221 @@ class _GraphViewState extends State<GraphView> {
     }
   }
 
+  // void hromatDigit(List<List<int?>> graph) {
+  //   int n = graph.length;
+  //   List<int?> colors = List.filled(n, null);
+  //   List<bool> usedColors = List.filled(n, false);
+  //
+  //   for (int i = 0; i < n; i++) {
+  //     List<int> neighbors = [];
+  //     for (List<int?> edge in graph) {
+  //       if (edge[0] == i) {
+  //         neighbors.add(edge[1]!);
+  //       } else if (edge[1] == i) {
+  //         neighbors.add(edge[0]!);
+  //       }
+  //     }
+  //
+  //     for (int neighbor in neighbors) {
+  //       if (colors[neighbor] != null) {
+  //         usedColors[colors[neighbor]!] = true;
+  //       }
+  //     }
+  //
+  //     int color;
+  //     for (color = 0; color < n; color++) {
+  //       if (!usedColors[color]) {
+  //         break;
+  //       }
+  //     }
+  //
+  //     colors[i] = color;
+  //
+  //     for (int neighbor in neighbors) {
+  //       if (colors[neighbor] != null) {
+  //         usedColors[colors[neighbor]!] = false;
+  //       }
+  //     }
+  //   }
+  //   print(colors);
+  // }
+
+  // void chromaticNumber(List<List<int?>> G, int N){
+  //   const int MAXN = 1005;
+  //   List<int?> color =  List<int?>.filled(MAXN, 0);
+  //   int? ans = 1;
+  //
+  //   bool checkColor(int u, int c) {
+  //     for(int v = 1; v <= N; v++){
+  //       if(G[u][v] == 1 && color[v] == c){
+  //         return false;
+  //       }
+  //     }
+  //     return true;
+  //   }
+  //
+  //   void dfs(int u) {
+  //     if(u == N + 1){
+  //       int? cnt = 0;
+  //       for(int i = 1; i <= N; i++){
+  //         cnt = cnt! > color[i]! ? cnt : color[i];
+  //       }
+  //       ans = ans! < cnt! ? ans : cnt;
+  //       return;
+  //     }
+  //     for(int c = 1; c <= N; c++){
+  //       if(checkColor(u, c)){
+  //         color[u] = c;
+  //         dfs(u + 1);
+  //         color[u] = 0;
+  //       }
+  //     }
+  //   }
+  //
+  //   dfs(1);
+  //   setState(() {
+  //     N = ans!;
+  //   });
+  // }
+
+  void chromaticNumber(List<List<int?>> adjMatrix) {
+    int n = adjMatrix.length;
+    List<int> colors = List.filled(n, -1);
+    List<bool> availableColors;
+
+    for (int i = 0; i < n; i++) {
+      availableColors = List.filled(n, true);
+
+      for (int j = 0; j < n; j++) {
+        if (adjMatrix[i][j] == 1 && colors[j] != -1) {
+          availableColors[colors[j]] = false;
+        }
+      }
+
+      int cr = 0;
+      while (!availableColors[cr]) {
+        cr++;
+      }
+
+      colors[i] = cr;
+    }
+    Set<int> uniqueColors = Set<int>.from(colors);
+    setState(() {
+      N = uniqueColors.length;
+    });
+  }
+
+  void hasEulerCycle(List<List<int?>> adjacencyMatrix) {
+    // Проверяем связность графа
+    Set<int> visited = {};
+    List<int> stack = [0];
+    while (stack.isNotEmpty) {
+      int v = stack.removeLast();
+      if (!visited.contains(v)) {
+        visited.add(v);
+        stack.addAll([for (int i = 0; i < adjacencyMatrix[v].length; i++) if (adjacencyMatrix[v][i] == 1 && !visited.contains(i)) i]);
+      }
+    }
+    if (visited.length != adjacencyMatrix.length) {
+      setState(() {
+        isHasEulerCycle = false;
+      });
+    }
+
+    // Подсчитываем степени вершин
+    List<int?> degrees = [for (List<int?> row in adjacencyMatrix) row.reduce((a, b) => a! + b!)];
+
+    // Проверяем наличие эйлерова цикла
+    int oddDegrees = degrees.where((degree) => degree! % 2 == 1).length;
+    setState(() {
+      isHasEulerCycle = oddDegrees == 0;
+    });
+  }
+
+  List<int>? findEulerCycle(List<List<int?>> graph) {
+    List<List<int>> copy = copyGraph(graph);
+    int oddDegreeVertices = 0;
+    int startVertex = 0;
+    for (int i = 0; i < graph.length; i++) {
+      int degree = 0;
+      for (int j = 0; j < graph[i].length; j++) {
+        degree += graph[i][j]!;
+      }
+      if (degree % 2 != 0) {
+        oddDegreeVertices++;
+        if (oddDegreeVertices > 2) {
+          return [];
+        }
+        startVertex = i;
+      }
+    }
+    // продолжаем только если есть не более двух вершин с нечетной степенью
+    List<int> cycle = [];
+    List<int> stack = [startVertex];
+    while (stack.isNotEmpty) {
+      int vertex = stack.last;
+      bool hasUnvisitedEdges = false;
+      for (int i = 0; i < copy[vertex].length; i++) {
+        int neighbor = copy[vertex][i];
+        if (neighbor != -1) {
+          stack.add(neighbor);
+          copy[vertex][i] = -1;
+          for (int j = 0; j < copy[neighbor].length; j++) {
+            if (copy[neighbor][j] == vertex) {
+              copy[neighbor][j] = -1;
+              break;
+            }
+          }
+          hasUnvisitedEdges = true;
+          break;
+        }
+      }
+      if (!hasUnvisitedEdges) {
+        cycle.add(vertex);
+        stack.removeLast();
+      }
+    }
+    return cycle.reversed.toList();
+  }
+
+
+  void eurlerCircle(){
+    var points = findEulerCycle(copyGraph(matrix));
+    if (points != null) {
+      String path = points.map((u) => String.fromCharCode(65 + u).toString()).join('⇒');
+      setState(() {
+        circle = path;
+      });
+    } else {
+      setState(() {
+        circle = "No Euler cycle";
+      });
+    }
+  }
+
+  List<List<int>> copyGraph(List<List<int?>> graph) {
+    int n = graph.length;
+    List<List<int>> copy = List.generate(n, (_) => List.filled(n, 0));
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+        copy[i][j] = graph[i][j]!;
+      }
+    }
+    return copy;
+  }
+  // final viewTransformationController = TransformationController();
   @override
   void initState() {
     super.initState();
     getColorVertices();
     getColorEdges();
+    chromaticNumber(matrix);
+    eurlerCircle();
   }
 
   @override
   Widget build(BuildContext context) {
-    List<Object> num = ["Свойства"];
+    List<Object> num = ["Свойства","Хроматическое число: $N",circle == "No Euler cycle" ? "Эйлерового цикла нет" : "Эйлеровый цикл равен:$circle" ];
     return Scaffold(
       appBar: AppBar(),
       body: Stack(
@@ -123,6 +333,7 @@ class _GraphViewState extends State<GraphView> {
           InteractiveViewer(
             minScale: 0.3,
             maxScale: 10.5,
+            // transformationController: viewTransformationController,
             boundaryMargin: const EdgeInsets.all(double.infinity),
             child: SizedBox(
               width: 400,
@@ -165,19 +376,16 @@ class _GraphViewState extends State<GraphView> {
                 title: const Text('Алгоритм Крускала'),
                 onTap: (){
                   kruskalAlgorithm();
-                  // error != '' ? final snackBar = SnackBar(
-                  //   content: const Text('Yay! A SnackBar!'),
-                  //   action: SnackBarAction(
-                  //     label: 'Undo',
-                  //     onPressed: () {
-                  //       // Some code to undo the change.
-                  //     },
-                  //   ),
-                  // );
-                  // ScaffoldMessenger.of(context).showSnackBar(snackBar);
                   Navigator.pop(context);
                 }
-              )
+              ),
+              // ListTile(
+              //     title: const Text('Хроматическое число'),
+              //     onTap: (){
+              //       eurlerCircle();
+              //       Navigator.pop(context);
+              //     }
+              // )
             ],
           )
       ),
@@ -228,11 +436,16 @@ class OpenPainter extends CustomPainter {
 
     var paint3 =  Paint()..color = const Color(0xffb69d9d)..strokeWidth = 1..style = PaintingStyle.stroke;
     var paint4 =  Paint()..color = const Color(0xff000000)..strokeWidth = 10..style = PaintingStyle.stroke;
-
+    var radius = 140;
+    if(matrix.length > 10) {
+      radius = 250;
+    }else if(matrix.length > 20){
+      radius = 500;
+    }
     //добавление вершин
     for(var i = 0; i < matrix.length;i++){
       final angle = 2 * pi * (i / matrix.length) + (360 / matrix.length);
-      points.add(Offset((cos(angle) * 140 + (size.width / 2)), (sin(angle) * 140 + (size.width / 2))));
+      points.add(Offset((cos(angle) * radius + (size.width / 2)), (sin(angle) * radius + (size.width / 2))));
     }
 
     //основной цикл полного рисования(петли, веса и т.д.)
@@ -249,21 +462,23 @@ class OpenPainter extends CustomPainter {
 
                 //рисует вес графа
                 if(isCheckedWeight){
-                  TextSpan span = TextSpan(style: const TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 17), text: "${matrix[i][j]}");
-                  TextPainter tp = TextPainter(text: span, textAlign: TextAlign.left, textDirection: TextDirection.ltr);
-                  tp.layout();
-                  if(matrix.length % 2 == 0){
-                    // делим отрезок в отношении 1/3
-                    var del = 1/3;
-                    tp.paint(canvas, Offset(((points[i].dx + del * points[j].dx) / (1 + del)), ((points[i].dy + del * points[j].dy) / (1 + del))));
-                  }else{
-                    // иначе делим в нормальном отношении 1/2
-                    tp.paint(canvas, Offset(((points[i].dx + points[j].dx) / 2), ((points[i].dy + points[j].dy) / 2)));
+                  if(matrix[i][j] != -1){
+                    TextSpan span = TextSpan(style: const TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 17), text: "${matrix[i][j]}");
+                    TextPainter tp = TextPainter(text: span, textAlign: TextAlign.left, textDirection: TextDirection.ltr);
+                    tp.layout();
+                    if(matrix.length % 2 == 0){
+                      // делим отрезок в отношении 1/3
+                      var del = 1/3;
+                      tp.paint(canvas, Offset(((points[i].dx + del * points[j].dx) / (1 + del)), ((points[i].dy + del * points[j].dy) / (1 + del))));
+                    }else{
+                      // иначе делим в нормальном отношении 1/2
+                      tp.paint(canvas, Offset(((points[i].dx + points[j].dx) / 2), ((points[i].dy + points[j].dy) / 2)));
+                    }
                   }
                 }
 
                 if(isCheckedOriented){
-                  if(points[i] != points[j]){
+                  if(points[i] != points[j] && matrix[i][j] != matrix[j][i]){
                     var del = 19/2;
                     final targetPoint = Offset(((points[i].dx + del * points[j].dx) / (1 + del)), ((points[i].dy + del * points[j].dy) / (1 + del)));
                     final dX = targetPoint.dx - points[i].dx;
@@ -309,7 +524,7 @@ class OpenPainter extends CustomPainter {
                 //     }
                 //   }
                 // }
-                matrix[j][i] = 0;
+                // matrix[j][i] = 0;
           }
         }
       }
@@ -319,7 +534,7 @@ class OpenPainter extends CustomPainter {
     for(var i = 0;i < matrix.length;i++) {
       //в дальнейшем тут надо будет при условии рисовать вершины разных цветов
       canvas.drawCircle(points[i], 15, drawPoints);
-      TextSpan span = TextSpan(style: const TextStyle(color: Colors.black,fontWeight: FontWeight.bold), text: "${i + 1}");
+      TextSpan span = TextSpan(style: const TextStyle(color: Colors.black,fontWeight: FontWeight.bold), text: String.fromCharCode(65 + i));
       TextPainter tp = TextPainter(text: span, textAlign: TextAlign.left, textDirection: TextDirection.ltr);
       tp.layout();
       tp.paint(canvas, Offset(points[i].dx -5.0, points[i].dy - 8.0));

@@ -17,6 +17,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     super.initState();
     getColorVertices();
     getColorEdges();
+    _isChecked = List<bool>.filled(_listOfExpertise.length, false);
   }
 
   void getColorVertices() async {
@@ -59,6 +60,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setColorVertices(color);
   }
 
+  final List<String> _listOfExpertise = [
+    "Буква",
+    "Цифра",
+  ];
+  List<bool> _isChecked = [];
+
+  SingingCharacter? _character = SingingCharacter.Digit;
   @override
   Widget build(BuildContext context) {
     return  Padding(
@@ -115,7 +123,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 10,),
+            const SizedBox(height: 10),
             const Text('Цвет вершин',style: TextStyle(fontWeight: FontWeight.w500)),
             const SizedBox(height: 10),
             Row(
@@ -162,6 +170,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: const Text('Выбрать цвет'),
                 ),
               ],
+            ),
+            const SizedBox(height: 10),
+            const Text('Название вершины',style: TextStyle(fontWeight: FontWeight.w500)),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: ListTile(
+                    title: const Text('Цифра',style: TextStyle(fontSize: 14)),
+                    leading: Radio<SingingCharacter>(
+                      value: SingingCharacter.Digit,
+                      groupValue: _character,
+                      onChanged: (SingingCharacter? value) {
+                        setState(() {
+                          _character = value;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: ListTile(
+                    title: const Text('Буква',style: TextStyle(fontSize: 14)),
+                    leading: Radio<SingingCharacter>(
+                      value: SingingCharacter.Letter,
+                      groupValue: _character,
+                      onChanged: (SingingCharacter? value) {
+                        setState(() {
+                          _character = value;
+                        });
+                      },
+                    ),
+                  ),
+                )
+              ],
             )
           ],
         ),
@@ -169,3 +212,4 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 }
+enum SingingCharacter { Digit, Letter }
