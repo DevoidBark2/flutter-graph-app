@@ -17,7 +17,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     super.initState();
     getColorVertices();
     getColorEdges();
-    _isChecked = List<bool>.filled(_listOfExpertise.length, false);
+    getTypeEdges();
   }
 
   void getColorVertices() async {
@@ -60,13 +60,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setColorVertices(color);
   }
 
-  final List<String> _listOfExpertise = [
-    "Буква",
-    "Цифра",
-  ];
-  List<bool> _isChecked = [];
+  SingingCharacter? _character;
 
-  SingingCharacter? _character = SingingCharacter.Digit;
+  void setTypeEdges() async {
+    var storage = await SharedPreferences.getInstance();
+    setState(() {
+      storage.setString("typeEdges", _character.toString());
+    });
+  }
+  void getTypeEdges() async {
+    var storage = await SharedPreferences.getInstance();
+    setState(() {
+      _character = SingingCharacter.values.firstWhere((e) => e.toString() == (storage.getString("typeEdges") ?? SingingCharacter.Digit.toString()));
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return  Padding(
@@ -185,6 +193,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onChanged: (SingingCharacter? value) {
                         setState(() {
                           _character = value;
+                          setTypeEdges();
                         });
                       },
                     ),
@@ -199,6 +208,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onChanged: (SingingCharacter? value) {
                         setState(() {
                           _character = value;
+                          setTypeEdges();
                         });
                       },
                     ),

@@ -23,6 +23,7 @@ class _GraphViewState extends State<GraphView> {
   String circle = '';
   var colorVertices = 0;
   var colorEdges = 0;
+  var typeEdges = "";
   String error = '';
   List<List<int?>> algoritmMatrix = [];
   late var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
@@ -72,6 +73,12 @@ class _GraphViewState extends State<GraphView> {
     var storage = await SharedPreferences.getInstance();
     setState(() {
       colorEdges = storage.getInt("indexColorEdges") ?? Colors.red.value;
+    });
+  }
+  void getTypeEdges() async {
+    var storage = await SharedPreferences.getInstance();
+    setState(() {
+      typeEdges = storage.getString("typeEdges") ?? "Digit";
     });
   }
 
@@ -312,7 +319,7 @@ class _GraphViewState extends State<GraphView> {
     }
     return copy;
   }
-  // final viewTransformationController = TransformationController();
+
   @override
   void initState() {
     super.initState();
@@ -320,6 +327,7 @@ class _GraphViewState extends State<GraphView> {
     getColorEdges();
     chromaticNumber(matrix);
     eurlerCircle();
+    getTypeEdges();
   }
 
   @override
@@ -339,7 +347,15 @@ class _GraphViewState extends State<GraphView> {
               width: 400,
               height: 400,
               child: CustomPaint(
-                painter: OpenPainter(matrix: matrix, algoritmMatrix:algoritmMatrix, isCheckedWeight: isCheckedWeight,isCheckedOriented: isCheckedOriented,colorVertices:colorVertices,colorEdges:colorEdges),
+                painter: OpenPainter(
+                    matrix: matrix,
+                    algoritmMatrix:algoritmMatrix,
+                    isCheckedWeight: isCheckedWeight,
+                    isCheckedOriented: isCheckedOriented,
+                    colorVertices:colorVertices,
+                    colorEdges:colorEdges,
+                    typeEdges: typeEdges
+                ),
               ),
             ),
           ),
@@ -418,13 +434,15 @@ class OpenPainter extends CustomPainter {
   final bool isCheckedOriented;
   final int colorVertices;
   final int colorEdges;
+  final String typeEdges;
   OpenPainter({Key? key,
     required this.matrix,
     required this.algoritmMatrix,
     required this.isCheckedWeight,
     required this.isCheckedOriented,
     required this.colorVertices,
-    required this.colorEdges
+    required this.colorEdges,
+    required this.typeEdges
   });
   @override
   void paint(Canvas canvas, Size size) {
@@ -534,7 +552,8 @@ class OpenPainter extends CustomPainter {
     for(var i = 0;i < matrix.length;i++) {
       //в дальнейшем тут надо будет при условии рисовать вершины разных цветов
       canvas.drawCircle(points[i], 15, drawPoints);
-      TextSpan span = TextSpan(style: const TextStyle(color: Colors.black,fontWeight: FontWeight.bold), text: String.fromCharCode(65 + i));
+      TextSpan span = TextSpan(style: const TextStyle(color: Colors.black,fontWeight: FontWeight.bold),
+          text: typeEdges == "SingingCharacter.Letter" ? String.fromCharCode(65 + i) : (i +1).toString());
       TextPainter tp = TextPainter(text: span, textAlign: TextAlign.left, textDirection: TextDirection.ltr);
       tp.layout();
       tp.paint(canvas, Offset(points[i].dx -5.0, points[i].dy - 8.0));

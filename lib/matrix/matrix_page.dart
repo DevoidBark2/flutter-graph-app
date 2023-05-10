@@ -123,99 +123,247 @@ class _MatrixPageState extends State<MatrixPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Center(
-      child: SizedBox(
-      child: Padding(
-          padding: const EdgeInsets.all(4.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            children: List.generate(
-              controllers.length,
-                  (index1) => Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  controllers[index1].length,
-                      (index2) => Center(
-                    child: Padding(
-                      padding: controllers.length > 8 ? const EdgeInsets.all(1.0) :
-                      controllers.length > 7 ? const EdgeInsets.all(1.0) :
-                      controllers.length > 6 ? const EdgeInsets.all(2.0) :
-                      controllers.length > 5 ? const EdgeInsets.all(3.0) :
-                      const EdgeInsets.all(6.0),
-                      child: SizedBox(
-                        height: controllers.length > 8 ? 32 : controllers.length > 7 ? 35 : controllers.length > 6 ? 40 : controllers.length > 5 ? 45 : 50,
-                        width: controllers.length > 8 ? 32 : controllers.length > 7 ? 35 : controllers.length > 6 ? 40 : controllers.length > 5 ? 45 : 50,
-                        child: MatrixField(
-                          action: (index2  == controllers.length -1 && index1 == controllers.length -1) ? TextInputAction.done : TextInputAction.next,
-                          controller: controllers[index1][index2],
+    // return SingleChildScrollView(
+    //   scrollDirection: Axis.horizontal,
+    //   child: SingleChildScrollView(
+    //     scrollDirection: Axis.vertical,
+    //     child: Center(
+    //   child: SizedBox(
+    //   child: Padding(
+    //       padding: const EdgeInsets.all(4.0),
+    //   child: Column(
+    //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //     children: [
+    //       Column(
+    //         children: List.generate(
+    //           controllers.length,
+    //               (index1) => Row(
+    //             mainAxisAlignment: MainAxisAlignment.center,
+    //             children: List.generate(
+    //               controllers[index1].length,
+    //                   (index2) => Center(
+    //                 child: Padding(
+    //                   padding: controllers.length > 8 ? const EdgeInsets.all(1.0) :
+    //                   controllers.length > 7 ? const EdgeInsets.all(1.0) :
+    //                   controllers.length > 6 ? const EdgeInsets.all(2.0) :
+    //                   controllers.length > 5 ? const EdgeInsets.all(3.0) :
+    //                   const EdgeInsets.all(6.0),
+    //                   child: SizedBox(
+    //                     height: controllers.length > 8 ? 32 : controllers.length > 7 ? 35 : controllers.length > 6 ? 40 : controllers.length > 5 ? 45 : 50,
+    //                     width: controllers.length > 8 ? 32 : controllers.length > 7 ? 35 : controllers.length > 6 ? 40 : controllers.length > 5 ? 45 : 50,
+    //                     child: MatrixField(
+    //                       action: (index2  == controllers.length -1 && index1 == controllers.length -1) ? TextInputAction.done : TextInputAction.next,
+    //                       controller: controllers[index1][index2],
+    //                     ),
+    //                   ),
+    //                 ),
+    //               ),
+    //             ),
+    //           ),
+    //         ),
+    //       ),
+    //       Column(
+    //         children: [
+    //           Row(
+    //             children: [
+    //               const SizedBox( width:233,child: Text('Взвешенный граф')),
+    //               Checkbox(
+    //                 checkColor: Colors.white,
+    //                 fillColor:MaterialStateProperty.resolveWith(getColor),
+    //                 value: isCheckedWeight,
+    //                 onChanged: (bool? value) {
+    //                   setState(() {
+    //                     isCheckedWeight = value!;
+    //                   });
+    //                 },
+    //               ),
+    //             ],
+    //           ),
+    //         ],
+    //       ),
+    //       ElevatedButton(
+    //           onPressed: () => checkMatrix(controllers) == true
+    //               ?
+    //           Navigator.push(context,MaterialPageRoute(builder: (context) {
+    //             return GraphView(controllers:controllers,isCheckedWeight: isCheckedWeight,isCheckedOriented: isCheckedOriented);
+    //           }))
+    //               :
+    //           showModalBottomSheet<void>(
+    //             context: context,
+    //             builder: (BuildContext context) {
+    //               return Container(
+    //                 height: 200,
+    //                 color: Colors.amber,
+    //                 child: Center(
+    //                   child: Column(
+    //                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //                     children: <Widget>[
+    //                       const Text('Не верный ввод!'),
+    //                       ElevatedButton(
+    //                         child: const Text('Закрыть'),
+    //                         onPressed: () => Navigator.pop(context),
+    //                       ),
+    //                     ],
+    //                   ),
+    //                 ),
+    //               );
+    //             },
+    //           ),
+    //           child: const Text('Отобразить')
+    //       ),
+    //     ],
+    //   ),
+    // ),
+    // ),
+    // ),
+    //   ),
+    // );
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        body: TabBarView(
+          children: [
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Center(
+              child: SizedBox(
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          children: List.generate(
+                            controllers.length,
+                                (index1) => Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(
+                                controllers[index1].length,
+                                    (index2) => Center(
+                                  child: Padding(
+                                    padding: controllers.length > 8 ? const EdgeInsets.all(1.0) :
+                                    controllers.length > 7 ? const EdgeInsets.all(1.0) :
+                                    controllers.length > 6 ? const EdgeInsets.all(2.0) :
+                                    controllers.length > 5 ? const EdgeInsets.all(3.0) :
+                                    const EdgeInsets.all(6.0),
+                                    child: SizedBox(
+                                      height: controllers.length > 8 ? 32 : controllers.length > 7 ? 35 : controllers.length > 6 ? 40 : controllers.length > 5 ? 45 : 50,
+                                      width: controllers.length > 8 ? 32 : controllers.length > 7 ? 35 : controllers.length > 6 ? 40 : controllers.length > 5 ? 45 : 50,
+                                      child: MatrixField(
+                                        action: (index2  == controllers.length -1 && index1 == controllers.length -1) ? TextInputAction.done : TextInputAction.next,
+                                        controller: controllers[index1][index2],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+                        Column(
+                          children: [
+                            Row(
+                              children: [
+                                const SizedBox( width:233,child: Text('Взвешенный граф')),
+                                Checkbox(
+                                  checkColor: Colors.white,
+                                  fillColor:MaterialStateProperty.resolveWith(getColor),
+                                  value: isCheckedWeight,
+                                  onChanged: (bool? value) {
+                                    setState(() {
+                                      isCheckedWeight = value!;
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        ElevatedButton(
+                            onPressed: () => checkMatrix(controllers) == true
+                                ?
+                            Navigator.push(context,MaterialPageRoute(builder: (context) {
+                              return GraphView(controllers:controllers,isCheckedWeight: isCheckedWeight,isCheckedOriented: isCheckedOriented);
+                            }))
+                                :
+                            showModalBottomSheet<void>(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return Container(
+                                  height: 200,
+                                  color: Colors.amber,
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: <Widget>[
+                                        const Text('Не верный ввод!'),
+                                        ElevatedButton(
+                                          child: const Text('Закрыть'),
+                                          onPressed: () => Navigator.pop(context),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            child: const Text('Отобразить')
+                        ),
+                      ],
                     ),
-                  ),
+                  )
                 ),
               ),
             ),
-          ),
-          Column(
-            children: [
-              Row(
-                children: [
-                  const SizedBox( width:233,child: Text('Взвешенный граф')),
-                  Checkbox(
-                    checkColor: Colors.white,
-                    fillColor:MaterialStateProperty.resolveWith(getColor),
-                    value: isCheckedWeight,
-                    onChanged: (bool? value) {
-                      setState(() {
-                        isCheckedWeight = value!;
-                      });
-                    },
-                  ),
+              ),
+            ),
+            const Text('dssd')
+          ],
+        ),
+      ),
+    );
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        body: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) => [
+            SliverAppBar(
+              title: Text('Tabs'),
+              pinned: true,
+              floating: true,
+              bottom: TabBar(
+                tabs: [
+                  Tab(text: 'Tab 1'),
+                  Tab(text: 'Tab 2'),
                 ],
+              ),
+            ),
+          ],
+          body: TabBarView(
+            children: [
+              SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Ваш контент для первой вкладки
+                  ],
+                ),
+              ),
+              SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Ваш контент для второй вкладки
+                  ],
+                ),
               ),
             ],
           ),
-          ElevatedButton(
-              onPressed: () => checkMatrix(controllers) == true
-                  ?
-              Navigator.push(context,MaterialPageRoute(builder: (context) {
-                return GraphView(controllers:controllers,isCheckedWeight: isCheckedWeight,isCheckedOriented: isCheckedOriented);
-              }))
-                  :
-              showModalBottomSheet<void>(
-                context: context,
-                builder: (BuildContext context) {
-                  return Container(
-                    height: 200,
-                    color: Colors.amber,
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          const Text('Не верный ввод!'),
-                          ElevatedButton(
-                            child: const Text('Закрыть'),
-                            onPressed: () => Navigator.pop(context),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-              child: const Text('Отобразить')
-          ),
-        ],
-      ),
-    ),
-    ),
-    ),
+        ),
       ),
     );
   }
