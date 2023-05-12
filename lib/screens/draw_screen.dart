@@ -14,7 +14,7 @@ class _DrawScreenState extends State<DrawScreen> {
 
   int handleInput(TextEditingController row){
     var a = int.tryParse(row.text);
-    if(a == null || a == 0) {
+    if(a == null || a <= 0) {
       return 0;
     }
     return 1;
@@ -64,9 +64,6 @@ class _DrawScreenState extends State<DrawScreen> {
                       handleInput(_row) == 1
                           ? Navigator.of(context).push(MaterialPageRoute(builder: (context) {
                         return Scaffold(
-                          appBar: AppBar(
-                            title: const Text('Ввод матрицы'),
-                          ),
                           body: MatrixPage(matrix: Matrix(int.parse(_row.text),int.parse(_row.text))),
                         );
                       }))

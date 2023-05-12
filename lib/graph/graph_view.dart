@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:core';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
@@ -320,12 +321,149 @@ class _GraphViewState extends State<GraphView> {
     return copy;
   }
 
+  void getRadius(List<List<int?>> adjacencyMatrix) {
+    int n = adjacencyMatrix.length;
+    List<List<int>> distances = floydWarshall(adjacencyMatrix);
+    int radius = n + 1;
+    for (int i = 0; i < n; i++) {
+      int maxDistance = distances[i].reduce(max);
+      if (maxDistance < radius && maxDistance > 0) {
+        radius = maxDistance;
+      }
+    }
+    if (radius == n + 1) {
+      print("Несвязный граф");
+    } else {
+      setState(() {
+        N = radius;
+      });
+    }
+  }
+
+  List<List<int>> floydWarshall(List<List<int?>> graph) {
+    int n = graph.length;
+    List<List<int>> distances = List.generate(n, (_) => List.generate(n, (_) => 0), growable: false);
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+        if (graph[i][j] != null) {
+          distances[i][j] = graph[i][j]!;
+        } else {
+          distances[i][j] = n + 1;
+        }
+      }
+    }
+    for (int k = 0; k < n; k++) {
+      for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+          if (distances[i][k] + distances[k][j] < distances[i][j]) {
+            distances[i][j] = distances[i][k] + distances[k][j];
+          }
+        }
+      }
+    }
+    return distances;
+  }
+
+  List<List<int>> subMatrix(List<List<int?>> matrix, List<int> rows) {
+    int n = rows.length;
+    List<List<int>> sub = List.generate(n, (_) => List.generate(n, (_) => 0), growable: false);
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+        sub[i][j] = matrix[rows[i]][rows[j]]!;
+      }
+    }
+    return sub;
+  }
+
+  List<List<int>> getConnectedComponents(List<List<int?>> adjacencyMatrix) {
+    int n = adjacencyMatrix.length;
+    List<List<int>> components = [];
+    Set<int> visited = {};
+    for (int i = 0; i < n; i++) {
+      if (!visited.contains(i)) {
+        List<int> component = [];
+        dfs(adjacencyMatrix, i, visited, component);
+        components.add(component);
+      }
+    }
+    return components;
+  }
+
+  void dfs(List<List<int?>> adjacencyMatrix, int vertex, Set<int> visited, List<int> component) {
+    visited.add(vertex);
+    component.add(vertex);
+    for (int neighbor = 0; neighbor < adjacencyMatrix.length; neighbor++) {
+      if (adjacencyMatrix[vertex][neighbor] == 1 && !visited.contains(neighbor)) {
+        dfs(adjacencyMatrix, neighbor, visited, component);
+      }
+    }
+  }
+
+  // List<List<int>> floydWarshall(List<List<int?>> graph) {
+  //   int n = graph.length;
+  //   List<List<int>> distances = List.generate(n, (_) => List.generate(n, (_) => 0), growable: false);
+  //   for (int i = 0; i < n; i++) {
+  //     for (int j = 0; j < n; j++) {
+  //       if (graph[i][j] != null) {
+  //         distances[i][j] = graph[i][j]!;
+  //       } else {
+  //         distances[i][j] = n + 1;
+  //       }
+  //     }
+  //   }
+  //   for (int k = 0; k < n; k++) {
+  //     for (int i = 0; i < n; i++) {
+  //       for (int j = 0; j < n; j++) {
+  //         if (distances[i][k] + distances[k][j] < distances[i][j]) {
+  //           distances[i][j] = distances[i][k] + distances[k][j];
+  //         }
+  //       }
+  //     }
+  //   }
+  //   return distances;
+  // }
+
+  void getDiameter(List<List<int?>> adjacencyMatrix) {
+    int n = adjacencyMatrix.length;
+    int diameter = 0;
+    for (int i = 0; i < n; i++) {
+      List<int> distances = bfs(adjacencyMatrix, i);
+      int maxDistance = distances.reduce(max);
+      if (maxDistance > diameter) {
+        diameter = maxDistance;
+      }
+    }
+   setState(() {
+     N = diameter;
+   });
+  }
+
+  List<int> bfs(List<List<int?>> adjacencyMatrix, int start) {
+    int n = adjacencyMatrix.length;
+    List<bool> visited = List.generate(n, (_) => false);
+    List<int> distances = List.generate(n, (_) => -1);
+    Queue<int> queue = Queue();
+    visited[start] = true;
+    distances[start] = 0;
+    queue.add(start);
+    while (queue.isNotEmpty) {
+      int u = queue.removeFirst();
+      for (int v = 0; v < n; v++) {
+        if (adjacencyMatrix[u][v] == 1 && !visited[v]) {
+          visited[v] = true;
+          distances[v] = distances[u] + 1;
+          queue.add(v);
+        }
+      }
+    }
+    return distances;
+  }
+
   @override
   void initState() {
     super.initState();
     getColorVertices();
     getColorEdges();
-    chromaticNumber(matrix);
     eurlerCircle();
     getTypeEdges();
   }
@@ -338,6 +476,7 @@ class _GraphViewState extends State<GraphView> {
       body: Stack(
         fit: StackFit.expand,
         children: [
+          Text("$N"),
           InteractiveViewer(
             minScale: 0.3,
             maxScale: 10.5,
@@ -388,6 +527,9 @@ class _GraphViewState extends State<GraphView> {
         width: 250,
           child:ListView(
             children: [
+              const ListTile(
+                title: Text('Алгоритмы',style: TextStyle(fontWeight: FontWeight.bold),textAlign: TextAlign.center,),
+              ),
               ListTile(
                 title: const Text('Алгоритм Крускала'),
                 onTap: (){
@@ -395,13 +537,37 @@ class _GraphViewState extends State<GraphView> {
                   Navigator.pop(context);
                 }
               ),
-              // ListTile(
-              //     title: const Text('Хроматическое число'),
-              //     onTap: (){
-              //       eurlerCircle();
-              //       Navigator.pop(context);
-              //     }
-              // )
+              ListTile(
+                  title: const Text('Алгоритм Дейкстры'),
+                  onTap: (){
+                    kruskalAlgorithm();
+                    Navigator.pop(context);
+                  }
+              ),
+              const ListTile(
+                title: Text('Свойства',style: TextStyle(fontWeight: FontWeight.bold),textAlign: TextAlign.center,),
+              ),
+              ListTile(
+                  title: const Text('Хроматическое число'),
+                  onTap: (){
+                    chromaticNumber(matrix);
+                    Navigator.pop(context);
+                  }
+              ),
+              ListTile(
+                  title: const Text('Радиус'),
+                  onTap: (){
+                    getRadius(matrix);
+                    Navigator.pop(context);
+                  }
+              ),
+              ListTile(
+                  title: const Text('Диаметр'),
+                  onTap: (){
+                    getDiameter(matrix);
+                    Navigator.pop(context);
+                  }
+              ),
             ],
           )
       ),

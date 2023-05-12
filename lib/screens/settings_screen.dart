@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
+enum TypeEdges { Digit, Letter }
+
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
 
@@ -12,6 +14,8 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   int selectedColorVertices = Colors.red.value;
   int selectedColorEdges = Colors.green.value;
+  TypeEdges? _typeEdges;
+
   @override
   void initState() {
     super.initState();
@@ -31,6 +35,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     var storage = await SharedPreferences.getInstance();
     setState(() {
       selectedColorEdges = storage.getInt("indexColorEdges") ?? Colors.red.value;
+    });
+  }
+
+  void getTypeEdges() async {
+    var storage = await SharedPreferences.getInstance();
+    setState(() {
+      _typeEdges = TypeEdges.values.firstWhere((e) => e.toString() == (storage.getString("typeEdges") ?? TypeEdges.Digit.toString()));
     });
   }
 
@@ -60,20 +71,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setColorVertices(color);
   }
 
-  SingingCharacter? _character;
-
   void setTypeEdges() async {
     var storage = await SharedPreferences.getInstance();
     setState(() {
-      storage.setString("typeEdges", _character.toString());
+      storage.setString("typeEdges", _typeEdges.toString());
     });
   }
-  void getTypeEdges() async {
-    var storage = await SharedPreferences.getInstance();
-    setState(() {
-      _character = SingingCharacter.values.firstWhere((e) => e.toString() == (storage.getString("typeEdges") ?? SingingCharacter.Digit.toString()));
-    });
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +88,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           textDirection: TextDirection.ltr,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('Цвет граней',style: TextStyle(fontWeight: FontWeight.w500)),
+            const Text('Цвет ребер',style: TextStyle(fontWeight: FontWeight.w500)),
             const SizedBox(height: 10),
             Row(
               children: <Widget>[
@@ -187,12 +191,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Expanded(
                   child: ListTile(
                     title: const Text('Цифра',style: TextStyle(fontSize: 14)),
-                    leading: Radio<SingingCharacter>(
-                      value: SingingCharacter.Digit,
-                      groupValue: _character,
-                      onChanged: (SingingCharacter? value) {
+                    leading: Radio<TypeEdges>(
+                      value: TypeEdges.Digit,
+                      groupValue: _typeEdges,
+                      onChanged: (TypeEdges? value) {
                         setState(() {
-                          _character = value;
+                          _typeEdges = value;
                           setTypeEdges();
                         });
                       },
@@ -202,12 +206,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Expanded(
                   child: ListTile(
                     title: const Text('Буква',style: TextStyle(fontSize: 14)),
-                    leading: Radio<SingingCharacter>(
-                      value: SingingCharacter.Letter,
-                      groupValue: _character,
-                      onChanged: (SingingCharacter? value) {
+                    leading: Radio<TypeEdges>(
+                      value: TypeEdges.Letter,
+                      groupValue: _typeEdges,
+                      onChanged: (TypeEdges? value) {
                         setState(() {
-                          _character = value;
+                          _typeEdges = value;
                           setTypeEdges();
                         });
                       },
@@ -222,4 +226,3 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 }
-enum SingingCharacter { Digit, Letter }
