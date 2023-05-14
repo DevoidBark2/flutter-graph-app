@@ -20,6 +20,7 @@ class _GraphViewState extends State<GraphView> {
   late final isCheckedWeight = widget.isCheckedWeight;
   late final isCheckedOriented = widget.isCheckedOriented;
   var N = 0;
+  var res;
   bool isHasEulerCycle = false;
   String circle = '';
   var colorVertices = 0;
@@ -459,13 +460,112 @@ class _GraphViewState extends State<GraphView> {
     return distances;
   }
 
+  List<int> dijkstra(List<List<int?>> graph, int start) {
+    int n = graph.length;
+    List<int> dist = List.filled(n, -1);
+    List<bool> visited = List.filled(n, false);
+    dist[start] = 0;
+    for (int i = 0; i < n - 1; i++) {
+      int u = -1;
+      for (int j = 0; j < n; j++) {
+        if (!visited[j] && (u == -1 || dist[j] < dist[u])) {
+          u = j;
+        }
+      }
+      if (dist[u] == -1) {
+        break;
+      }
+      visited[u] = true;
+      for (int v = 0; v < n; v++) {
+        if (graph[u][v] != null && !visited[v]) {
+          int alt = dist[u] + graph[u][v]!;
+          if (dist[v] == -1 || alt < dist[v]) {
+            dist[v] = alt;
+          }
+        }
+      }
+    }
+    print(dist);
+    return dist;
+  }
+
+  void dijkstraAlgorithm(List<List<int?>> graph, int start) {
+    // Создаем множество посещенных вершин
+    Set<int> visited = <int>{};
+    // Создаем список расстояний до каждой вершины
+    Map<int?, int?> dist = <int?, int?>{};
+
+    // Инициализируем расстояния для всех вершин
+    for (var i = 0; i < graph.length; i++) {
+      dist[i] = null;
+    }
+    dist[start] = 0; // Расстояние от начальной вершины до нее же самой равно 0
+
+    // Запускаем цикл по всем вершинам
+    while (visited.length < graph.length) {
+      // Ищем вершину с минимальным расстоянием
+      int? current = findMinimum(dist, visited);
+      if (current == -1) {
+        break; // Все вершины посещены
+      }
+
+      // Добавляем текущую вершину в множество посещенных
+      visited.add(current!);
+
+      // Обновляем расстояния до соседних вершин
+      for (var i = 0; i < graph[current].length; i++) {
+        if (graph[current][i] == 0) {
+          continue; // Ребро не существует
+        }
+        int newDist = (dist[current] ?? 0) + graph[current][i]!;
+        if (dist[i] == null || newDist < dist[i]!) {
+          // Обновляем расстояние до вершины i
+          dist[i] = newDist;
+        }
+      }
+    }
+    String result = "";
+    result = "Начальная вершина: ${start + 1}" "\n";
+    for (var i = 0; i < dist.length; i++) {
+      if (dist[i] == null) {
+        result += "Vertex ${i + 1} is not connected to vertex ${start +1}" "\n";
+      } else {
+        if(start == i){
+          continue;
+        }
+        result += "Вершина ${i + 1}: ${dist[i]}" "\n";
+      }
+    }
+    setState(() {
+      res = result;
+    });
+  }
+
+  int? findMinimum(Map<int?, int?> dist, Set<int> visited) {
+    int minDist = 1000000;
+    int? minVertex = -1;
+
+    for (var vertex in dist.keys) {
+      if (visited.contains(vertex)) {
+        continue; // Пропускаем уже посещенные вершины
+      }
+
+      int? currentDist = dist[vertex];
+      if (currentDist != null && currentDist < minDist) {
+        minDist = currentDist;
+        minVertex = vertex;
+      }
+    }
+
+    return minVertex;
+  }
   @override
   void initState() {
     super.initState();
     getColorVertices();
     getColorEdges();
-    eurlerCircle();
     getTypeEdges();
+    // eurlerCircle();
   }
 
   @override
@@ -476,11 +576,10 @@ class _GraphViewState extends State<GraphView> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Text("$N"),
+          res != null ? Text(res.toString()) : Text(''),
           InteractiveViewer(
             minScale: 0.3,
             maxScale: 10.5,
-            // transformationController: viewTransformationController,
             boundaryMargin: const EdgeInsets.all(double.infinity),
             child: SizedBox(
               width: 400,
@@ -488,7 +587,7 @@ class _GraphViewState extends State<GraphView> {
               child: CustomPaint(
                 painter: OpenPainter(
                     matrix: matrix,
-                    algoritmMatrix:algoritmMatrix,
+                    algorithmMatrix:algoritmMatrix,
                     isCheckedWeight: isCheckedWeight,
                     isCheckedOriented: isCheckedOriented,
                     colorVertices:colorVertices,
@@ -540,8 +639,30 @@ class _GraphViewState extends State<GraphView> {
               ListTile(
                   title: const Text('Алгоритм Дейкстры'),
                   onTap: (){
-                    kruskalAlgorithm();
-                    Navigator.pop(context);
+                    showModalBottomSheet<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Container(
+                          height: 200,
+                          color: Colors.amber,
+                          child: Center(
+                            child: ListView.builder(
+                              itemCount: matrix.length,
+                              itemBuilder: (context, index) {
+                                return ElevatedButton(
+                                  onPressed: () {
+                                    dijkstraAlgorithm(matrix, index);
+                                    Navigator.pop(context);
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text("${index + 1}"),
+                                );
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    );
                   }
               ),
               const ListTile(
@@ -595,7 +716,7 @@ List<Edge> getEdgesFromMatrix(List<List<int?>> matrix) {
 
 class OpenPainter extends CustomPainter {
   final List<List<int?>> matrix;
-  final List<List<int?>> algoritmMatrix;
+  final List<List<int?>> algorithmMatrix;
   final bool isCheckedWeight;
   final bool isCheckedOriented;
   final int colorVertices;
@@ -603,7 +724,7 @@ class OpenPainter extends CustomPainter {
   final String typeEdges;
   OpenPainter({Key? key,
     required this.matrix,
-    required this.algoritmMatrix,
+    required this.algorithmMatrix,
     required this.isCheckedWeight,
     required this.isCheckedOriented,
     required this.colorVertices,
@@ -654,6 +775,7 @@ class OpenPainter extends CustomPainter {
                       // делим отрезок в отношении 1/3
                       var del = 1/3;
                       tp.paint(canvas, Offset(((points[i].dx + del * points[j].dx) / (1 + del)), ((points[i].dy + del * points[j].dy) / (1 + del))));
+                      matrix[j][i] = 0;
                     }else{
                       // иначе делим в нормальном отношении 1/2
                       tp.paint(canvas, Offset(((points[i].dx + points[j].dx) / 2), ((points[i].dy + points[j].dy) / 2)));
@@ -709,6 +831,7 @@ class OpenPainter extends CustomPainter {
                 //   }
                 // }
                 // matrix[j][i] = 0;
+            // matrix[j][i] = 0;
           }
         }
       }
