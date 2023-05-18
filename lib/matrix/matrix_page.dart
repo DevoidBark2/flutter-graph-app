@@ -41,11 +41,11 @@ class _MatrixPageState extends State<MatrixPage> {
       currentUserData = userData;
     });
   }
-  Future<void> setDataUserGraph(String data) async {
+  Future<void> setDataUserGraph(String matrix,bool orinted,bool weight) async {
     User? currentUser = FirebaseAuth.instance.currentUser;
     String? userId = currentUser?.uid;
     final userRef = FirebaseFirestore.instance.collection('users').doc(userId).collection('userData');
-    await userRef.add({'data': data, 'timestamp': FieldValue.serverTimestamp()});
+    await userRef.add({'matrix': matrix, 'orinted' : orinted, 'weight': weight, 'timestamp': FieldValue.serverTimestamp()});
   }
   void createControllers() {
     for (var i = 0; i < rows; i++) {
@@ -79,11 +79,6 @@ class _MatrixPageState extends State<MatrixPage> {
     var mat = List.generate(controllers.length, (row) => List.generate(controllers.length ,(column) => int.tryParse(controllers[row][column].text)));
     List<List<int?>> result = List.generate(mat[0].length, (i) => List.filled(mat.length, 0));
 
-    //сохранение графа в бд
-   // if(currentUserData != null){
-    //  setDataUserGraph(mat.toString());
-    //}
-
     for(var i = 0; i < mat.length; i++){
       for(var j = 0; j < mat.length; j++){
         if(mat[i][j] == null){
@@ -105,6 +100,10 @@ class _MatrixPageState extends State<MatrixPage> {
       }
       else{
         isCheckedOriented = true;
+      }
+      //сохранение графа в бд
+      if(currentUserData != null){
+       setDataUserGraph(mat.toString(),isCheckedOriented,isCheckedWeight);
       }
       return true;
     }

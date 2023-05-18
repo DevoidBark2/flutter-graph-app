@@ -57,6 +57,21 @@ class _InstructionScreenState extends State<InstructionScreen> {
               listOrder: ListOrder.ordered,
               bulletType: BulletType.conventional,
             ),
+            BulletedList(
+              listItems:[
+                RichText(
+                  text: TextSpan(
+                    text: 'Для обхода в ширину',
+                    style: DefaultTextStyle.of(context).style,
+                    children: const <TextSpan>[
+                      TextSpan(text: ' матрица должна состоять из 0 и 1.', style: TextStyle(fontWeight: FontWeight.w800)),
+                    ],
+                  ),
+                ),
+              ],
+              listOrder: ListOrder.ordered,
+              bulletType: BulletType.conventional,
+            ),
           ],
         ),
       ),

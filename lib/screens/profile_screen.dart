@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import "dart:convert";
 
@@ -185,6 +184,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   //   }
   //   return dataList;
   // }
+
   Future<Map<String, dynamic>?> getCurrentUserData() async {
     try {
       User? currentUser = FirebaseAuth.instance.currentUser;
@@ -431,7 +431,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
       );
-    }else{
+    }
+    else{
       if(currentUserData == null){
         return const Center(child: Text('Loading...'));
       }

@@ -1,9 +1,11 @@
-import 'dart:collection';
 import 'dart:core';
 import 'dart:math';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:test_project/algorithms/bfs.dart';
+import 'package:test_project/algorithms/dijkstra_algorithm.dart';
+import 'package:test_project/algorithms/get_degress.dart';
+import 'package:test_project/algorithms/kruskal_algorithm.dart';
 
 class GraphView extends StatefulWidget {
   final List<List<TextEditingController>> controllers;
@@ -16,19 +18,20 @@ class GraphView extends StatefulWidget {
 }
 
 class _GraphViewState extends State<GraphView> {
-  late final matrixF = widget.controllers;
+  late final matrixFrom = widget.controllers;
   late final isCheckedWeight = widget.isCheckedWeight;
   late final isCheckedOriented = widget.isCheckedOriented;
   var N = 0;
   var res;
+  bool showRes = false;
   bool isHasEulerCycle = false;
   String circle = '';
   var colorVertices = 0;
   var colorEdges = 0;
   var typeEdges = "";
   String error = '';
-  List<List<int?>> algoritmMatrix = [];
-  late var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
+  List<List<int?>> algorithmMatrix = [];
+  late var matrix = List.generate(matrixFrom.length, (row) => List.generate(matrixFrom.length ,(column) => int.tryParse(matrixFrom[row][column].text)));
 
   // bool completeGraph(){
   //   var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
@@ -59,11 +62,20 @@ class _GraphViewState extends State<GraphView> {
   //     return false;
   //   }
   // }
-  // void countOfRibs(){
-  //   // var matrix = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
-  //   var count = matrix.length;
-  //   N = (count* (count - 1)) ~/ 2;
-  // }
+  void countOfRibs(){
+    var edgesCount = 0;
+    for(var i=0; i<matrix.length; i++){
+      for(var j=i+1; j<matrix[i].length; j++){
+        if(matrix[i][j] != null && matrix[i][j] != 0){
+          edgesCount++;
+        }
+      }
+    }
+    setState(() {
+      res = "Кол-во ребер: $edgesCount";
+      showRes = true;
+    });
+  }
 
   void getColorVertices() async{
     var storage = await SharedPreferences.getInstance();
@@ -84,39 +96,40 @@ class _GraphViewState extends State<GraphView> {
     });
   }
 
-  void kruskalAlgorithm(){
-    print(matrix);
-    if(isCheckedWeight == false){
-        error = 'Граф должен быть взвешенный';
-    }else if(isCheckedOriented == true){
-      error="Граф не должен быть орентированный";
-    }
-    else{
-      //var mat = List.generate(matrixF.length, (row) => List.generate(matrixF.length ,(column) => int.tryParse(matrixF[row][column].text)));
-      List<Edge> edges = getEdgesFromMatrix(matrix);
-      List<Edge> result = [];
-      List<int> treeIds = List<int>.generate(matrix.length+1, (int index) => index);
-      edges.sort((a, b) => a.w - b.w); // сортируем ребра по весу
-
-      for (Edge edge in edges) {
-        if (treeIds[edge.a] != treeIds[edge.b]) {
-          result.add(edge);
-          int oldId = treeIds[edge.b], newId = treeIds[edge.a];
-          for (int i = 1; i <= matrix.length; i++) {
-            if (treeIds[i] == oldId) treeIds[i] = newId;
-          }
+  void kruskal(){
+    var result = KruskalAlgorithm.kruskalAlgorithm(isCheckedWeight, isCheckedOriented, error, matrix);
+    setState(() {
+        //algorithmMatrix = matrix;
+        if(result.error == ''){
+          matrix = result.newMatrix;
+          res = 'Сумма весов минимального остовного дерева: ${result.totalWeight}';
+          showRes = true;
         }
-      }
-      List<List<int>> newMatrix = List.generate(matrix.length, (i) => List.filled(matrix.length, 0));
-      for (Edge edge in result) {
-        newMatrix[edge.a - 1][edge.b - 1] = edge.w;
-        newMatrix[edge.b - 1][edge.a - 1] = edge.w;
-      }
-      setState(() {
-        algoritmMatrix = matrix;
-        matrix = newMatrix;
-      });
-    }
+       else{
+         error = result.error;
+       }
+    });
+  }
+  void dijkstra(int index){
+    var result = DijkstraAlgorithm.dijkstraAlgorithm(matrix, index);
+    setState(() {
+      res = result.result;
+      showRes = true;
+    });
+  }
+  void getDegrees(){
+    var result = GetDegreesAlgorithm.getDegrees(matrix);
+    setState(() {
+      res = result.result;
+      showRes = true;
+    });
+  }
+  void bfs(int start){
+    var result = BFSAlgorithm.bfs(matrix, start);
+    setState(() {
+      res = result.result;
+      showRes = true;
+    });
   }
 
   // void hromatDigit(List<List<int?>> graph) {
@@ -201,6 +214,8 @@ class _GraphViewState extends State<GraphView> {
     List<int> colors = List.filled(n, -1);
     List<bool> availableColors;
 
+    List<int> usedColors = []; // список всех использованных цветов
+
     for (int i = 0; i < n; i++) {
       availableColors = List.filled(n, true);
 
@@ -216,10 +231,14 @@ class _GraphViewState extends State<GraphView> {
       }
 
       colors[i] = cr;
+      usedColors.add(cr); // добавляем использованный цвет в список
     }
-    Set<int> uniqueColors = Set<int>.from(colors);
+
+    int uniqueColors = Set<int>.from(usedColors).length; // подсчитываем количество уникальных цветов
+
     setState(() {
-      N = uniqueColors.length;
+      res = uniqueColors;
+      showRes = true;
     });
   }
 
@@ -250,73 +269,152 @@ class _GraphViewState extends State<GraphView> {
     });
   }
 
-  List<int>? findEulerCycle(List<List<int?>> graph) {
-    List<List<int>> copy = copyGraph(graph);
-    int oddDegreeVertices = 0;
-    int startVertex = 0;
-    for (int i = 0; i < graph.length; i++) {
-      int degree = 0;
-      for (int j = 0; j < graph[i].length; j++) {
-        degree += graph[i][j]!;
-      }
-      if (degree % 2 != 0) {
-        oddDegreeVertices++;
-        if (oddDegreeVertices > 2) {
-          return [];
-        }
-        startVertex = i;
+
+  List<int> findUnvisitedNeighbors(List<List<int>> graph, int vertex) {
+    List<int> neighbors = [];
+    for (int i = 0; i < graph[vertex].length; i++) {
+      if (graph[vertex][i] == 1) {
+        neighbors.add(i);
       }
     }
-    // продолжаем только если есть не более двух вершин с нечетной степенью
-    List<int> cycle = [];
-    List<int> stack = [startVertex];
-    while (stack.isNotEmpty) {
-      int vertex = stack.last;
-      bool hasUnvisitedEdges = false;
-      for (int i = 0; i < copy[vertex].length; i++) {
-        int neighbor = copy[vertex][i];
-        if (neighbor != -1) {
-          stack.add(neighbor);
-          copy[vertex][i] = -1;
-          for (int j = 0; j < copy[neighbor].length; j++) {
-            if (copy[neighbor][j] == vertex) {
-              copy[neighbor][j] = -1;
-              break;
-            }
+    return neighbors.where((v) => graph[vertex][v] != -1).toList();
+  }
+  List<List<int>> findOddDegreeClasses(List<List<int?>> graph) {
+    List<List<int>> oddDegreeClasses = [];
+    List<bool> visited = List.generate(graph.length, (_) => false);
+    for (int i = 0; i < graph.length; i++) {
+      if (!visited[i]) {
+        List<int> currentClass = [];
+        traverseGraph(graph, i, visited, (int vertex, int degree) {
+          if (degree % 2 != 0) {
+            currentClass.add(vertex);
           }
-          hasUnvisitedEdges = true;
+        });
+        if (currentClass.isNotEmpty) {
+          oddDegreeClasses.add(currentClass);
+        }
+      }
+    }
+    return oddDegreeClasses;
+  }
+  void traverseGraph(List<List<int?>> graph, int vertex, List<bool> visited, Function onVisit) {
+    visited[vertex] = true;
+    int degree = 0;
+    for (int i = 0; i < graph[vertex].length; i++) {
+      if (graph[vertex][i] == 1) {
+        degree++;
+        if (!visited[i]) {
+          traverseGraph(graph, i, visited, onVisit);
+        }
+      }
+    }
+    onVisit(vertex, degree);
+  }
+  void findEulerCycle(List<List<int?>> graph) {
+    print(graph);
+    List<List<int>> copy = copyGraph(graph);
+    print(copy);
+    List<int> cycle = [];
+
+    // найдем все вершины с нечетной степенью
+    List<List<int>> oddDegreeClasses = findOddDegreeClasses(copy);
+
+    // начинаем с первой вершины с нечетной степенью
+    cycle.add(oddDegreeClasses[0][0]);
+    int currentIndex = 0;
+    while (oddDegreeClasses.isNotEmpty) {
+      // переходим к первой вершине, которая может быть частью определенного класса эквивалентности
+      while (currentIndex < cycle.length - 1) {
+        int lastVertex = cycle.last;
+        int nextVertex = cycle[currentIndex + 1];
+        if (oddDegreeClasses.any((c) =>
+        c.contains(lastVertex) && c.contains(nextVertex))) {
           break;
         }
+        currentIndex++;
       }
-      if (!hasUnvisitedEdges) {
-        cycle.add(vertex);
-        stack.removeLast();
+      // выбираем класс эквивалентности, который может быть продолжен из текущей вершины, и продолжаем цикл
+      int currentVertex = cycle[currentIndex];
+      List<List<int>> currentClass = oddDegreeClasses
+          .where((c) => c.contains(currentVertex))
+          .toList();
+      if (currentClass.isEmpty) {
+        break;
+      }
+      List<int> neighbors = findUnvisitedNeighbors(copy, currentVertex);
+      if (neighbors.isEmpty) {
+        cycle.removeAt(currentIndex);
+        currentIndex--;
+        continue;
+      }
+      int neighbor = neighbors.first;
+      cycle.insert(currentIndex + 1, neighbor);
+      copy[currentVertex][neighbor] = -1;
+      copy[neighbor][currentVertex] = -1;
+      // если мы вернулись в вершину со степенью, не равной 0, значит мы закончили цикл
+      if (neighbor == cycle[0] && findUnvisitedNeighbors(copy, cycle[0]).isNotEmpty) {
+        // объединяем найденный цикл с остальными
+        List<int> newCycle = [];
+        for (int i = 0; i < cycle.length - 1; i++) {
+          newCycle.add(cycle[i]);
+          if (oddDegreeClasses.any((c) =>
+          c.contains(cycle[i]) && c.contains(cycle[i + 1]))) {
+            oddDegreeClasses.removeWhere((c) =>
+            c.contains(cycle[i]) && c.contains(cycle[i + 1]));
+          }
+        }
+        newCycle.add(cycle.last);
+        oddDegreeClasses.remove(currentClass);
+        cycle = newCycle;
+        currentIndex = 0;
+      } else {
+        currentIndex++;
       }
     }
-    return cycle.reversed.toList();
+
+    // если некоторые классы эквивалентности не были найдены, то граф не содержит эйлерова цикла
+    if (oddDegreeClasses.isNotEmpty) {
+      setState(() {
+        res = "Эйлерового цикла нет";
+        showRes = true;
+      });
+      return;
+    }
+
+    // формируем строку-результат
+    String resString = '';
+    for (int vertex in cycle) {
+      resString += '$vertex -> ';
+    }
+    resString += cycle[0].toString();
+    setState(() {
+      res = resString;
+      showRes = true;
+    });
   }
 
 
-  void eurlerCircle(){
-    var points = findEulerCycle(copyGraph(matrix));
-    if (points != null) {
-      String path = points.map((u) => String.fromCharCode(65 + u).toString()).join('⇒');
-      setState(() {
-        circle = path;
-      });
-    } else {
-      setState(() {
-        circle = "No Euler cycle";
-      });
-    }
-  }
+  // void eurlerCircle(){
+  //   var points = findEulerCycle(copyGraph(matrix));
+  //   if (points != null) {
+  //     String path = points.map((u) => (u + 1).toString()).join('⇒');
+  //     setState(() {
+  //       circle = path;
+  //     });
+  //   } else {
+  //     setState(() {
+  //       circle = "No Euler cycle";
+  //     });
+  //   }
+  //   print(circle);
+  // }
+
 
   List<List<int>> copyGraph(List<List<int?>> graph) {
-    int n = graph.length;
-    List<List<int>> copy = List.generate(n, (_) => List.filled(n, 0));
-    for (int i = 0; i < n; i++) {
-      for (int j = 0; j < n; j++) {
-        copy[i][j] = graph[i][j]!;
+    List<List<int>> copy = List.generate(graph.length, (index) => []);
+    for (int i = 0; i < graph.length; i++) {
+      for (int j = 0; j < graph[i].length; j++) {
+        copy[i].add(graph[i][j] ?? 0);
       }
     }
     return copy;
@@ -336,7 +434,7 @@ class _GraphViewState extends State<GraphView> {
       print("Несвязный граф");
     } else {
       setState(() {
-        N = radius;
+        res = radius;
       });
     }
   }
@@ -424,161 +522,67 @@ class _GraphViewState extends State<GraphView> {
   //   return distances;
   // }
 
-  void getDiameter(List<List<int?>> adjacencyMatrix) {
-    int n = adjacencyMatrix.length;
-    int diameter = 0;
-    for (int i = 0; i < n; i++) {
-      List<int> distances = bfs(adjacencyMatrix, i);
-      int maxDistance = distances.reduce(max);
-      if (maxDistance > diameter) {
-        diameter = maxDistance;
-      }
-    }
-   setState(() {
-     N = diameter;
-   });
-  }
+  // void getDiameter(List<List<int?>> adjacencyMatrix) {
+  //   int n = adjacencyMatrix.length;
+  //   int diameter = 0;
+  //   for (int i = 0; i < n; i++) {
+  //     List<int> distances = bfs(adjacencyMatrix, i);
+  //     int maxDistance = distances.reduce(max);
+  //     if (maxDistance > diameter) {
+  //       diameter = maxDistance;
+  //     }
+  //   }
+  //  setState(() {
+  //    N = diameter;
+  //  });
+  // }
 
-  List<int> bfs(List<List<int?>> adjacencyMatrix, int start) {
-    int n = adjacencyMatrix.length;
-    List<bool> visited = List.generate(n, (_) => false);
-    List<int> distances = List.generate(n, (_) => -1);
-    Queue<int> queue = Queue();
-    visited[start] = true;
-    distances[start] = 0;
-    queue.add(start);
-    while (queue.isNotEmpty) {
-      int u = queue.removeFirst();
-      for (int v = 0; v < n; v++) {
-        if (adjacencyMatrix[u][v] == 1 && !visited[v]) {
-          visited[v] = true;
-          distances[v] = distances[u] + 1;
-          queue.add(v);
-        }
-      }
-    }
-    return distances;
-  }
 
-  List<int> dijkstra(List<List<int?>> graph, int start) {
-    int n = graph.length;
-    List<int> dist = List.filled(n, -1);
-    List<bool> visited = List.filled(n, false);
-    dist[start] = 0;
-    for (int i = 0; i < n - 1; i++) {
-      int u = -1;
-      for (int j = 0; j < n; j++) {
-        if (!visited[j] && (u == -1 || dist[j] < dist[u])) {
-          u = j;
-        }
-      }
-      if (dist[u] == -1) {
-        break;
-      }
-      visited[u] = true;
-      for (int v = 0; v < n; v++) {
-        if (graph[u][v] != null && !visited[v]) {
-          int alt = dist[u] + graph[u][v]!;
-          if (dist[v] == -1 || alt < dist[v]) {
-            dist[v] = alt;
-          }
-        }
-      }
-    }
-    print(dist);
-    return dist;
-  }
 
-  void dijkstraAlgorithm(List<List<int?>> graph, int start) {
-    // Создаем множество посещенных вершин
-    Set<int> visited = <int>{};
-    // Создаем список расстояний до каждой вершины
-    Map<int?, int?> dist = <int?, int?>{};
 
-    // Инициализируем расстояния для всех вершин
-    for (var i = 0; i < graph.length; i++) {
-      dist[i] = null;
-    }
-    dist[start] = 0; // Расстояние от начальной вершины до нее же самой равно 0
 
-    // Запускаем цикл по всем вершинам
-    while (visited.length < graph.length) {
-      // Ищем вершину с минимальным расстоянием
-      int? current = findMinimum(dist, visited);
-      if (current == -1) {
-        break; // Все вершины посещены
-      }
 
-      // Добавляем текущую вершину в множество посещенных
-      visited.add(current!);
+  // bool isGraphConnected(List<List<int?>> adjacencyMatrix) {
+  //   int n = adjacencyMatrix.length;
+  //   List<bool> visited = List.generate(n, (_) => false);
+  //   List<List<int>> visitedEdges = [];
+  //   Queue<int> queue = Queue();
+  //   queue.add(0);
+  //   visited[0] = true;
+  //
+  //   while (queue.isNotEmpty) {
+  //     int node = queue.removeFirst();
+  //     for (int i = 0; i < n; i++) {
+  //       if (adjacencyMatrix[node][i] != null && adjacencyMatrix[node][i] != 0 && !visited[i]) {
+  //         queue.add(i);
+  //         visited[i] = true;
+  //         visitedEdges.add([node, i]);
+  //       }
+  //     }
+  //   }
+  //
+  //   return visited.every((element) => element == true) && visitedEdges.length == n-1;
+  // }
 
-      // Обновляем расстояния до соседних вершин
-      for (var i = 0; i < graph[current].length; i++) {
-        if (graph[current][i] == 0) {
-          continue; // Ребро не существует
-        }
-        int newDist = (dist[current] ?? 0) + graph[current][i]!;
-        if (dist[i] == null || newDist < dist[i]!) {
-          // Обновляем расстояние до вершины i
-          dist[i] = newDist;
-        }
-      }
-    }
-    String result = "";
-    result = "Начальная вершина: ${start + 1}" "\n";
-    for (var i = 0; i < dist.length; i++) {
-      if (dist[i] == null) {
-        result += "Vertex ${i + 1} is not connected to vertex ${start +1}" "\n";
-      } else {
-        if(start == i){
-          continue;
-        }
-        result += "Вершина ${i + 1}: ${dist[i]}" "\n";
-      }
-    }
-    setState(() {
-      res = result;
-    });
-  }
 
-  int? findMinimum(Map<int?, int?> dist, Set<int> visited) {
-    int minDist = 1000000;
-    int? minVertex = -1;
 
-    for (var vertex in dist.keys) {
-      if (visited.contains(vertex)) {
-        continue; // Пропускаем уже посещенные вершины
-      }
-
-      int? currentDist = dist[vertex];
-      if (currentDist != null && currentDist < minDist) {
-        minDist = currentDist;
-        minVertex = vertex;
-      }
-    }
-
-    return minVertex;
-  }
   @override
   void initState() {
     super.initState();
     getColorVertices();
     getColorEdges();
     getTypeEdges();
-    // eurlerCircle();
   }
 
   @override
   Widget build(BuildContext context) {
-    List<Object> num = ["Свойства","Хроматическое число: $N",circle == "No Euler cycle" ? "Эйлерового цикла нет" : "Эйлеровый цикл равен:$circle" ];
     return Scaffold(
       appBar: AppBar(),
       body: Stack(
         fit: StackFit.expand,
         children: [
-          res != null ? Text(res.toString()) : Text(''),
           InteractiveViewer(
-            minScale: 0.3,
+            minScale: matrix.length > 9 ? 0.1 : 0.3,
             maxScale: 10.5,
             boundaryMargin: const EdgeInsets.all(double.infinity),
             child: SizedBox(
@@ -587,7 +591,7 @@ class _GraphViewState extends State<GraphView> {
               child: CustomPaint(
                 painter: OpenPainter(
                     matrix: matrix,
-                    algorithmMatrix:algoritmMatrix,
+                    algorithmMatrix:algorithmMatrix,
                     isCheckedWeight: isCheckedWeight,
                     isCheckedOriented: isCheckedOriented,
                     colorVertices:colorVertices,
@@ -599,21 +603,21 @@ class _GraphViewState extends State<GraphView> {
           ),
           Positioned(
             child: DraggableScrollableSheet(
-              initialChildSize: 0.07,
-              minChildSize: 0.07,
+              initialChildSize: showRes ? 0.07 : 0.0,
+              minChildSize: showRes ? 0.07 : 0.0,
               builder: (context,controller) => Container(
                   decoration: BoxDecoration(
                     color:Colors.amberAccent,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: ListView.builder(
                       shrinkWrap: true,
                       controller: controller,
-                      itemCount: num.length,
+                      itemCount: 1,
                       itemBuilder: (context,index){
-                        return index == 0 ? Text('${num[index]}',textAlign: TextAlign.center) : Text("${num[index]}");
+                        return Text(res.toString());
                       },
                     ),
                   )
@@ -623,21 +627,37 @@ class _GraphViewState extends State<GraphView> {
         ],
       ),
       endDrawer: Drawer(
-        width: 250,
+        width: 210,
           child:ListView(
             children: [
               const ListTile(
-                title: Text('Алгоритмы',style: TextStyle(fontWeight: FontWeight.bold),textAlign: TextAlign.center,),
+                title: Text('Алгоритмы',style: TextStyle(fontWeight: FontWeight.bold),textAlign: TextAlign.center),
               ),
               ListTile(
-                title: const Text('Алгоритм Крускала'),
+                title: const Text('Алгоритм Крускала',textAlign: TextAlign.center),
                 onTap: (){
-                  kruskalAlgorithm();
-                  Navigator.pop(context);
+                  kruskal();
+                  if(error != ''){
+                    showModalBottomSheet<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Container(
+                          height: 200,
+                          color: Colors.amber,
+                          child: Center(
+                            child: Text(error),
+                          ),
+                        );
+                      },
+                    );
+                  }
+                  else{
+                    Navigator.pop(context);
+                  }
                 }
               ),
               ListTile(
-                  title: const Text('Алгоритм Дейкстры'),
+                  title: const Text('Алгоритм Дейкстры',textAlign: TextAlign.center),
                   onTap: (){
                     showModalBottomSheet<void>(
                       context: context,
@@ -646,19 +666,19 @@ class _GraphViewState extends State<GraphView> {
                           height: 200,
                           color: Colors.amber,
                           child: Center(
-                            child: ListView.builder(
-                              itemCount: matrix.length,
-                              itemBuilder: (context, index) {
-                                return ElevatedButton(
-                                  onPressed: () {
-                                    dijkstraAlgorithm(matrix, index);
-                                    Navigator.pop(context);
-                                    Navigator.pop(context);
-                                  },
-                                  child: Text("${index + 1}"),
-                                );
-                              },
-                            ),
+                              child: isCheckedWeight ? ListView.builder(
+                                itemCount: matrix.length,
+                                itemBuilder: (context, index) {
+                                  return ElevatedButton(
+                                    onPressed: () {
+                                      dijkstra(index);
+                                      Navigator.pop(context);
+                                      Navigator.pop(context);
+                                    },
+                                    child:Text("${index + 1}"),
+                                  );
+                                },
+                              ) : const Text('Граф должен быть взвешенный')
                           ),
                         );
                       },
@@ -669,23 +689,73 @@ class _GraphViewState extends State<GraphView> {
                 title: Text('Свойства',style: TextStyle(fontWeight: FontWeight.bold),textAlign: TextAlign.center,),
               ),
               ListTile(
-                  title: const Text('Хроматическое число'),
+                  title: const Text('Степень вершин',textAlign: TextAlign.center),
+                  onTap: (){
+                    getDegrees();
+                    Navigator.pop(context);
+                  }
+              ),
+              ListTile(
+                  title: const Text('Обход в ширину',textAlign: TextAlign.center),
+                  onTap: (){
+                    showModalBottomSheet<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Container(
+                          height: 200,
+                          color: Colors.amber,
+                          child: Center(
+                              child:ListView.builder(
+                                itemCount: matrix.length,
+                                itemBuilder: (context, index) {
+                                  return ElevatedButton(
+                                    onPressed: () {
+                                      bfs(index);
+                                      Navigator.pop(context);
+                                      Navigator.pop(context);
+                                    },
+                                    child:Text("${index + 1}"),
+                                  );
+                                },
+                              )
+                          ),
+                        );
+                      },
+                    );
+                  }
+              ),
+              ListTile(
+                  title: const Text('Хроматическое число',textAlign: TextAlign.center),
                   onTap: (){
                     chromaticNumber(matrix);
                     Navigator.pop(context);
                   }
               ),
               ListTile(
-                  title: const Text('Радиус'),
+                  title: const Text('Радиус',textAlign: TextAlign.center),
                   onTap: (){
                     getRadius(matrix);
                     Navigator.pop(context);
                   }
               ),
               ListTile(
-                  title: const Text('Диаметр'),
+                  title: const Text('Диаметр',textAlign: TextAlign.center),
                   onTap: (){
-                    getDiameter(matrix);
+                    //getDiameter(matrix);
+                    Navigator.pop(context);
+                  }
+              ),
+              ListTile(
+                  title: const Text('Найти Эйлеровый цикл',textAlign: TextAlign.center),
+                  onTap: (){
+                    findEulerCycle(copyGraph(matrix));
+                    Navigator.pop(context);
+                  }
+              ),
+              ListTile(
+                  title: const Text('Количество ребер',textAlign: TextAlign.center),
+                  onTap: (){
+                    countOfRibs();
                     Navigator.pop(context);
                   }
               ),
@@ -694,24 +764,6 @@ class _GraphViewState extends State<GraphView> {
       ),
     );
   }
-}
-
-class Edge {
-  int a, b, w;
-  Edge(this.a, this.b, this.w);
-}
-
-List<Edge> getEdgesFromMatrix(List<List<int?>> matrix) {
-  List<Edge> edges = [];
-  int n = matrix.length;
-  for (int i = 0; i < n; i++) {
-    for (int j = i + 1; j < n; j++) {
-      if (matrix[i][j] != 0) {
-        edges.add(Edge(i+1, j+1, matrix[i][j]!));
-      }
-    }
-  }
-  return edges;
 }
 
 class OpenPainter extends CustomPainter {
@@ -736,16 +788,16 @@ class OpenPainter extends CustomPainter {
     var path = Path();
     final List<Offset> points = [];
 
-    var drawPoints = Paint()..color = Color(colorVertices)..strokeCap = StrokeCap.round..strokeWidth = 30;
+    var drawPoints = Paint()..color = Color(colorVertices)..strokeCap = StrokeCap.round..strokeWidth = 20;
     var drawLines = Paint()..color = Color(colorEdges)..strokeWidth = 2;
 
     var paint3 =  Paint()..color = const Color(0xffb69d9d)..strokeWidth = 1..style = PaintingStyle.stroke;
     var paint4 =  Paint()..color = const Color(0xff000000)..strokeWidth = 10..style = PaintingStyle.stroke;
     var radius = 140;
     if(matrix.length > 10) {
-      radius = 250;
-    }else if(matrix.length > 20){
       radius = 500;
+    }else if(matrix.length > 20){
+      radius = 1000;
     }
     //добавление вершин
     for(var i = 0; i < matrix.length;i++){
@@ -753,11 +805,12 @@ class OpenPainter extends CustomPainter {
       points.add(Offset((cos(angle) * radius + (size.width / 2)), (sin(angle) * radius + (size.width / 2))));
     }
 
-    //основной цикл полного рисования(петли, веса и т.д.)
+    //основной цикл полного рисования(петли, веса и направления т.д.)
     for(var i = 0; i < matrix.length;i++){
       for(var j = 0; j < matrix.length;j++){
-        if(matrix[i][j] != 0){
-          if(i == j){ // рисует петлю
+        if(matrix[i][j] != 0) {
+          // рисует петлю
+          if(i == j) {
             Offset ofs = Offset(points[i].dx, points[i].dy - 15);
             canvas.drawCircle(ofs,20.0, paint3);
           }
@@ -766,26 +819,24 @@ class OpenPainter extends CustomPainter {
                 canvas.drawLine(points[i], points[j], drawLines);
 
                 //рисует вес графа
-                if(isCheckedWeight){
-                  if(matrix[i][j] != -1){
-                    TextSpan span = TextSpan(style: const TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 17), text: "${matrix[i][j]}");
-                    TextPainter tp = TextPainter(text: span, textAlign: TextAlign.left, textDirection: TextDirection.ltr);
-                    tp.layout();
-                    if(matrix.length % 2 == 0){
-                      // делим отрезок в отношении 1/3
-                      var del = 1/3;
-                      tp.paint(canvas, Offset(((points[i].dx + del * points[j].dx) / (1 + del)), ((points[i].dy + del * points[j].dy) / (1 + del))));
-                      matrix[j][i] = 0;
-                    }else{
-                      // иначе делим в нормальном отношении 1/2
-                      tp.paint(canvas, Offset(((points[i].dx + points[j].dx) / 2), ((points[i].dy + points[j].dy) / 2)));
-                    }
+                if (isCheckedWeight && matrix[i][j] != -1) {
+                  TextSpan span = TextSpan(style: const TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 17), text: "${matrix[i][j]}");
+                  TextPainter tp = TextPainter(text: span, textAlign: TextAlign.left, textDirection: TextDirection.ltr);
+                  tp.layout();
+                  if (matrix.length % 2 == 0 && matrix[i][j] != matrix[j][i]) {
+                    // делим отрезок в отношении 1/3
+                    var del = 1/3;
+                    tp.paint(canvas, Offset(((points[i].dx + del * points[j].dx) / (1 + del)), ((points[i].dy + del * points[j].dy) / (1 + del))));
+                  } else {
+                    // иначе делим в нормальном отношении 1/2
+                    tp.paint(canvas, Offset(((points[i].dx + points[j].dx) / 2), ((points[i].dy + points[j].dy) / 2)));
                   }
                 }
 
+                //рисует направление ребра
                 if(isCheckedOriented){
                   if(points[i] != points[j] && matrix[i][j] != matrix[j][i]){
-                    var del = 19/2;
+                    var del = 17/2;
                     final targetPoint = Offset(((points[i].dx + del * points[j].dx) / (1 + del)), ((points[i].dy + del * points[j].dy) / (1 + del)));
                     final dX = targetPoint.dx - points[i].dx;
                     final dY = targetPoint.dy - points[i].dy;
@@ -799,39 +850,6 @@ class OpenPainter extends CustomPainter {
                     canvas.drawPath(path, paint4);
                   }
                 }
-                // if(isCheckedOriented){
-                //   if(points[i] != points[j]){
-                //     var del = 19/2;
-                //     final targetPoint = Offset(((points[i].dx + del * points[j].dx) / (1 + del)), ((points[i].dy + del * points[j].dy) / (1 + del)));
-                //     final dX = targetPoint.dx - points[i].dx;
-                //     final dY = targetPoint.dy - points[i].dy;
-                //     final angle = atan2(dX, dY);
-                //     const arrowSize = 5;
-                //     const arrowAngle=  30 * pi/360;
-                //
-                //     // проверяем наличие обратного ребра
-                //     bool isBidirectional = false;
-                //     for(int k = 0; k < matrix[j].length; k++){
-                //       if(matrix[j][k] == i){
-                //         isBidirectional = true;
-                //         break;
-                //       }
-                //       if(matrix[i][k] == j){
-                //         isBidirectional = true;
-                //         break;
-                //       }
-                //     }
-                //     if(!isBidirectional){
-                //       path.moveTo(targetPoint.dx - arrowSize * sin(angle - arrowAngle), targetPoint.dy - arrowSize * cos(angle - arrowAngle));
-                //       path.lineTo(targetPoint.dx, targetPoint.dy);
-                //       path.lineTo(targetPoint.dx - arrowSize * sin(angle + arrowAngle),targetPoint.dy - arrowSize * cos(angle + arrowAngle));
-                //       path.close();
-                //       canvas.drawPath(path, paint4);
-                //     }
-                //   }
-                // }
-                // matrix[j][i] = 0;
-            // matrix[j][i] = 0;
           }
         }
       }
@@ -839,13 +857,21 @@ class OpenPainter extends CustomPainter {
 
     // рисование вершин и индекса вершины
     for(var i = 0;i < matrix.length;i++) {
-      //в дальнейшем тут надо будет при условии рисовать вершины разных цветов
       canvas.drawCircle(points[i], 15, drawPoints);
       TextSpan span = TextSpan(style: const TextStyle(color: Colors.black,fontWeight: FontWeight.bold),
-          text: typeEdges == "SingingCharacter.Letter" ? String.fromCharCode(65 + i) : (i +1).toString());
+          text: typeEdges == "TypeEdges.Letter" ? String.fromCharCode(65 + i) : (i +1).toString());
       TextPainter tp = TextPainter(text: span, textAlign: TextAlign.left, textDirection: TextDirection.ltr);
       tp.layout();
-      tp.paint(canvas, Offset(points[i].dx -5.0, points[i].dy - 8.0));
+      if(matrix.length > 9){
+        if(i < 9){
+          tp.paint(canvas, Offset(points[i].dx -5.0, points[i].dy - 8.0));
+        }else{
+          tp.paint(canvas, Offset(points[i].dx -9.0, points[i].dy - 8.0));
+        }
+      }
+      else{
+        tp.paint(canvas, Offset(points[i].dx -5.0, points[i].dy - 8.0));
+      }
     }
   }
 
