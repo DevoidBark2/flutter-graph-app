@@ -227,6 +227,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     currentUserData = null;
     setState(() {});
   }
+
   @override
   initState() {
     super.initState();

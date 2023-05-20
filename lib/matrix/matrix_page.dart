@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +25,8 @@ class _MatrixPageState extends State<MatrixPage> {
   bool isCheckedOriented = false;
   Map<String,dynamic>? currentUserData;
   final textFieldController = TextEditingController();
+  final lower = TextEditingController();
+  final upper = TextEditingController();
 
   Future<Map<String, dynamic>?> getCurrentUserData() async {
     try {
@@ -45,7 +49,7 @@ class _MatrixPageState extends State<MatrixPage> {
     User? currentUser = FirebaseAuth.instance.currentUser;
     String? userId = currentUser?.uid;
     final userRef = FirebaseFirestore.instance.collection('users').doc(userId).collection('userData');
-    await userRef.add({'matrix': matrix, 'orinted' : orinted, 'weight': weight, 'timestamp': FieldValue.serverTimestamp()});
+    await userRef.add({'data': matrix, 'timestamp': FieldValue.serverTimestamp()});
   }
   void createControllers() {
     for (var i = 0; i < rows; i++) {
@@ -103,6 +107,7 @@ class _MatrixPageState extends State<MatrixPage> {
       }
       //сохранение графа в бд
       if(currentUserData != null){
+        print('add');
        setDataUserGraph(mat.toString(),isCheckedOriented,isCheckedWeight);
       }
       return true;
@@ -133,7 +138,6 @@ class _MatrixPageState extends State<MatrixPage> {
               child: Padding(
                 padding: const EdgeInsets.all(4.0),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Column(
                       children: List.generate(
@@ -211,6 +215,89 @@ class _MatrixPageState extends State<MatrixPage> {
                           },
                         ),
                         child: const Text('Отобразить')
+                    ),
+                    ElevatedButton(
+                      onLongPress: (){
+                        showModalBottomSheet<void>(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return Container(
+                              height: 200,
+                              color: Colors.amber,
+                              child: Center(
+                                child:  Column(
+                                 mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const SizedBox(width: 94),
+                                        SizedBox(
+                                          width:50,
+                                            child: TextField(
+                                              textAlign: TextAlign.center,
+                                              controller: lower,
+                                              keyboardType: TextInputType.number,
+                                              decoration: const InputDecoration(
+                                                  border: OutlineInputBorder()
+                                              ),
+                                            )
+                                        ),
+                                        const SizedBox(width: 5.0),
+                                        const Padding(padding:EdgeInsets.only(top: 20.0),child: Text('*',style: TextStyle(fontSize: 40.0),)),
+                                        const SizedBox(width: 5.0),
+                                        SizedBox(
+                                          width: 50,
+                                          child: TextField(
+                                            textAlign: TextAlign.center,
+                                            controller: upper,
+                                            keyboardType: TextInputType.number,
+                                            decoration: const InputDecoration(
+                                                border: OutlineInputBorder()
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: (){
+                                        for (int i = 0; i < controllers.length; i++) {
+                                          for (int j = 0; j < controllers[i].length; j++) {
+                                            int? lowerValue = int.tryParse(lower.text);
+                                            int? upperValue = int.tryParse(upper.text);
+                                            int rnd = Random().nextInt((lowerValue?.toInt() ?? 2) + (upperValue?.toInt() ?? 0));
+                                            controllers[i][j].text = rnd.toString();
+                                            controllers[j][i].text = rnd.toString();
+                                            if(i == j){
+                                              controllers[i][j].text = 0.toString();
+                                            }
+                                          }
+                                        }
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text('Сгенерировать'),
+                                    )
+                                  ],
+                                )
+                              ),
+                            );
+                          },
+                        );
+                      },
+                      onPressed: () {
+                        for (int i = 0; i < controllers.length; i++) {
+                          for (int j = 0; j < controllers[i].length; j++) {
+                            int? lowerValue = int.tryParse(lower.text);
+                            int? upperValue = int.tryParse(upper.text);
+                            int rnd = Random().nextInt((lowerValue?.toInt() ?? 2) + (upperValue?.toInt() ?? 0));
+                            controllers[i][j].text = rnd.toString();
+                            controllers[j][i].text = rnd.toString();
+                            if(i == j){
+                              controllers[i][j].text = 0.toString();
+                            }
+                          }
+                        }
+                      },
+                      child: const Text('Автозаполнение'),
                     ),
                   ],
                 ),

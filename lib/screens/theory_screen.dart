@@ -68,7 +68,7 @@ class _TheoryScreenState extends State<TheoryScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text('Основные понятия теории графов',textAlign: TextAlign.center,style: TextStyle(fontWeight: FontWeight.w700,fontSize: 20)),
+            const Text('Некоторые понятия теории графов',textAlign: TextAlign.center,style: TextStyle(fontWeight: FontWeight.w700,fontSize: 20)),
             const SizedBox(height: 10),
             BulletedList(
               listItems:[

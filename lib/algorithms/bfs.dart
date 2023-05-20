@@ -1,7 +1,7 @@
 import 'dart:collection';
 
 class BFSAlgorithm{
-  static BFSResult bfs(List<List<int?>> adjacencyMatrix, int start) {
+  static List<int> bfs(List<List<int?>> adjacencyMatrix, int start) {
     int n = adjacencyMatrix.length;
     List<bool> visited = List.generate(n, (_) => false);
     List<int> visitedOrder = [];
@@ -36,10 +36,10 @@ class BFSAlgorithm{
         }
       }
     }
-    return BFSResult(visitedOrder.toString());
+    return visitedOrder;
   }
 }
 class BFSResult{
-  late String result;
+  late List<int> result;
   BFSResult(this.result);
 }
