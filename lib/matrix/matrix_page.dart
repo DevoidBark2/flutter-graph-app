@@ -25,7 +25,6 @@ class _MatrixPageState extends State<MatrixPage> {
   bool isCheckedOriented = false;
   Map<String,dynamic>? currentUserData;
   final textFieldController = TextEditingController();
-  final lower = TextEditingController();
   final upper = TextEditingController();
 
   Future<Map<String, dynamic>?> getCurrentUserData() async {
@@ -107,7 +106,6 @@ class _MatrixPageState extends State<MatrixPage> {
       }
       //сохранение графа в бд
       if(currentUserData != null){
-        print('add');
        setDataUserGraph(mat.toString(),isCheckedOriented,isCheckedWeight);
       }
       return true;
@@ -230,21 +228,7 @@ class _MatrixPageState extends State<MatrixPage> {
                                   children: [
                                     Row(
                                       children: [
-                                        const SizedBox(width: 94),
-                                        SizedBox(
-                                          width:50,
-                                            child: TextField(
-                                              textAlign: TextAlign.center,
-                                              controller: lower,
-                                              keyboardType: TextInputType.number,
-                                              decoration: const InputDecoration(
-                                                  border: OutlineInputBorder()
-                                              ),
-                                            )
-                                        ),
-                                        const SizedBox(width: 5.0),
-                                        const Padding(padding:EdgeInsets.only(top: 20.0),child: Text('*',style: TextStyle(fontSize: 40.0),)),
-                                        const SizedBox(width: 5.0),
+                                        const SizedBox(width: 135),
                                         SizedBox(
                                           width: 50,
                                           child: TextField(
@@ -262,13 +246,18 @@ class _MatrixPageState extends State<MatrixPage> {
                                       onPressed: (){
                                         for (int i = 0; i < controllers.length; i++) {
                                           for (int j = 0; j < controllers[i].length; j++) {
-                                            int? lowerValue = int.tryParse(lower.text);
                                             int? upperValue = int.tryParse(upper.text);
-                                            int rnd = Random().nextInt((lowerValue?.toInt() ?? 2) + (upperValue?.toInt() ?? 0));
+                                            int rnd = Random().nextInt((upperValue?.toInt() ?? 2));
                                             controllers[i][j].text = rnd.toString();
                                             controllers[j][i].text = rnd.toString();
                                             if(i == j){
-                                              controllers[i][j].text = 0.toString();
+                                              bool rnd = Random().nextBool();
+                                              if(rnd){
+                                                controllers[i][j].text = 0.toString();
+                                              }
+                                              else{
+                                                controllers[i][j].text = 1.toString();
+                                              }
                                             }
                                           }
                                         }
@@ -286,13 +275,18 @@ class _MatrixPageState extends State<MatrixPage> {
                       onPressed: () {
                         for (int i = 0; i < controllers.length; i++) {
                           for (int j = 0; j < controllers[i].length; j++) {
-                            int? lowerValue = int.tryParse(lower.text);
                             int? upperValue = int.tryParse(upper.text);
-                            int rnd = Random().nextInt((lowerValue?.toInt() ?? 2) + (upperValue?.toInt() ?? 0));
+                            int rnd = Random().nextInt((upperValue?.toInt() ?? 2));
                             controllers[i][j].text = rnd.toString();
                             controllers[j][i].text = rnd.toString();
                             if(i == j){
-                              controllers[i][j].text = 0.toString();
+                              bool rnd = Random().nextBool();
+                              if(rnd){
+                                controllers[i][j].text = 0.toString();
+                              }
+                              else{
+                                controllers[i][j].text = 1.toString();
+                              }
                             }
                           }
                         }

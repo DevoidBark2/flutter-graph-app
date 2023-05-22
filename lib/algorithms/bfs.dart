@@ -39,7 +39,3 @@ class BFSAlgorithm{
     return visitedOrder;
   }
 }
-class BFSResult{
-  late List<int> result;
-  BFSResult(this.result);
-}
