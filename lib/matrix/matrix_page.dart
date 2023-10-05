@@ -1,5 +1,7 @@
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:math';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:test_project/graph/graph_view.dart';
 import 'matrix.dart';
@@ -23,13 +25,14 @@ class _MatrixPageState extends State<MatrixPage> {
   bool isCheckedOriented = false;
   Map<String,dynamic>? currentUserData;
   final textFieldController = TextEditingController();
+  final upper = TextEditingController();
 
   Future<Map<String, dynamic>?> getCurrentUserData() async {
     try {
-      // User? currentUser = FirebaseAuth.instance.currentUser;
-      // String? userId = currentUser?.uid;
-      // DocumentSnapshot userData = await FirebaseFirestore.instance.collection('users').doc(userId).get();
-      // return userData.data() as Map<String, dynamic>;
+      User? currentUser = FirebaseAuth.instance.currentUser;
+      String? userId = currentUser?.uid;
+      DocumentSnapshot userData = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+      return userData.data() as Map<String, dynamic>;
     } catch (e) {
       print('Ошибка при получении данных текущего пользователя: $e');
       return null;
@@ -42,10 +45,10 @@ class _MatrixPageState extends State<MatrixPage> {
     });
   }
   Future<void> setDataUserGraph(String matrix,bool orinted,bool weight) async {
-    // User? currentUser = FirebaseAuth.instance.currentUser;
-    // String? userId = currentUser?.uid;
-    // final userRef = FirebaseFirestore.instance.collection('users').doc(userId).collection('userData');
-    // await userRef.add({'matrix': matrix, 'orinted' : orinted, 'weight': weight, 'timestamp': FieldValue.serverTimestamp()});
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    String? userId = currentUser?.uid;
+    final userRef = FirebaseFirestore.instance.collection('users').doc(userId).collection('userData');
+    await userRef.add({'data': matrix, 'timestamp': FieldValue.serverTimestamp()});
   }
   void createControllers() {
     for (var i = 0; i < rows; i++) {
@@ -133,7 +136,6 @@ class _MatrixPageState extends State<MatrixPage> {
               child: Padding(
                 padding: const EdgeInsets.all(4.0),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Column(
                       children: List.generate(
@@ -211,6 +213,85 @@ class _MatrixPageState extends State<MatrixPage> {
                           },
                         ),
                         child: const Text('Отобразить')
+                    ),
+                    ElevatedButton(
+                      onLongPress: (){
+                        showModalBottomSheet<void>(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return Container(
+                              height: 200,
+                              color: Colors.amber,
+                              child: Center(
+                                child:  Column(
+                                 mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const SizedBox(width: 135),
+                                        SizedBox(
+                                          width: 50,
+                                          child: TextField(
+                                            textAlign: TextAlign.center,
+                                            controller: upper,
+                                            keyboardType: TextInputType.number,
+                                            decoration: const InputDecoration(
+                                                border: OutlineInputBorder()
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: (){
+                                        for (int i = 0; i < controllers.length; i++) {
+                                          for (int j = 0; j < controllers[i].length; j++) {
+                                            int? upperValue = int.tryParse(upper.text);
+                                            int rnd = Random().nextInt((upperValue?.toInt() ?? 2));
+                                            controllers[i][j].text = rnd.toString();
+                                            controllers[j][i].text = rnd.toString();
+                                            if(i == j){
+                                              bool rnd = Random().nextBool();
+                                              if(rnd){
+                                                controllers[i][j].text = 0.toString();
+                                              }
+                                              else{
+                                                controllers[i][j].text = 1.toString();
+                                              }
+                                            }
+                                          }
+                                        }
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text('Сгенерировать'),
+                                    )
+                                  ],
+                                )
+                              ),
+                            );
+                          },
+                        );
+                      },
+                      onPressed: () {
+                        for (int i = 0; i < controllers.length; i++) {
+                          for (int j = 0; j < controllers[i].length; j++) {
+                            int? upperValue = int.tryParse(upper.text);
+                            int rnd = Random().nextInt((upperValue?.toInt() ?? 2));
+                            controllers[i][j].text = rnd.toString();
+                            controllers[j][i].text = rnd.toString();
+                            if(i == j){
+                              bool rnd = Random().nextBool();
+                              if(rnd){
+                                controllers[i][j].text = 0.toString();
+                              }
+                              else{
+                                controllers[i][j].text = 1.toString();
+                              }
+                            }
+                          }
+                        }
+                      },
+                      child: const Text('Автозаполнение'),
                     ),
                   ],
                 ),

@@ -1,5 +1,3 @@
-import '../graph/edge.dart';
-
 class KruskalAlgorithm{
   static List<Edge> _getEdgesFromMatrix(List<List<int?>> matrix) {
     List<Edge> edges = [];
@@ -56,4 +54,8 @@ class KruskalResult{
   late String error = '';
   KruskalResult(this.totalWeight, this.newMatrix);
   KruskalResult.empty(this.error);
+}
+class Edge {
+  int a, b, w;
+  Edge(this.a, this.b, this.w);
 }
