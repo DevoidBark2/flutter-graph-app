@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:test_project/screens/draw_screen.dart';
+import 'package:test_project/screens/drawing_screen.dart';
 import 'package:test_project/screens/profile_screen.dart';
 import 'package:test_project/screens/settings_screen.dart';
 import 'package:test_project/screens/main_screen.dart';
@@ -17,7 +18,7 @@ class _HomePageState extends State<HomePage> {
   static const List<Widget> _widgetOptions = <Widget>[
     MainScreen(),
     DrawScreen(),
-    ProfileScreen(),
+    DrawingScreen()
   ];
 
   void _onItemTapped(int index) {

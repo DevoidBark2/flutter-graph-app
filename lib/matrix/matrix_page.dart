@@ -1,5 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:test_project/graph/graph_view.dart';
 import 'matrix.dart';
@@ -26,10 +26,10 @@ class _MatrixPageState extends State<MatrixPage> {
 
   Future<Map<String, dynamic>?> getCurrentUserData() async {
     try {
-      User? currentUser = FirebaseAuth.instance.currentUser;
-      String? userId = currentUser?.uid;
-      DocumentSnapshot userData = await FirebaseFirestore.instance.collection('users').doc(userId).get();
-      return userData.data() as Map<String, dynamic>;
+      // User? currentUser = FirebaseAuth.instance.currentUser;
+      // String? userId = currentUser?.uid;
+      // DocumentSnapshot userData = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+      // return userData.data() as Map<String, dynamic>;
     } catch (e) {
       print('Ошибка при получении данных текущего пользователя: $e');
       return null;
@@ -42,10 +42,10 @@ class _MatrixPageState extends State<MatrixPage> {
     });
   }
   Future<void> setDataUserGraph(String matrix,bool orinted,bool weight) async {
-    User? currentUser = FirebaseAuth.instance.currentUser;
-    String? userId = currentUser?.uid;
-    final userRef = FirebaseFirestore.instance.collection('users').doc(userId).collection('userData');
-    await userRef.add({'matrix': matrix, 'orinted' : orinted, 'weight': weight, 'timestamp': FieldValue.serverTimestamp()});
+    // User? currentUser = FirebaseAuth.instance.currentUser;
+    // String? userId = currentUser?.uid;
+    // final userRef = FirebaseFirestore.instance.collection('users').doc(userId).collection('userData');
+    // await userRef.add({'matrix': matrix, 'orinted' : orinted, 'weight': weight, 'timestamp': FieldValue.serverTimestamp()});
   }
   void createControllers() {
     for (var i = 0; i < rows; i++) {
