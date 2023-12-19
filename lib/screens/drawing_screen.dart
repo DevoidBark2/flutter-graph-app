@@ -12,9 +12,48 @@ class DrawingScreen extends StatefulWidget {
 
 class _DrawingScreenState extends State<DrawingScreen> {
   List<Offset> points = [];
+  List<List<int>> edges = [];
   int activePointIndex = -1;
-  int startVertexIndex = -1;
-  int endVertexIndex = -1;
+
+  final adjacencyMatrix = [
+    [0, 1, 1, 1, 1],
+    [1, 0, 1, 1, 1],
+    [1, 1, 0, 1, 1],
+    [1, 1, 1, 0, 1],
+    [0, 1, 1, 1, 0]];
+
+  @override
+  void initState() {
+    super.initState();
+    createVertices();
+    createEdges();
+  }
+
+  void createVertices() {
+    final numVertices = adjacencyMatrix.length;
+    const double radius = 150;
+    const double centerX = 300;
+    const double centerY = 300;
+    final double angleBetweenVertices = 2 * pi / numVertices;
+
+    for (var i = 0; i < numVertices; i++) {
+      final x = centerX + radius * cos(i * angleBetweenVertices);
+      final y = centerY + radius * sin(i * angleBetweenVertices);
+      points.add(Offset(x, y));
+    }
+  }
+
+  void createEdges() {
+    final numVertices = adjacencyMatrix.length;
+
+    for (var i = 0; i < numVertices; i++) {
+      for (var j = i + 1; j < numVertices; j++) {
+        if (adjacencyMatrix[i][j] == 1) {
+          edges.add([i, j]);
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,22 +66,15 @@ class _DrawingScreenState extends State<DrawingScreen> {
             points.add(typePosition);
           } else {
             activePointIndex = tappedPointIndex;
-            startVertexIndex = tappedPointIndex;
           }
-        } else {
-          if (tappedPointIndex != null && tappedPointIndex != activePointIndex) {
-            endVertexIndex = tappedPointIndex;
-            createEdge(startVertexIndex, endVertexIndex);
-          }
-          resetLine();
-        }
-        if (kDebugMode) {
-          print(points);
+        } else
+        if (tappedPointIndex != null && tappedPointIndex != activePointIndex) {
+          createEdge(activePointIndex, tappedPointIndex);
+          activePointIndex = -1;
         }
         setState(() {});
       },
       onLongPressDown: (details) {
-        resetLine();
         final off = details.localPosition;
         activePointIndex = getTappedPointIndex(off) ?? -1;
         setState(() {});
@@ -55,11 +87,18 @@ class _DrawingScreenState extends State<DrawingScreen> {
         }
       },
       onPanEnd: (_) {
-        resetLine();
+        activePointIndex = -1;
       },
-      child: Scaffold(body: CustomPaint(painter: OpenPainter(points: points, activePointIndex: activePointIndex))),
+      child: Scaffold(
+        body: CustomPaint(
+          painter: OpenPainter(
+              points: points, edges: edges, activePointIndex: activePointIndex),
+        ),
+      ),
     );
-  }
+    }
+
+
 
   int? getTappedPointIndex(Offset position) {
     for (var i = 0; i < points.length; i++) {
@@ -76,23 +115,19 @@ class _DrawingScreenState extends State<DrawingScreen> {
       start = end;
       end = temp;
     }
-    for (var i = start + 1; i < end; i++) {
-      points.removeAt(start + 1);
-      end--;
-    }
+    edges.add([start, end]);
   }
 
-  void resetLine() {
-    startVertexIndex = -1;
-    endVertexIndex = -1;
-  }
 }
+
+
 
 class OpenPainter extends CustomPainter {
   final List<Offset> points;
+  final List<List<int>> edges;
   final int activePointIndex;
 
-  OpenPainter({Key? key, required this.points, required this.activePointIndex});
+  OpenPainter({required this.points, required this.edges, required this.activePointIndex});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -118,10 +153,17 @@ class OpenPainter extends CustomPainter {
     }
 
     for (var i = 0; i < points.length; i++) {
-      TextSpan span = TextSpan(style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold), text: "${i + 1}");
+      TextSpan span =
+      TextSpan(style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold), text: "${i + 1}");
       TextPainter tp = TextPainter(text: span, textAlign: TextAlign.left, textDirection: TextDirection.ltr);
       tp.layout();
       tp.paint(canvas, Offset(points[i].dx - 5.0, points[i].dy - 5.0));
+    }
+
+    for (var i = 0; i < edges.length; i++) {
+      final start = points[edges[i][0]];
+      final end = points[edges[i][1]];
+      drawLine(canvas, start, end, paint1);
     }
   }
 

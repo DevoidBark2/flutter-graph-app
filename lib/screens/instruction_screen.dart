@@ -25,6 +25,7 @@ class _InstructionScreenState extends State<InstructionScreen> {
               bulletType: BulletType.conventional,
             ),
             const SizedBox(height: 10),
+
             const Text('Инструкция',textAlign: TextAlign.center,style: TextStyle(fontWeight: FontWeight.w700,fontSize: 25)),
             const SizedBox(height: 10),
             const BulletedList(

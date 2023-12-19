@@ -34,7 +34,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void getColorEdges() async {
     var storage = await SharedPreferences.getInstance();
     setState(() {
-      selectedColorEdges = storage.getInt("indexColorEdges") ?? Colors.red.value;
+      selectedColorEdges = storage.getInt("indexColorEdges") ?? Colors.green.value;
     });
   }
 
