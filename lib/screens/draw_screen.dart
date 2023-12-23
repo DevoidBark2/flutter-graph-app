@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import '../matrix/matrix.dart';
@@ -13,6 +14,13 @@ class DrawScreen extends StatefulWidget {
 class _DrawScreenState extends State<DrawScreen> {
   final matrixSize = TextEditingController();
   var inputError = '';
+  final CollectionReference _collectionRef = FirebaseFirestore.instance.collection('tasks');
+
+  Future<void> getTasks() async{
+    QuerySnapshot querySnapshot = await _collectionRef.get();
+    // final allTasks = querySnapshot.docs.map((doc) => doc.data()).toList();
+    print(querySnapshot);
+  }
 
   int handleInput(TextEditingController row){
     var a = int.tryParse(row.text);
@@ -25,6 +33,13 @@ class _DrawScreenState extends State<DrawScreen> {
       return 0;
     }
     return 1;
+  }
+
+@override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getTasks();
   }
 
   @override
@@ -81,7 +96,7 @@ class _DrawScreenState extends State<DrawScreen> {
                                 height: 200,
                                 color: const Color(0xffffffff),
                                 child: Padding(
-                                  padding: const EdgeInsets.only(top: 20.0,bottom: 20.0),
+                                  padding: const EdgeInsets.only(top: 10.0,bottom: 5.0),
                                   child: Column(
                                       mainAxisAlignment: MainAxisAlignment.start,
                                       children: [

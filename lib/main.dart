@@ -1,16 +1,17 @@
-// import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'firebase_options.dart';
 import 'package:postgres/postgres.dart';
 import 'home_page.dart';
 import 'db/database.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // final databaseManager = DatabaseManager();
-  //
-  // await databaseManager.connect();
 
-  // await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(const MyApp());
 }
 

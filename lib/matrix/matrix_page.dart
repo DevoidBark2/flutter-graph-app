@@ -138,6 +138,7 @@ class _MatrixPageState extends State<MatrixPage> {
           physics: const BouncingScrollPhysics(),
           child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Center(
                 child: SizedBox(
@@ -175,6 +176,7 @@ class _MatrixPageState extends State<MatrixPage> {
                         ),
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -208,7 +210,7 @@ class _MatrixPageState extends State<MatrixPage> {
                                       color: Colors.white,
                                       child: Center(
                                         child: Padding(
-                                          padding: const EdgeInsets.only(top: 20.0, bottom: 20.0),
+                                          padding: const EdgeInsets.only(top: 10.0, bottom: 5.0),
                                           child: Column(
                                             mainAxisAlignment: MainAxisAlignment.start,
                                             children: [

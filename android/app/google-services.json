@@ -1,36 +1,26 @@
 {
   "project_info": {
-    "project_number": "924338993109",
-    "project_id": "flutter-graph-app-2023",
-    "storage_bucket": "flutter-graph-app-2023.appspot.com"
+    "project_number": "67420622852",
+    "project_id": "graph-world",
+    "storage_bucket": "graph-world.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:924338993109:android:53bc418c6aaacd8ad5af5c",
+        "mobilesdk_app_id": "1:67420622852:android:846a4f43a85f70e8bea551",
         "android_client_info": {
           "package_name": "com.example.test_project"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "924338993109-3n62in90nusrae23rbsm4ajviqauidt7.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAUpaf5rYDMr7-zCad-WYIUyKNdamJixJA"
+          "current_key": "AIzaSyC0NmwCnUGI4MGNOEa_czRQtks6SSMH7BM"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "924338993109-3n62in90nusrae23rbsm4ajviqauidt7.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }

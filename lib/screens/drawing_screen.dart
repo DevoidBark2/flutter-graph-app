@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class DrawingScreen extends StatefulWidget {
@@ -57,43 +56,35 @@ class _DrawingScreenState extends State<DrawingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapUp: (position) {
-        final typePosition = position.localPosition;
-        final tappedPointIndex = getTappedPointIndex(typePosition);
-        if (activePointIndex == -1) {
-          if (tappedPointIndex == null) {
-            points.add(typePosition);
-          } else {
-            activePointIndex = tappedPointIndex;
-          }
-        } else
-        if (tappedPointIndex != null && tappedPointIndex != activePointIndex) {
-          createEdge(activePointIndex, tappedPointIndex);
-          activePointIndex = -1;
-        }
-        setState(() {});
-      },
-      onLongPressDown: (details) {
-        final off = details.localPosition;
-        activePointIndex = getTappedPointIndex(off) ?? -1;
-        setState(() {});
-      },
-      onPanUpdate: (details) {
-        if (activePointIndex != -1) {
-          final newPosition = details.localPosition;
-          points[activePointIndex] = newPosition;
-          setState(() {});
-        }
-      },
-      onPanEnd: (_) {
-        activePointIndex = -1;
-      },
-      child: Scaffold(
-        body: CustomPaint(
-          painter: OpenPainter(
-              points: points, edges: edges, activePointIndex: activePointIndex),
-        ),
+    return Container(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+         Padding(
+            padding: EdgeInsets.only(left:10.0,top: 5.0,right: 10.0,bottom: 5.0),
+            child:  Container(
+              height: 50.0,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                  color:Colors.indigo,
+                  borderRadius: BorderRadius.circular(10.0)
+              ),
+              child: Text('asd'),
+            ),
+         ),
+         Padding(
+            padding: EdgeInsets.only(left:10.0,top: 5.0,right: 10.0,bottom: 5.0),
+            child:  Container(
+              height: 50.0,
+              width: 200.0,
+              decoration: BoxDecoration(
+                  color:Colors.indigo,
+                  borderRadius: BorderRadius.circular(10.0)
+              ),
+              child: Text('asd'),
+            ),
+          )
+        ],
       ),
     );
     }
