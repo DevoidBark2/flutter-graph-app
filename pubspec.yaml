@@ -77,6 +77,9 @@ flutter:
     - assets/images/Logo.svg
     - assets/images/coins.png
     - assets/images/error.svg
+    - assets/images/list-theory.svg
+    - assets/images/rules_app.svg
+    - assets/images/logo_avatar.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

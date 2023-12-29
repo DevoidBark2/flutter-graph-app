@@ -6,9 +6,10 @@ import 'package:test_project/screens/interactive_game.dart';
 import 'package:test_project/screens/profile_screen.dart';
 import 'package:test_project/screens/settings_screen.dart';
 import 'package:test_project/screens/main_screen.dart';
+import 'package:test_project/screens/theory_screen.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({Key? key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -18,10 +19,11 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
   static const List<Widget> _widgetOptions = <Widget>[
-    MainScreen(),
+    TheoryScreen(),
     DrawScreen(),
     DrawingScreen(),
     InteractiveGame(),
+    SettingsScreen()
   ];
 
   void _onItemTapped(int index) {
@@ -29,6 +31,7 @@ class _HomePageState extends State<HomePage> {
       _selectedIndex = index;
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,53 +41,92 @@ class _HomePageState extends State<HomePage> {
             SvgPicture.asset(
               'assets/images/Logo.svg',
               width: 50,
-              height: 50
+              height: 50,
             ),
           ],
         ),
         actions: <Widget>[
           IconButton(
-            icon: const Icon(Icons.menu),
+            icon: const Icon(Icons.settings),
             tooltip: 'Настройки',
-
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute<void>(
-                builder: (BuildContext context) {
-                  return Scaffold(
+              Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (BuildContext context) => Scaffold(
                     appBar: AppBar(
                       title: const Text('Настройки'),
                     ),
-                    body: const SettingsScreen()
-                  );
-                },
-              ));
+                    body: const SettingsScreen(),
+                  ),
+                ),
+              );
             },
           ),
         ],
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: <Color>[Colors.orange, Colors.deepOrange]),
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: <Color>[Colors.orange, Colors.deepOrange],
+            ),
           ),
         ),
       ),
-      body: _widgetOptions.elementAt(_selectedIndex),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Главная'),
-          BottomNavigationBarItem(icon: Icon(Icons.draw_rounded), label: 'Визуализация'),
-          BottomNavigationBarItem(icon: Icon(Icons.gamepad), label: 'Игра'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Профиль')
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.deepOrangeAccent,
-        onTap: _onItemTapped,
-        unselectedItemColor: Colors.grey,
-        showUnselectedLabels: true,
-        type: BottomNavigationBarType.fixed,
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            Container(
+              height:100.0,
+              decoration: const BoxDecoration(
+                color: Colors.blueAccent
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.home),
+              title: const Text('Главная'),
+              onTap: () {
+                _onItemTapped(0);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.draw_rounded),
+              title: const Text('Визуализация'),
+              onTap: () {
+                _onItemTapped(1);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.gamepad),
+              title: const Text('Игра'),
+              onTap: () {
+                _onItemTapped(2);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text('Профиль'),
+              onTap: () {
+                _onItemTapped(3);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Настройки'),
+              onTap: () {
+                _onItemTapped(4);
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
       ),
+      body: _widgetOptions.elementAt(_selectedIndex),
     );
   }
 }
