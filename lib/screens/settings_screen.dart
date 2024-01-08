@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:test_project/theme/theme_manager.dart';
 
 enum TypeEdges { Digit, Letter }
 
@@ -78,6 +79,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
+  final ThemeManger _themeManger = ThemeManger();
 
   @override
   Widget build(BuildContext context) {
@@ -186,40 +188,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 10),
             const Text('Название вершины',style: TextStyle(fontWeight: FontWeight.w500)),
             const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: ListTile(
-                    title: const Text('Цифра',style: TextStyle(fontSize: 14)),
-                    leading: Radio<TypeEdges>(
-                      value: TypeEdges.Digit,
-                      groupValue: _typeEdges,
-                      onChanged: (TypeEdges? value) {
-                        setState(() {
-                          _typeEdges = value;
-                          setTypeEdges();
-                        });
-                      },
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: ListTile(
-                    title: const Text('Буква',style: TextStyle(fontSize: 14)),
-                    leading: Radio<TypeEdges>(
-                      value: TypeEdges.Letter,
-                      groupValue: _typeEdges,
-                      onChanged: (TypeEdges? value) {
-                        setState(() {
-                          _typeEdges = value;
-                          setTypeEdges();
-                        });
-                      },
-                    ),
-                  ),
-                )
-              ],
-            )
+            // Row(
+            //   children: [
+            //     Expanded(
+            //       child: ListTile(
+            //         title: const Text('Цифра',style: TextStyle(fontSize: 14)),
+            //         leading: Radio<TypeEdges>(
+            //           value: TypeEdges.Digit,
+            //           groupValue: _typeEdges,
+            //           onChanged: (TypeEdges? value) {
+            //             setState(() {
+            //               _typeEdges = value;
+            //               setTypeEdges();
+            //             });
+            //           },
+            //         ),
+            //       ),
+            //     ),
+            //     Expanded(
+            //       child: ListTile(
+            //         title: const Text('Буква',style: TextStyle(fontSize: 14)),
+            //         leading: Radio<TypeEdges>(
+            //           value: TypeEdges.Letter,
+            //           groupValue: _typeEdges,
+            //           onChanged: (TypeEdges? value) {
+            //             setState(() {
+            //               _typeEdges = value;
+            //               setTypeEdges();
+            //             });
+            //           },
+            //         ),
+            //       ),
+            //     )
+            //   ],
+            // ),
+            Switch(value: _themeManger.themeMode == ThemeMode.dark, onChanged:(newValue){
+              _themeManger.toggleTheme(newValue);
+            })
           ],
         ),
       )

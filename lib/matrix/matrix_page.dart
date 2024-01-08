@@ -82,7 +82,7 @@ class _MatrixPageState extends State<MatrixPage> {
   bool checkMatrix(controllers){
     bool isCheckedValidMatrix = true;
     var mat = List.generate(controllers.length, (row) => List.generate(controllers.length ,(column) => int.tryParse(controllers[row][column].text)));
-    print(mat);
+    print("mat ${mat.toString()}");
     List<List<int?>> result = List.generate(mat[0].length, (i) => List.filled(mat.length, 0));
     print(result);
 

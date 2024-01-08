@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:test_project/screens/auth/login_screen.dart';
 import 'package:test_project/screens/draw_screen.dart';
 import 'package:test_project/screens/drawing_screen.dart';
 import 'package:test_project/screens/interactive_game.dart';
@@ -23,7 +25,8 @@ class _HomePageState extends State<HomePage> {
     DrawScreen(),
     DrawingScreen(),
     InteractiveGame(),
-    SettingsScreen()
+    SettingsScreen(),
+    LoginScreen()
   ];
 
   void _onItemTapped(int index) {
@@ -34,6 +37,9 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
+    print(user);
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -108,14 +114,6 @@ class _HomePageState extends State<HomePage> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.person),
-              title: const Text('Профиль'),
-              onTap: () {
-                _onItemTapped(3);
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
               leading: const Icon(Icons.settings),
               title: const Text('Настройки'),
               onTap: () {
@@ -123,6 +121,21 @@ class _HomePageState extends State<HomePage> {
                 Navigator.pop(context);
               },
             ),
+            user != null ?  ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text('Профиль'),
+              onTap: () {
+                _onItemTapped(3);
+                Navigator.pop(context);
+              },
+            ) : ListTile(
+              leading: const Icon(Icons.login_rounded),
+              title: const Text('Войти'),
+              onTap: () {
+                _onItemTapped(5);
+                Navigator.pop(context);
+              },
+            )
           ],
         ),
       ),

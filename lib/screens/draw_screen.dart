@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:test_project/screens/force_algorithm/%20fr%C3%BCchtermann_reingold_algorithm.dart';
 import '../matrix/matrix.dart';
 import '../matrix/matrix_page.dart';
 
@@ -18,8 +20,8 @@ class _DrawScreenState extends State<DrawScreen> {
 
   Future<void> getTasks() async{
     QuerySnapshot querySnapshot = await _collectionRef.get();
-    // final allTasks = querySnapshot.docs.map((doc) => doc.data()).toList();
-    print(querySnapshot);
+    final allTasks = querySnapshot.docs.map((doc) => doc.data()).toList();
+    print(allTasks);
   }
 
   int handleInput(TextEditingController row){
@@ -44,6 +46,7 @@ class _DrawScreenState extends State<DrawScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(15.0),
@@ -128,6 +131,42 @@ class _DrawScreenState extends State<DrawScreen> {
                         backgroundColor: MaterialStateProperty.all<Color>(Colors.deepOrangeAccent),
                     ),
                 ),
+                Container(
+                  child: Padding(
+                    padding: EdgeInsets.all(10.0),
+                    child: Text(
+                        'Силовые алгоритмы',
+                        style: TextStyle(
+                            fontSize: 25.0
+                        )
+                    ),
+                  ),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                      border: Border(
+                          bottom: BorderSide(
+                              color:Colors.black,
+                              width: 1.0
+                          )
+                      )
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: (){
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (BuildContext context) => Scaffold(
+                          appBar: AppBar(
+                            title: const Text('Настройки'),
+                          ),
+                          body: AnimatedGraph(),
+                        ),
+                      ),
+                    );
+                  },
+                  child: Text('Попробовать'),
+                )
               ],
             )
           ],

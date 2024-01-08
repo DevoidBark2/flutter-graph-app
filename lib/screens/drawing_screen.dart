@@ -1,6 +1,15 @@
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:test_project/algorithms/kruskal_algorithm.dart';
+
+import '../models/Task.dart';
+import 'auth/login_screen.dart';
+import 'level_game_screen.dart';
 
 class DrawingScreen extends StatefulWidget {
   const DrawingScreen({Key? key}) : super(key: key);
@@ -21,11 +30,45 @@ class _DrawingScreenState extends State<DrawingScreen> {
     [1, 1, 1, 0, 1],
     [0, 1, 1, 1, 0]];
 
+  final List<Task> tasks = [];
+
+  final _collectionRef = FirebaseFirestore.instance.collection('tasks');
+  final _userData = FirebaseFirestore.instance.collection('users-list');
+
+  final user = FirebaseAuth.instance.currentUser;
+  int userTotalData = 0;
+
+  Future<void> getUserData() async{
+    try {
+      QuerySnapshot querySnapshot = await _collectionRef.where('uid', isEqualTo: user?.uid ?? '').get();
+      QuerySnapshot _user = await _userData.where('uid', isEqualTo: user?.uid ?? '').get();
+      final userData = _user.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+
+      if (userData.isNotEmpty) {
+        userTotalData = userData[0]['total_user'];
+        setState(() {});
+      }
+
+    } catch (e) {
+      print('Exception occurred: $e');
+    }
+  }
+
+  // Future<void> getTasks() async{
+  //   QuerySnapshot querySnapshot = await _collectionRef.get();
+  //   final allTasks = querySnapshot.docs.map((doc) => tasks.from(doc)).toList();
+  //   allTasks.map((Task task){
+  //     tasks.add(task);
+  //   });
+  // }
+
   @override
   void initState() {
     super.initState();
     createVertices();
     createEdges();
+    getUserData();
+    // getTasks();
   }
 
   void createVertices() {
@@ -54,40 +97,258 @@ class _DrawingScreenState extends State<DrawingScreen> {
     }
   }
 
+  Future<void> _refreshData() async {
+    setState(() {});
+  }
+
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-         Padding(
-            padding: EdgeInsets.only(left:10.0,top: 5.0,right: 10.0,bottom: 5.0),
-            child:  Container(
-              height: 50.0,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                  color:Colors.indigo,
-                  borderRadius: BorderRadius.circular(10.0)
-              ),
-              child: Text('asd'),
-            ),
-         ),
-         Padding(
-            padding: EdgeInsets.only(left:10.0,top: 5.0,right: 10.0,bottom: 5.0),
-            child:  Container(
-              height: 50.0,
-              width: 200.0,
-              decoration: BoxDecoration(
-                  color:Colors.indigo,
-                  borderRadius: BorderRadius.circular(10.0)
-              ),
-              child: Text('asd'),
-            ),
-          )
-        ],
-      ),
-    );
+    if(user != null){
+      return RefreshIndicator(
+        onRefresh: _refreshData,
+        child: SingleChildScrollView(
+            child: Padding(
+                padding: const EdgeInsets.only(top:5.0,right: 10.0,bottom: 5.0,left: 10.0),
+                child: Container(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Container(
+                        height: 150.0,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                            colors: <Color>[Colors.orange, Colors.deepOrange],
+                          ),
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.all(10.0),
+                          child: Row(
+                            children: [
+                              Container(
+                                child: Row(
+                                  children: [
+                                    SvgPicture.asset(
+                                      'assets/images/money.svg',
+                                      height: 40.0,
+                                      width: 40.0,
+                                    ),
+                                    Text(
+                                      "${userTotalData}",
+                                      style: TextStyle(
+                                          fontSize: 30.0,
+                                          fontWeight: FontWeight.bold
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                              Container()
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 20.0,
+                      ),
+                      Container(
+                        child: Padding(
+                          padding: EdgeInsets.all(10.0),
+                          child: Text(
+                              'Задачи',
+                              style: TextStyle(
+                                  fontSize: 25.0
+                              )
+                          ),
+                        ),
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                            border: Border(
+                                bottom: BorderSide(
+                                    color:Colors.black,
+                                    width: 1.0
+                                )
+                            )
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 30.0,
+                      ),
+                      StreamBuilder<QuerySnapshot>(
+                        stream: _collectionRef.snapshots(),
+                        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                          if (snapshot.hasError) {
+                            return Text('Ошибка получения данных: ${snapshot.error}');
+                          }
+
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const SpinKitFadingCircle(
+                              color: Colors.orange,
+                              size: 100.0,
+                              duration: Duration(milliseconds: 3000),
+                            );
+                          }
+
+                          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                            return Center(
+                              child:  Text('Нет доступных задач'),
+                            );
+                          }
+
+                          final tasks = snapshot.data!.docs
+                              .map((doc) => Task.fromMap(doc.data() as Map<String, dynamic>))
+                              .toList();
+
+                          return Container(
+                            width:MediaQuery.of(context).size.height / 2,
+                            height: MediaQuery.of(context).size.height / 2,
+                            child: ListView.builder(
+                              itemCount: tasks.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                final task = tasks[index];
+                                return GestureDetector(
+                                  onTap: (){
+                                    showDialog(
+                                        context: context,
+                                        builder: (BuildContext context){
+                                          return AlertDialog(
+                                              title: Text('Задание ${task.id}'),
+                                              content: Container(
+                                                height: 100.0,
+                                                child: Padding(
+                                                  padding: EdgeInsets.all((10.0)),
+                                                  child: Column(
+                                                    children: [
+                                                      Text('${task.description}'),
+                                                      Text('Время выполнения:${task.time_level} сек.')
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: Text('Закрыть'),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.push(context, MaterialPageRoute<void>(
+                                                      builder: (BuildContext context) {
+                                                        return Scaffold(
+                                                            appBar: AppBar(
+                                                              title: Text('Уровень${index + 1}'),
+                                                            ),
+                                                            body: LevelGameScreen(task:task)
+                                                        );
+                                                      },
+                                                    ));
+                                                  },
+                                                  child: Text('Начать'),
+                                                )
+                                              ]
+                                          );
+                                        }
+                                    );
+                                  },
+                                  child: Container(
+                                    height: 80.0,
+                                    margin: EdgeInsets.only(bottom: 20.0),
+                                    decoration: BoxDecoration(
+                                      color: Colors.orange,
+                                      borderRadius: BorderRadius.circular(10.0),
+                                    ),
+                                    child: Stack(
+                                      children: [
+                                        Align(  // Расположение по правому нижнему углу
+                                          alignment: Alignment.topLeft,
+                                          child: Padding(
+                                            padding: EdgeInsets.all(10.0),
+                                            child: Text("${task.id}"),
+                                          ),
+                                        ),
+                                        Align(  // Расположение по правому нижнему углу
+                                          alignment: Alignment.bottomLeft,
+                                          child: Padding(
+                                            padding: EdgeInsets.all(10.0),
+                                            child: Text("Уровень ${task.level}"),
+                                          ),
+                                        ),
+                                        Align(// Расположение по правому нижнему углу
+                                          alignment: Alignment.bottomRight,
+                                          child: Padding(
+                                            padding: EdgeInsets.only(right: 10.0, bottom: 10.0), // Измените EdgeInsets здесь
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                SvgPicture.asset(
+                                                  'assets/images/money.svg',
+                                                  height: 40.0,
+                                                  width: 40.0,
+                                                ),
+                                                SizedBox(width: 5.0), // Добавьте небольшой отступ между иконкой и текстом
+                                                Text("${task.total}"),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                )
+            )
+        ),
+      );
     }
+    else{
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SvgPicture.asset(
+              'assets/images/lock.svg',
+              height: 120,
+              width: 120,
+            ),
+            Center(
+              child: Text('Доступ к игре ограничен!'),
+            ),
+            Center(
+              child: Column(
+                children: [
+                  Text('Войдите в свой аккаунт'),
+                  ElevatedButton(
+                    onPressed: (){
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) {
+                          return LoginScreen();
+                        })
+                      );
+                    },
+                    child: Text('Войти'),
+                  )
+                ],
+              ),
+            )
+          ],
+        )
+      );
+    }
+  }
 
 
 

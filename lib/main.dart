@@ -1,43 +1,69 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:test_project/screens/splash_screen.dart';
+import 'package:test_project/screens/theory_screen.dart';
+import 'package:test_project/theme/theme_costans.dart';
+import 'package:test_project/theme/theme_manager.dart';
 import 'firebase_options.dart';
-import 'package:postgres/postgres.dart';
 import 'home_page.dart';
-import 'db/database.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-  
+ThemeManger _themeManger = ThemeManger();
+
+class MyApp extends StatefulWidget {
+
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+
+  @override
+  void dispose() {
+    _themeManger.removeListener(themeListener);
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    _themeManger.addListener(themeListener);
+    super.initState();
+  }
+
+  themeListener(){
+    if(mounted){
+      setState(() {
+
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Graph App',
       home: const Scaffold(
-        body: HomePage(),
+        body: SplashScreen(),
       ),
-      theme: ThemeData(
-        fontFamily: 'JetBrainsMono',
-        textTheme: const TextTheme(
-          displayLarge: TextStyle(fontSize: 52.0, fontWeight: FontWeight.bold),
-          titleLarge: TextStyle(fontSize: 20.0, fontStyle: FontStyle.italic,fontWeight: FontWeight.bold),
-          bodyMedium: TextStyle(fontSize: 14.0, fontFamily: 'Georgia'),
-        ),
-      ),
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: _themeManger.themeMode,
       debugShowCheckedModeBanner: false,
+      routes: {
+        '/homepage': (context) => const TheoryScreen()
+      },
     );
   }
 }
-
 
 
 
