@@ -273,26 +273,6 @@ class _TheoryScreenState extends State<TheoryScreen> {
                               );
                             },
                           ),
-                          // Expanded( // Wrap ListView.builder with Expanded
-                          //   child: ListView.builder(
-                          //     itemCount: itemCount,
-                          //     itemBuilder: (context, index) {
-                          //       return ListTile(
-                          //         leading: Container(
-                          //           decoration: BoxDecoration(
-                          //               border: Border.all(color: Colors.black,width: 3.0),
-                          //               borderRadius: BorderRadius.circular(50.0)
-                          //           ),
-                          //           child: Padding(
-                          //               padding: EdgeInsets.all(10.0),
-                          //               child: Image.asset('assets/images/logo_avatar.jpg',width: 50.0,height: 50.0,)
-                          //           ),
-                          //         ),
-                          //         title: Text('Player ${index + 1}'),
-                          //       );
-                          //     },
-                          //   ),
-                          // ),
                         ],
                       ),
                     ),
@@ -315,7 +295,7 @@ class _TheoryScreenState extends State<TheoryScreen> {
           color:Colors.deepOrange[500],
           borderRadius: BorderRadius.circular(10)
       ),
-      margin: EdgeInsets.symmetric(horizontal: 5),
+      margin: const EdgeInsets.symmetric(horizontal: 5),
       child: Padding(
         padding: EdgeInsets.all(10),
         child:  Row(
