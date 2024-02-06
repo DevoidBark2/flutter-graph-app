@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:test_project/screens/force_algorithm/%20fr%C3%BCchtermann_reingold_algorithm.dart';
+// import 'package:test_project/screens/force_algorithm/%20fr%C3%BCchtermann_reingold_algorithm.dart';
 import '../matrix/matrix.dart';
 import '../matrix/matrix_page.dart';
 
@@ -160,7 +160,7 @@ class _DrawScreenState extends State<DrawScreen> {
                           appBar: AppBar(
                             title: const Text('Настройки'),
                           ),
-                          body: AnimatedGraph(),
+                          body: Text('dfdf'),
                         ),
                       ),
                     );
