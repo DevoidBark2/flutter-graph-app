@@ -1,11 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:test_project/screens/splash_screen.dart';
-import 'package:test_project/screens/theory_screen.dart';
 import 'package:test_project/theme/theme_costans.dart';
 import 'package:test_project/theme/theme_manager.dart';
 import 'firebase_options.dart';
-import 'home_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -58,9 +56,6 @@ class _MyAppState extends State<MyApp> {
       darkTheme: darkTheme,
       themeMode: _themeManger.themeMode,
       debugShowCheckedModeBanner: false,
-      routes: {
-        '/homepage': (context) => const TheoryScreen()
-      },
     );
   }
 }

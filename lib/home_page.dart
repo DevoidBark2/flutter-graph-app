@@ -11,14 +11,19 @@ import 'package:test_project/screens/main_screen.dart';
 import 'package:test_project/screens/theory_screen.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key});
+  int selectedIndex;
+  HomePage({Key? key, required this.selectedIndex});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState(selectedIndex: selectedIndex);
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
+
+  _HomePageState({required int selectedIndex}) {
+    _selectedIndex = selectedIndex;
+  }
 
   static const List<Widget> _widgetOptions = <Widget>[
     TheoryScreen(),

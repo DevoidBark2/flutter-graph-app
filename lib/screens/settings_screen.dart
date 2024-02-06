@@ -188,44 +188,44 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 10),
             const Text('Название вершины',style: TextStyle(fontWeight: FontWeight.w500)),
             const SizedBox(height: 10),
-            // Row(
-            //   children: [
-            //     Expanded(
-            //       child: ListTile(
-            //         title: const Text('Цифра',style: TextStyle(fontSize: 14)),
-            //         leading: Radio<TypeEdges>(
-            //           value: TypeEdges.Digit,
-            //           groupValue: _typeEdges,
-            //           onChanged: (TypeEdges? value) {
-            //             setState(() {
-            //               _typeEdges = value;
-            //               setTypeEdges();
-            //             });
-            //           },
-            //         ),
-            //       ),
-            //     ),
-            //     Expanded(
-            //       child: ListTile(
-            //         title: const Text('Буква',style: TextStyle(fontSize: 14)),
-            //         leading: Radio<TypeEdges>(
-            //           value: TypeEdges.Letter,
-            //           groupValue: _typeEdges,
-            //           onChanged: (TypeEdges? value) {
-            //             setState(() {
-            //               _typeEdges = value;
-            //               setTypeEdges();
-            //             });
-            //           },
-            //         ),
-            //       ),
-            //     )
-            //   ],
-            // ),
+            Row(
+              children: [
+                Expanded(
+                  child: ListTile(
+                    title: const Text('Цифра',style: TextStyle(fontSize: 14)),
+                    leading: Radio<TypeEdges>(
+                      value: TypeEdges.Digit,
+                      groupValue: _typeEdges,
+                      onChanged: (TypeEdges? value) {
+                        setState(() {
+                          _typeEdges = value;
+                          setTypeEdges();
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: ListTile(
+                    title: const Text('Буква',style: TextStyle(fontSize: 14)),
+                    leading: Radio<TypeEdges>(
+                      value: TypeEdges.Letter,
+                      groupValue: _typeEdges,
+                      onChanged: (TypeEdges? value) {
+                        setState(() {
+                          _typeEdges = value;
+                          setTypeEdges();
+                        });
+                      },
+                    ),
+                  ),
+                )
+              ],
+            ),
             Switch(value: _themeManger.themeMode == ThemeMode.dark, onChanged:(newValue){
               _themeManger.toggleTheme(newValue);
             })
-          ],
+          ]
         ),
       )
     );

@@ -94,7 +94,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         resizeToAvoidBottomInset: false,
         body: SingleChildScrollView(
           child: Padding(
-              padding: EdgeInsets.all(30.0),
+              padding: const EdgeInsets.all(30.0),
               child: Form(
                 key: formKey,
                 child: Column(
@@ -113,7 +113,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                       keyboardType: TextInputType.text,
                       autocorrect: false,
                       controller: firstName,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                           hintText: 'Введите Имя'
                       ),
@@ -125,7 +125,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                       keyboardType: TextInputType.text,
                       autocorrect: false,
                       controller: secondName,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                           hintText: 'Введите E-mail'
                       ),
@@ -137,7 +137,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                       keyboardType: TextInputType.emailAddress,
                       autocorrect: false,
                       controller: emailController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                           hintText: 'Введите E-mail'
                       ),
@@ -151,7 +151,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                       obscureText: isHiddenPassword,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       decoration: InputDecoration(
-                          border: OutlineInputBorder(),
+                          border: const OutlineInputBorder(),
                           hintText: 'Введите пароль',
                           suffix: InkWell(
                             onTap: togglePasswordView,
@@ -174,11 +174,11 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                           signup(context);
                         },
                         child: const Center(child: Text('Зарегистрироваться'))
-                    ),
-                  ],
-                ),
+                    )
+                  ]
+                )
               )
-          ),
+          )
         )
     );
   }

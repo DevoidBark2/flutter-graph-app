@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:test_project/algorithms/kruskal_algorithm.dart';
+import 'package:test_project/home_page.dart';
 
 import '../models/Task.dart';
 import 'auth/login_screen.dart';
@@ -335,7 +336,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) {
-                          return LoginScreen();
+                          return HomePage(selectedIndex: 5);
                         })
                       );
                     },

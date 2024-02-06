@@ -1,6 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:test_project/home_page.dart';
 import 'package:test_project/screens/auth/signup_screen.dart';
 import 'package:test_project/screens/theory_screen.dart';
 import 'package:test_project/service/snack_bar.dart';
@@ -14,6 +15,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+
   bool isHiddenPassword = true;
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
@@ -48,33 +50,41 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
     if(!isValid) return;
 
+    if(emailController.text.trim() == ""){
+      SnackBarService.showSnackBar(
+          context,
+          'Введите E-mail!',
+          true
+      );
+      return;
+    }
+
+    if(passwordController.text.trim() == ""){
+      SnackBarService.showSnackBar(
+          context,
+          'Пароль не может быть пустым!',
+          true
+      );
+      return;
+    }
+
     try{
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim()
       );
 
-      if (!mounted) return;
-
-      // Navigator.pushAndRemoveUntil(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => const TheoryScreen()),
-      //       (route) => false,
-      // );
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => const TheoryScreen()),
-      // );
-      // Navigator.of(context).pushAndRemoveUntil(
-      //     MaterialPageRoute(builder: (context) => TheoryScreen()),
-      //         (Route<dynamic> route) => false);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage(selectedIndex: 0,)),
+      );
 
       SnackBarService.showSnackBar(
           context,
-          'Вы вошли в систему!',
-          true
+          'Вы вошли в профиль!',
+          false
       );
-      // Navigator.popAndPushNamed(context, '/homepage');
+
     } on FirebaseAuthException catch (e) {
       print(e.code);
 
@@ -114,7 +124,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                     keyboardType: TextInputType.emailAddress,
                     autocorrect: false,
                     controller: emailController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         hintText: 'Введите E-mail'
                     ),
@@ -128,7 +138,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                     obscureText: isHiddenPassword,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     decoration: InputDecoration(
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                         hintText: 'Введите пароль',
                         suffix: InkWell(
                           onTap: togglePasswordView,
@@ -176,11 +186,11 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         );
                       },
                       child: const Center(child: Text('Регистрация'))
-                  ),
-                ],
-              ),
+                  )
+                ]
+              )
             )
-        ),
+        )
       )
     );
   }
