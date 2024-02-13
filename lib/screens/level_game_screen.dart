@@ -1,8 +1,13 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:test_project/models/Task.dart';
+
+import '../models/DropDownItem.dart';
 
 class LevelGameScreen extends StatefulWidget {
   final Task task;
@@ -19,7 +24,11 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
   int time = 0;
   bool isTimeEnd = false;
 
-  int? draggingVertexIndex; // Изменение: индекс перетаскиваемой вершины
+  final CollectionReference usersRef = FirebaseFirestore.instance.collection('users-list');
+  final String currentUserUid = FirebaseAuth.instance.currentUser!.uid;
+
+
+  int? draggingVertexIndex;
   Offset? lastDragOffset;
 
   @override
@@ -27,7 +36,7 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
     super.initState();
     initializePoints();
     _startTimer();
-    time = widget.task.time_level;// Изменение: инициализация списка вершин
+    time = widget.task.time_level;
   }
 
   void initializePoints() {
@@ -36,7 +45,6 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
     final double sizeHeight = 400;
     final double radius = getRadius(matrix.length, sizeWidth);
 
-    // Добавление вершин
     for (var i = 0; i < matrix.length; i++) {
       final angle = 2 * pi * (i / matrix.length) + (360 / matrix.length);
       points.add(Offset((cos(angle) * radius + sizeWidth / 2), sin(angle) * radius + sizeHeight / 2));
@@ -71,7 +79,7 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
     for (int i = 0; i < points.length; i++) {
       final vertexPosition = points[i];
       final distance = (tapPosition - vertexPosition).distance;
-      if (distance <= 15) { // Радиус вершины
+      if (distance <= 15) {
         return i;
       }
     }
@@ -84,16 +92,9 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
         if (widget.task.graph[i][j] != 0 && i != j) {
           final startPoint = points[i];
           final endPoint = points[j];
-          // points[i][j] = Offset(startPoint, endPoint);
-          // Обновление позиции ребра, связанного с вершинами i и j
-          // Например, можно обновить список точек ребра, если он хранится отдельно
-          // или обновить матрицу ребер с новыми координатами вершин
           widget.task.graph[i][j] = (endPoint - startPoint).distance.toInt();
-          // Если ребро неориентированное, то также обновите обратное ребро
           widget.task.graph[j][i] = (endPoint - startPoint).distance.toInt();
-          setState(() {
-
-          });
+          setState(() {});
         }
       }
     }
@@ -106,73 +107,123 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(10),
-      child: Container(
-        child:  Stack(
-          fit: StackFit.expand,
-          children: [
-            Container(
-              child: Container(
-                child: isTimeEnd != false
-                    ? Text(
-                    "${time}",
-                  style: TextStyle(
-                      color: Colors.red
-                  )
-                )
-                    : Text("${time}"
-                )
-              ),
-            ),
-            GestureDetector(
-              onLongPressStart: (details) {
-                final tapPosition = details.localPosition;
-                final vertexIndex = getTappedVertexIndex(tapPosition);
-                for (int i = 0; i < points.length; i++) {
-                  if ((tapPosition.dx - points[i].dx).abs() < 30.0) {
-                    selectedVertexOffset = i;
-                    setState(() {});
-                    print('Good - Tapped Vertex: $i'); // Выводим сообщение с индексом вершины
-                    break;
-                  } else {
-                    print('Bad');
-                  }
-                }
-                setState(() {
-                  draggingVertexIndex = vertexIndex;
-                  lastDragOffset = tapPosition;
-                });
-              },
-              onLongPressMoveUpdate: (details) {
-                if (draggingVertexIndex != null && lastDragOffset != null) {
-                  final newOffset = details.localPosition;
-                  final delta = newOffset - lastDragOffset!;
-                  setState(() {
-                    points[draggingVertexIndex!] += delta;
-                    lastDragOffset = newOffset;
-                  });
-                }
-              },
-              child: CustomPaint(
-                painter: OpenPainter(
-                    matrix: widget.task.graph,
-                    selectedIndex: selectedVertexOffset,
-                    points:points
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 0,
-              right:0,
-              child: Container(
-                  child: ElevatedButton(
-                    onPressed: _checkPlangraph,
-                    child: Text('Закончить'),
-                  )
-              ),
+      padding: const EdgeInsets.all(10),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Container(
+            child: isTimeEnd != false
+                ? Text(
+                "$time",
+              style: const TextStyle(
+                  color: Colors.red
+              )
             )
-          ],
-        ),
+                : Text("$time")
+          ),
+          GestureDetector(
+            onLongPressStart: (details) {
+              final tapPosition = details.localPosition;
+              final vertexIndex = getTappedVertexIndex(tapPosition);
+              for (int i = 0; i < points.length; i++) {
+                if ((tapPosition.dx - points[i].dx).abs() < 30.0) {
+                  selectedVertexOffset = i;
+                  setState(() {});
+                  print('Good - Tapped Vertex: $i'); // Выводим сообщение с индексом вершины
+                  break;
+                } else {
+                  print('Bad');
+                }
+              }
+              setState(() {
+                draggingVertexIndex = vertexIndex;
+                lastDragOffset = tapPosition;
+              });
+            },
+            onLongPressMoveUpdate: (details) {
+              if (draggingVertexIndex != null && lastDragOffset != null) {
+                final newOffset = details.localPosition;
+                final delta = newOffset - lastDragOffset!;
+                setState(() {
+                  points[draggingVertexIndex!] += delta;
+                  lastDragOffset = newOffset;
+                });
+              }
+            },
+            child: CustomPaint(
+              painter: OpenPainter(
+                  matrix: widget.task.graph,
+                  selectedIndex: selectedVertexOffset,
+                  points:points
+              ),
+            ),
+          ),
+          StreamBuilder<QuerySnapshot>(
+            stream: usersRef.where('id', isEqualTo: currentUserUid).snapshots(),
+            builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (snapshot.hasError) {
+                return Text('Ошибка получения данных: ${snapshot.error}');
+              }
+
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return Center(
+                  child:  Text('Нет доступных у вас навыков!'),
+                );
+              }
+
+              final userSkillsRef = snapshot.data!.docs[0].reference.collection('skills');
+
+              return StreamBuilder<QuerySnapshot>(
+                stream: userSkillsRef.snapshots(),
+                builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> skillsSnapshot) {
+                  if (skillsSnapshot.hasError) {
+                    return Text('Ошибка получения данных о навыках: ${skillsSnapshot.error}');
+                  }
+
+                  if (!skillsSnapshot.hasData || skillsSnapshot.data!.docs.isEmpty) {
+                    return Center(
+                      child: Text('Нет доступных у вас навыков!'),
+                    );
+                  }
+
+                  final skills = snapshot.data!.docs
+                      .map((doc) => DropDownItem.fromMap(doc.data() as Map<String, dynamic>))
+                      .toList();
+
+                  return ListView.builder(
+                    itemCount: skills.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final skill = skills[index];
+                      return Positioned(
+                        top:0,
+                        right:0,
+                        child: Row(
+                          children: [
+                            SvgPicture.network(
+                              skill.image_item,
+                              width: 40,
+                              height: 40,
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+              );
+            },
+          ),
+          Positioned(
+            bottom: 0,
+            right:0,
+            child: Container(
+                child: ElevatedButton(
+                  onPressed: _checkPlangraph,
+                  child: Text('Закончить'),
+                )
+            ),
+          )
+        ],
       ),
     );
   }

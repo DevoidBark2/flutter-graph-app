@@ -1,15 +1,13 @@
-import 'package:bulleted_list/bulleted_list.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:test_project/algorithms/kruskal_algorithm.dart';
 import 'package:test_project/models/User.dart';
 import 'package:test_project/screens/instruction_screen.dart';
-import 'package:test_project/screens/rules_game.dart';
-import 'package:test_project/screens/settings_screen.dart';
+import 'package:test_project/screens/news_screen.dart';
 import 'package:test_project/screens/theory_screen_2.dart';
 
 import '../models/News.dart';
@@ -91,13 +89,14 @@ class _TheoryScreenState extends State<TheoryScreen> {
                         options: CarouselOptions(
                             height: 200,
                             autoPlay: false,
-                            viewportFraction: 1
+                            viewportFraction: 1,
+                            enableInfiniteScroll: news.length > 1
                         ),
                         itemCount: news.length,
                         itemBuilder: (context,index,realIndex){
                           final newsItem = news[index];
 
-                          return buildImage(newsItem);
+                          return buildNews(newsItem);
                         },
                       );
                     },
@@ -123,7 +122,7 @@ class _TheoryScreenState extends State<TheoryScreen> {
                           child: Container(
                             height: 150,
                             decoration: BoxDecoration(
-                                color:Colors.deepOrange[500],
+                                color:const Color(0xFF819db5),
                                 borderRadius: BorderRadius.circular(10.0)
                             ),
                             child: Padding(
@@ -171,7 +170,7 @@ class _TheoryScreenState extends State<TheoryScreen> {
                           child: Container(
                             height: 150,
                             decoration: BoxDecoration(
-                                color:Colors.deepOrange[500],
+                                color:const Color(0xFF819db5),
                                 borderRadius: BorderRadius.circular(10.0)
                             ),
                             child: Padding(
@@ -207,7 +206,7 @@ class _TheoryScreenState extends State<TheoryScreen> {
                   ),
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.deepOrange[500],
+                      color: const Color(0xFF819db5),
                       borderRadius: BorderRadius.circular(10.0),
                     ),
                     child: Padding(
@@ -243,12 +242,19 @@ class _TheoryScreenState extends State<TheoryScreen> {
                                   .map((doc) => UserData.fromMap(doc.data() as Map<String, dynamic>))
                                   .toList();
 
+                              final sortedUsers = users
+                                  .where((user) => user.total_user != null)
+                                  .toList()
+                                ..sort((a, b) => b.total_user.compareTo(a.total_user));
+
+                              final top5Users = sortedUsers.take(5).toList();
+
                               return Container(
                                 height: MediaQuery.of(context).size.height / 3,
                                 child: ListView.builder(
-                                  itemCount: users.length,
+                                  itemCount: top5Users.length,
                                   itemBuilder: (BuildContext context, int index) {
-                                    final user = users[index];
+                                    final user = top5Users[index];
                                     return Container(
                                       margin: const EdgeInsets.only(bottom: 10.0),
                                       width: double.infinity,
@@ -260,11 +266,11 @@ class _TheoryScreenState extends State<TheoryScreen> {
                                           ),
                                           const SizedBox(width: 10,),
                                           Text('${user.second_name} ${user.first_name}'),
-                                         const SizedBox(width: 40,),
-                                         Align(
-                                           alignment: Alignment.centerRight,
-                                           child:  Text('${user.total_user}'),
-                                         )
+                                          const SizedBox(width: 40,),
+                                          Align(
+                                            alignment: Alignment.centerRight,
+                                            child:  Text('${user.total_user}'),
+                                          )
                                         ],
                                       ),
                                     );
@@ -285,50 +291,81 @@ class _TheoryScreenState extends State<TheoryScreen> {
     );
   }
 
-  Widget buildImage(News news_item) => GestureDetector(
+  Widget buildNews(News newsItem) => GestureDetector(
     onTap: (){
-      print(news_item);
+      Navigator.push(
+        context,
+        MaterialPageRoute<void>(
+          builder: (BuildContext context) => Scaffold(
+            appBar: AppBar(
+              flexibleSpace: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: <Color>[Color(0xFF819db5),Color(0xFF678094)],
+                  ),
+                ),
+              ),
+              title: Text(newsItem.title),
+            ),
+            body: NewsScreen(content: newsItem.content,),
+          ),
+        ),
+      );
     },
     child: Container(
       width: double.infinity,
       decoration: BoxDecoration(
-          color:Colors.deepOrange[500],
+          color: const Color(0xFF678094),
           borderRadius: BorderRadius.circular(10)
       ),
       margin: const EdgeInsets.symmetric(horizontal: 5),
       child: Padding(
-        padding: EdgeInsets.all(10),
+        padding: const EdgeInsets.all(10),
         child:  Row(
           children: [
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.network(
-                  news_item.news_image,
-                  width: 120,
+                Expanded(
+                  child: SvgPicture.network(
+                    newsItem.news_image,
+                    width: 100,
+                    height: 100,
+                  ),
                 )
               ],
             ),
             const SizedBox(width: 20),
-            Container(
-              width: 160,
+            SizedBox(
+              width: 170,
               child: Column(
                 children: [
                   Text(
-                    '${news_item.title}',
-                    style: TextStyle(
+                    newsItem.title,
+                    style: const TextStyle(
                       fontSize: 18,
+                      fontWeight: FontWeight.w800
                     ),
                   ),
+                  const SizedBox(height: 5),
                   Text(
-                      '${news_item.sub_title}',
-                    style: TextStyle(
-
+                      newsItem.sub_title,
+                    style: const TextStyle(
+                      fontSize: 15
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: const Padding(
+                      padding: EdgeInsets.all(10.0),
+                      child: Text('Читать подробнее'),
                     ),
                   ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       )

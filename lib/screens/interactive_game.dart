@@ -1,20 +1,14 @@
-import 'dart:typed_data';
+import 'dart:io';
+import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:test_project/db/database.dart';
-import 'package:test_project/models/Task.dart';
-import 'package:test_project/models/User.dart';
-import 'package:test_project/screens/level_game_screen.dart';
-import 'package:test_project/screens/rating_users_screen.dart';
-import 'package:test_project/screens/rules_game.dart';
-
+import 'package:firebase_storage/firebase_storage.dart';
 import '../home_page.dart';
 import '../service/snack_bar.dart';
-import 'change_profile_screen.dart';
 
 class InteractiveGame extends StatefulWidget {
   const InteractiveGame({Key? key}) : super(key: key);
@@ -26,13 +20,17 @@ class InteractiveGame extends StatefulWidget {
 class _InteractiveGameState extends State<InteractiveGame> {
 
   late User? user = FirebaseAuth.instance.currentUser;
-  late List<Task> data = [];
-  Uint8List? _selectedImage;
   final _collectionRef = FirebaseFirestore.instance.collection('users-list');
+  // final _globalSettings = FirebaseFirestore.instance.collection('settings').doc('global_settings');
   String? firstName;
   String? secondName;
   String? profileImage;
   var userDataProfile;
+  var placeholderImage;
+  TextEditingController firstNameController = TextEditingController();
+  TextEditingController secondNameController = TextEditingController();
+  var userDataTitle = 'Учетные данные'.toUpperCase();
+  var accountTitle = 'Аккаунт'.toUpperCase();
 
   Future<void> getUserData() async{
     try {
@@ -44,6 +42,10 @@ class _InteractiveGameState extends State<InteractiveGame> {
         secondName = userData[0]['second_name'];
         profileImage = userData[0]['profile_image'];
         userDataProfile = userData;
+
+        firstNameController.text = firstName ?? '';
+        secondNameController.text = secondName ?? '';
+
         setState(() {});
       }
 
@@ -52,6 +54,7 @@ class _InteractiveGameState extends State<InteractiveGame> {
       print('Exception occurred: $e');
     }
   }
+
   Future<void> logout() async{
     await FirebaseAuth.instance.signOut();
     setState(() {
@@ -68,28 +71,134 @@ class _InteractiveGameState extends State<InteractiveGame> {
     );
   }
 
-  Future<void> _pickImage() async {
+  Future<void> _pickImageAndUpload() async {
     final picker = ImagePicker();
-    XFile? pickedImage = await picker.pickImage(source: ImageSource.gallery);
+    final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+
     if (pickedImage != null) {
-      // setState(() {
-      //    _selectedImage = pickedImage.readAsBytes() as Uint8List?;
-      // });
+      File imageFile = File(pickedImage.path);
 
-      // Сохранение выбранного изображения в базе данных
-      // Здесь вы можете добавить свой код для сохранения изображения в базе данных пользователей
-      // Например, вы можете использовать какой-то пакет для работы с базой данных, наподобие sqflite или Firebase
+      FirebaseStorage storage = FirebaseStorage.instance;
+      Reference ref = storage.ref().child('images/${user?.uid}_${Timestamp.now().toString()}.jpg');
+      UploadTask uploadTask = ref.putFile(imageFile);
 
-      print('Изображение сохранено в базе данных');
+      TaskSnapshot taskSnapshot = await uploadTask;
+      String imageUrl = await taskSnapshot.ref.getDownloadURL();
+
+      await FirebaseFirestore.instance.collection('users-list').doc(user?.uid).update({
+        'profile_image': imageUrl,
+      });
+      print('Изображение успешно загружено и ссылка сохранена в базе данных: $imageUrl');
+      setState(() {
+        profileImage = imageUrl;
+      });
+
+
     }
   }
 
   void changeProfileData(){
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(
-        builder: (BuildContext context) => ChangeProfileData(userData:userDataProfile)
-      ),
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          height: MediaQuery.of(context).size.height,
+          color: Colors.white,
+          child: Stack(
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 15.0),
+                    TextField(
+                      controller: firstNameController,
+                      decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'Имя'
+                      ),
+                    ),
+                    const SizedBox(height: 15.0),
+                    TextField(
+                      controller: secondNameController,
+                      decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'Фамилия'
+                      ),
+                    ),
+                    const SizedBox(height: 15.0),
+                    ElevatedButton(
+                      onPressed: saveUserData,
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(Colors.deepOrangeAccent),
+                      ),
+                      child: const Text('Сохранить'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> saveUserData() async {
+    await FirebaseFirestore.instance.collection('users-list').doc(user?.uid).update({
+      'first_name': firstNameController.text.trim(),
+      'second_name': secondNameController.text.trim(),
+    });
+    setState(() {
+      firstName = firstNameController.text;
+      secondName = secondNameController.text;
+    });
+    Navigator.of(context).pop();
+    SnackBarService.showSnackBar(
+        context,
+        'Данные успешно сохранены',
+        false
+    );
+  }
+
+  Future<void> deleteAccount() async {
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Container(
+            height: 100,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SvgPicture.asset(
+                  'assets/images/warning_icon.svg',
+                  width: 40,
+                  height: 40,
+                ),
+                const SizedBox(
+                  child: Padding(
+                    padding: EdgeInsets.all(10.0),
+                    child: Text('При удалении аккаунта все данные пропадут навсегда!'),
+                  ),
+                )
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Удалить'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Закрыть'),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -105,68 +214,123 @@ class _InteractiveGameState extends State<InteractiveGame> {
       child: RefreshIndicator(
         onRefresh: getUserData,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
               padding: const EdgeInsets.all(10),
-              child:  Container(
-                height: 200,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: <Color>[Colors.orange, Colors.deepOrange],
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: SizedBox(
+                  height: 200,
+                  child: Stack(
+                    children: [
+                      if(profileImage != null && profileImage != "")
+                        Positioned.fill(
+                          child: Image.network(
+                            profileImage!,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      // Blur effect
+                      Positioned.fill(
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                          child: Container(
+                            color: Colors.transparent,
+                          ),
+                        ),
+                      ),
+                      // CircularAvatar
+                      Center(
+                        child: CircleAvatar(
+                          radius: 60,
+                          backgroundImage: (profileImage != null && profileImage != "")
+                              ? NetworkImage(profileImage!)
+                              : null,
+                          child: (profileImage == null || profileImage == "")
+                              ? const Icon(Icons.person)
+                              : null,
+                        ),
+                      ),
+                      // Add Photo Button
+                      Positioned(
+                        bottom: 10,
+                        right: 10,
+                        child: Container(
+                          decoration: BoxDecoration(
+                              color: const Color(0xFF678094),
+                              borderRadius: BorderRadius.circular(40)
+                          ),
+                          child: IconButton(
+                              icon: const Icon(Icons.add_a_photo),
+                              onPressed: _pickImageAndUpload,
+                              color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  borderRadius: BorderRadius.circular(10)
-                ),
-                child: Center(
-                    child: Stack(
-                      children: [
-                        CircleAvatar(
-                          radius: 50,
-                          backgroundImage: profileImage != null
-                              ? NetworkImage(profileImage!) as ImageProvider<Object>?
-                              : const AssetImage('placeholder_image.jpg') as ImageProvider<Object>?,
-                        ),
-                        Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.orangeAccent,
-                                  borderRadius: BorderRadius.circular(40)
-                              ),
-                              child: IconButton(
-                                  icon: const Icon(Icons.add_a_photo),
-                                  onPressed: _pickImage
-                              ),
-                            )
-                        ),
-                      ],
-                    )
                 ),
               ),
             ),
             const SizedBox(height: 10),
             Padding(
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.only(left: 20,right: 20),
+              child: Text(
+                userDataTitle,
+                style: const TextStyle(
+                    fontWeight: FontWeight.w500
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(10),
               child: Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
-                      colors: <Color>[Colors.orange, Colors.deepOrange],
+                      colors: <Color>[Color(0xFF819db5),Color(0xFF678094)],
                     ),
                     borderRadius: BorderRadius.circular(10)
                 ),
                 child: Padding(
-                    padding: EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(20),
                     child:  Column(
                       children: [
-                        // Text("${firstName!} ${secondName!}"),
-                        ElevatedButton(
-                            onPressed: changeProfileData,
-                            child: Text('Изменить данные')
+                        GestureDetector(
+                          onTap: changeProfileData,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  decoration: const BoxDecoration(
+                                    border: Border(
+                                        bottom: BorderSide(
+                                            color:Colors.black,
+                                            width: 1.0
+                                        )
+                                    )
+                                  ),
+                                  child: Padding(
+                                    padding: EdgeInsets.only(bottom: 5),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text("${firstName != null ? firstName : ""} ${secondName != null ? secondName : ""}"),
+                                        SvgPicture.asset(
+                                          'assets/images/right_icon.svg',
+                                          width: 15,
+                                          height: 15,
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
                         ),
                       ],
                     )
@@ -174,9 +338,97 @@ class _InteractiveGameState extends State<InteractiveGame> {
               ),
             ),
             const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: logout,
-              child: Text('Выйти'),
+            Padding(
+              padding: const EdgeInsets.only(left: 20,right: 20,bottom: 10),
+              child: Text(
+                accountTitle,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w500
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 10,right: 10,bottom: 10),
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: <Color>[Color(0xFF819db5),Color(0xFF678094)],
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      GestureDetector(
+                        onTap: logout,
+                        child: Container(
+                            decoration: const BoxDecoration(
+                                border: Border(
+                                    bottom: BorderSide(
+                                        color:Colors.black,
+                                        width: 1.0
+                                    )
+                                )
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 5),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Выйти',
+                                  ),
+                                  SvgPicture.asset(
+                                    'assets/images/right_icon.svg',
+                                    width: 15,
+                                    height: 15,
+                                  )
+                                ],
+                              ),
+                            ),
+                          )
+                      ),
+                      const SizedBox(height: 10),
+                      GestureDetector(
+                        onTap: deleteAccount,
+                        child: Container(
+                          decoration: const BoxDecoration(
+                              border: Border(
+                                  bottom: BorderSide(
+                                      color:Colors.black,
+                                      width: 1.0
+                                  )
+                              )
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 5),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'Удалить аккаунт',
+                                  style: TextStyle(
+                                      color: Color(0xFFdb4653)
+                                  ),
+                                ),
+                                SvgPicture.asset(
+                                  'assets/images/right_icon.svg',
+                                  width: 15,
+                                  height: 15,
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             )
           ],
         ),

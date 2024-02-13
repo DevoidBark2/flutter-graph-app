@@ -28,6 +28,12 @@ class _MatrixPageState extends State<MatrixPage> {
   final textFieldController = TextEditingController();
   final upper = TextEditingController();
   String errorMessage = "";
+  var rulesFillMatrix = [
+    'Можно вводить веса графа ручным способом',
+    'Можно вводить веса графа автозаполнением',
+    'Если нажать один раз на кнопку \"Автозаполнение\", матрица заполнятся 0 и 1',
+    'Если зажать кнопку \"Автозаполнение\", Вы сможете выбрать маскимальное число для рандомных весов графа',
+  ];
 
   // Future<Map<String, dynamic>?> getCurrentUserData() async {
   //   try {
@@ -74,9 +80,9 @@ class _MatrixPageState extends State<MatrixPage> {
       MaterialState.focused,
     };
     if (states.any(interactiveStates.contains)) {
-      return Colors.blue;
+      return const Color(0xFF8eb3ed);
     }
-    return Colors.blue;
+    return const Color(0xFF678094);
   }
 
   bool checkMatrix(controllers){
@@ -129,204 +135,299 @@ class _MatrixPageState extends State<MatrixPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ввод матрицы'),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: <Color>[Color(0xFF819db5),Color(0xFF678094)],
+            ),
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
+          scrollDirection: Axis.vertical,
           physics: const BouncingScrollPhysics(),
           child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Center(
-                child: SizedBox(
-                  child: Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: Column(
-                      children: [
-                        Column(
-                          children: List.generate(
-                            controllers.length,
-                                (index1) => Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(
-                                controllers[index1].length,
-                                    (index2) => Center(
-                                  child: Padding(
-                                    padding: controllers.length > 8 ? const EdgeInsets.all(1.0) :
-                                    controllers.length > 7 ? const EdgeInsets.all(1.0) :
-                                    controllers.length > 6 ? const EdgeInsets.all(2.0) :
-                                    controllers.length > 5 ? const EdgeInsets.all(3.0) :
-                                    const EdgeInsets.all(6.0),
-                                    child: SizedBox(
-                                      height: controllers.length > 8 ? 32 : controllers.length > 7 ? 35 : controllers.length > 6 ? 40 : controllers.length > 5 ? 45 : 50,
-                                      width: controllers.length > 8 ? 32 : controllers.length > 7 ? 35 : controllers.length > 6 ? 40 : controllers.length > 5 ? 45 : 50,
-                                      child: MatrixField(
-                                        action: (index2  == controllers.length -1 && index1 == controllers.length -1) ? TextInputAction.done : TextInputAction.next,
-                                        controller: controllers[index1][index2],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                const SizedBox( width:233,child: Text('Взвешенный граф')),
-                                Checkbox(
-                                  checkColor: Colors.white,
-                                  fillColor:MaterialStateProperty.resolveWith(getColor),
-                                  value: isCheckedWeight,
-                                  onChanged: (bool? value) {
-                                    setState(() {
-                                      isCheckedWeight = value!;
-                                    });
-                                  },
-                                ),
-                              ],
-                            ),
-                            ElevatedButton(
-                                onPressed: () => checkMatrix(controllers) == true
-                                    ?
-                                Navigator.push(context,MaterialPageRoute(builder: (context) {
-                                  return GraphView(controllers:controllers,isCheckedWeight: isCheckedWeight,isCheckedOriented: isCheckedOriented);
-                                }))
-                                    :
-                                showModalBottomSheet<void>(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return Container(
-                                      height: 200,
-                                      color: Colors.white,
-                                      child: Center(
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(top: 10.0, bottom: 5.0),
-                                          child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            children: [
-                                              SvgPicture.asset(
-                                                  'assets/images/error.svg',
-                                                  width: 50,
-                                                  height: 50
-                                              ),
-                                              const SizedBox(height: 15.0),
-                                              Text(errorMessage),
-                                              const SizedBox(height: 35.0),
-                                              ElevatedButton(
-                                                child: const Text('Закрыть'),
-                                                onPressed: () => {
-                                                  Navigator.pop(context)
-                                                },
-                                                style: ButtonStyle(
-                                                  backgroundColor: MaterialStateProperty.all<Color>(Colors.deepOrangeAccent),
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Center(
+                    child: SizedBox(
+                        child: Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Column(
+                                    children: List.generate(
+                                        controllers.length,
+                                            (index1) => Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: List.generate(
+                                            controllers[index1].length,
+                                                (index2) => Center(
+                                              child: Padding(
+                                                padding: controllers.length > 8 ? const EdgeInsets.all(1.0) :
+                                                controllers.length > 7 ? const EdgeInsets.all(1.0) :
+                                                controllers.length > 6 ? const EdgeInsets.all(2.0) :
+                                                controllers.length > 5 ? const EdgeInsets.all(3.0) :
+                                                const EdgeInsets.all(6.0),
+                                                child: SizedBox(
+                                                  height: controllers.length > 8 ? 32 : controllers.length > 7 ? 35 : controllers.length > 6 ? 40 : controllers.length > 5 ? 45 : 50,
+                                                  width: controllers.length > 8 ? 32 : controllers.length > 7 ? 35 : controllers.length > 6 ? 40 : controllers.length > 5 ? 45 : 50,
+                                                  child: MatrixField(
+                                                    action: (index2  == controllers.length -1 && index1 == controllers.length -1) ? TextInputAction.done : TextInputAction.next,
+                                                    controller: controllers[index1][index2],
+                                                  ),
                                                 ),
                                               ),
-                                            ],
+                                            ),
                                           ),
-                                        ),
+                                        )
+                                    ),
+                                  ),
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          const SizedBox( width:233,child: Text('Взвешенный граф')),
+                                          Checkbox(
+                                            checkColor: Colors.white,
+                                            fillColor:MaterialStateProperty.resolveWith(getColor),
+                                            value: isCheckedWeight,
+                                            onChanged: (bool? value) {
+                                              setState(() {
+                                                isCheckedWeight = value!;
+                                              });
+                                            },
+                                          ),
+                                        ],
                                       ),
-                                    );
-                                  },
-                                ),
-                                child: const Text('Отобразить')
-                            ),
-                            ElevatedButton(
-                              onLongPress: (){
-                                showModalBottomSheet<void>(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return Container(
-                                      height: 200,
-                                      color: Colors.amber,
-                                      child: Center(
-                                          child:  Column(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  const SizedBox(width: 135),
-                                                  SizedBox(
-                                                    width: 50,
-                                                    child: TextField(
-                                                      textAlign: TextAlign.center,
-                                                      controller: upper,
-                                                      keyboardType: TextInputType.number,
-                                                      decoration: const InputDecoration(
-                                                          border: OutlineInputBorder()
+                                      ElevatedButton(
+                                        onPressed: () => checkMatrix(controllers) == true
+                                            ?
+                                        Navigator.push(context,MaterialPageRoute(builder: (context) {
+                                          return GraphView(controllers:controllers,isCheckedWeight: isCheckedWeight,isCheckedOriented: isCheckedOriented);
+                                        }))
+                                            :
+                                        showModalBottomSheet<void>(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return Container(
+                                              height: 200,
+                                              color: Colors.white,
+                                              child: Center(
+                                                child: Padding(
+                                                  padding: const EdgeInsets.only(top: 10.0, bottom: 5.0),
+                                                  child: Column(
+                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                    children: [
+                                                      SvgPicture.asset(
+                                                          'assets/images/error.svg',
+                                                          width: 50,
+                                                          height: 50
                                                       ),
-                                                    ),
+                                                      const SizedBox(height: 15.0),
+                                                      Text(errorMessage),
+                                                      const SizedBox(height: 35.0),
+                                                      ElevatedButton(
+                                                        child: const Text('Закрыть'),
+                                                        onPressed: () => {
+                                                          Navigator.pop(context)
+                                                        },
+                                                        style: ButtonStyle(
+                                                          backgroundColor: MaterialStateProperty.all<Color>(Colors.deepOrangeAccent),
+                                                        ),
+                                                      ),
+                                                    ],
                                                   ),
-                                                ],
+                                                ),
                                               ),
-                                              ElevatedButton(
-                                                onPressed: (){
-                                                  for (int i = 0; i < controllers.length; i++) {
-                                                    for (int j = 0; j < controllers[i].length; j++) {
-                                                      int? upperValue = int.tryParse(upper.text);
-                                                      int rnd = Random().nextInt((upperValue?.toInt() ?? 2));
-                                                      controllers[i][j].text = rnd.toString();
-                                                      controllers[j][i].text = rnd.toString();
-                                                      if(i == j){
-                                                        bool rnd = Random().nextBool();
-                                                        if(rnd){
-                                                          controllers[i][j].text = 0.toString();
-                                                        }
-                                                        else{
-                                                          controllers[i][j].text = 1.toString();
-                                                        }
-                                                      }
-                                                    }
-                                                  }
-                                                  Navigator.pop(context);
-                                                },
-                                                child: const Text('Сгенерировать'),
-                                              )
-                                            ],
-                                          )
+                                            );
+                                          },
+                                        ),
+                                        style: ButtonStyle(
+                                            backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                                            foregroundColor: MaterialStateProperty.all<Color>(Colors.white)
+                                        ),
+                                        child: const Text('Отобразить'),
                                       ),
-                                    );
-                                  },
-                                );
-                              },
-                              onPressed: () {
-                                for (int i = 0; i < controllers.length; i++) {
-                                  for (int j = 0; j < controllers[i].length; j++) {
-                                    int? upperValue = int.tryParse(upper.text);
-                                    int rnd = Random().nextInt((upperValue?.toInt() ?? 2));
-                                    controllers[i][j].text = rnd.toString();
-                                    controllers[j][i].text = rnd.toString();
-                                    if(i == j){
-                                      bool rnd = Random().nextBool();
-                                      if(rnd){
-                                        controllers[i][j].text = 0.toString();
-                                      }
-                                      else{
-                                        controllers[i][j].text = 1.toString();
-                                      }
-                                    }
-                                  }
-                                }
-                              },
-                              child: const Text('Автозаполнение'),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ]
+
+                                     Row(
+                                       children: [
+                                         ElevatedButton(
+                                           onPressed: () {
+                                             for (int i = 0; i < controllers.length; i++) {
+                                               for (int j = 0; j < controllers[i].length; j++) {
+                                                 int? upperValue = int.tryParse(upper.text);
+                                                 int rnd = Random().nextInt((upperValue?.toInt() ?? 2));
+                                                 controllers[i][j].text = rnd.toString();
+                                                 controllers[j][i].text = rnd.toString();
+                                                 if (i == j) {
+                                                   bool rnd = Random().nextBool();
+                                                   if (rnd) {
+                                                     controllers[i][j].text = 0.toString();
+                                                   } else {
+                                                     controllers[i][j].text = 1.toString();
+                                                   }
+                                                 }
+                                               }
+                                             }
+                                           },
+                                           onLongPress: () {
+                                             showDialog(
+                                               context: context,
+                                               builder: (BuildContext context) {
+                                                 return AlertDialog(
+                                                   backgroundColor: Colors.white,
+                                                   contentPadding: const EdgeInsets.all(20),
+                                                   title: const Text('Максимальное число для рандомных весов графа 🎲'),
+                                                   content: Container(
+                                                     height: 140,
+                                                     child: Center(
+                                                       child: Column(
+                                                         mainAxisAlignment: MainAxisAlignment.center,
+                                                         children: [
+                                                           SizedBox(
+                                                             width: 50,
+                                                             child: TextField(
+                                                               textAlign: TextAlign.center,
+                                                               controller: upper,
+                                                               keyboardType: TextInputType.number,
+                                                               cursorColor: const Color(0xFF678094),
+                                                               decoration: InputDecoration(
+                                                                   border: OutlineInputBorder(
+                                                                     borderSide: const BorderSide(
+                                                                       color: Color(0xFF678094),
+                                                                       width: 2.0,
+                                                                     ),
+                                                                     borderRadius: BorderRadius.circular(8.0),
+                                                                   ),
+                                                                   focusedBorder: const OutlineInputBorder(
+                                                                     borderSide: BorderSide(
+                                                                         color: Color(0xFF678094),
+                                                                         width: 2.0
+                                                                     ),
+                                                                   )
+                                                               ),
+                                                             ),
+                                                           ),
+                                                           const SizedBox(height: 10),
+                                                           ElevatedButton(
+                                                             onPressed: () {
+                                                               for (int i = 0; i < controllers.length; i++) {
+                                                                 for (int j = 0; j < controllers[i].length; j++) {
+                                                                   int? upperValue = int.tryParse(upper.text);
+                                                                   int rnd = Random().nextInt((upperValue?.toInt() ?? 2));
+                                                                   controllers[i][j].text = rnd.toString();
+                                                                   controllers[j][i].text = rnd.toString();
+                                                                   if (i == j) {
+                                                                     bool rnd = Random().nextBool();
+                                                                     if (rnd) {
+                                                                       controllers[i][j].text = 0.toString();
+                                                                     } else {
+                                                                       controllers[i][j].text = 1.toString();
+                                                                     }
+                                                                   }
+                                                                 }
+                                                               }
+                                                               Navigator.pop(context);
+                                                             },
+                                                             style: ButtonStyle(
+                                                               backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                                                               foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                                                             ),
+                                                             child: const Text('Сгенерировать'),
+                                                           ),
+                                                         ],
+                                                       ),
+                                                     ),
+                                                   ),
+                                                 );
+                                               },
+                                             );
+                                           },
+                                           style: ButtonStyle(
+                                             backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                                             foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                                           ),
+                                           child: const Text('Автозаполнение'),
+                                         ),
+                                         GestureDetector(
+                                           onTap: () {
+                                             showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
+                                               return Container(
+                                                 height: 280,
+                                                 width: double.infinity,
+                                                 color: const Color(0xffffffff),
+                                                 child: Padding(
+                                                   padding: const EdgeInsets.only(top: 10,left: 10,right: 10,bottom: 20),
+                                                   child: Column(
+                                                     mainAxisAlignment: MainAxisAlignment.start,
+                                                     children: [
+                                                       Expanded(
+                                                         child: ListView.builder(
+                                                           itemCount: rulesFillMatrix.length,
+                                                           itemBuilder: (BuildContext context, int index) {
+                                                             return ListTile(
+                                                               leading: SvgPicture.asset(
+                                                                   'assets/images/success_icon.svg',
+                                                                   width:20,
+                                                                   height:20
+                                                               ),
+                                                               title: Text(rulesFillMatrix[index]),
+                                                             );
+                                                           },
+                                                         ),
+                                                       ),
+                                                       const SizedBox(height: 10),
+                                                       ElevatedButton(
+                                                         onPressed: () => Navigator.pop(context),
+                                                         style: ButtonStyle(
+                                                           backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                                                           foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                                                         ),
+                                                         child: const Text('Закрыть'),
+                                                       ),
+                                                     ],
+                                                   ),
+                                                 ),
+                                               );
+                                             });
+                                           },
+                                           child: Container(
+                                             width: 30.0,
+                                             height: 30.0,
+                                             margin: EdgeInsets.only(left: 10),
+                                             decoration: const BoxDecoration(
+                                               shape: BoxShape.circle,
+                                             ),
+                                             child: ClipOval(
+                                               child: SvgPicture.asset(
+                                                 'assets/images/question_icon.svg',
+                                               ),
+                                             ),
+                                           ),
+                                         )
+                                       ],
+                                     )
+                                    ],
+                                  )
+                                ]
+                            )
+                        )
+                    )
+                )
+              ]
           ),
         ),
       ),

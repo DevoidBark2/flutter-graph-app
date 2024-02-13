@@ -222,7 +222,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 )
               ],
             ),
-            Switch(value: _themeManger.themeMode == ThemeMode.dark, onChanged:(newValue){
+            Switch(value: true, onChanged:(newValue){
               _themeManger.toggleTheme(newValue);
             })
           ]

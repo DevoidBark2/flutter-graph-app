@@ -66,7 +66,8 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         first_name: firstName.text.trim(),
         second_name: secondName.text.trim(),
         total_user: 0,
-        profile_image: ''
+        profile_image: 'https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg',
+        skills: []
       );
 
       FirebaseFirestore.instance.collection('users-list').doc(userID).set(userData.toJson());

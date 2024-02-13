@@ -1,13 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:test_project/screens/auth/login_screen.dart';
 import 'package:test_project/screens/draw_screen.dart';
 import 'package:test_project/screens/drawing_screen.dart';
 import 'package:test_project/screens/interactive_game.dart';
-import 'package:test_project/screens/profile_screen.dart';
 import 'package:test_project/screens/settings_screen.dart';
-import 'package:test_project/screens/main_screen.dart';
 import 'package:test_project/screens/theory_screen.dart';
 
 class HomePage extends StatefulWidget {
@@ -33,18 +33,52 @@ class _HomePageState extends State<HomePage> {
     SettingsScreen(),
     LoginScreen()
   ];
+  var rulesMatrix = [
+    'Размер матрицы должен быть задан.',
+    'Размер матрицы должен быть больше 0.',
+    'Размер матрицы должен представлять число.',
+  ];
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
+  final user = FirebaseAuth.instance.currentUser;
+  var data;
+
+  @override
+  void initState() {
+    getData();
+    super.initState();
+  }
+  void getData() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('users-list')
+          .where('uid', isEqualTo: user.uid)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        setState(() {
+          data = querySnapshot.docs.first.data();
+          print('Данные пользователя: $data');
+        });
+      } else {
+        print('Пользователь с UID ${user.uid} не найден в Firestore.');
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
 
-    print(user);
+    // if (data == null) {
+    //   return const Center(child: CircularProgressIndicator());
+    // }
+
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -60,6 +94,7 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             icon: const Icon(Icons.settings),
             tooltip: 'Настройки',
+            color: Colors.white,
             onPressed: () {
               Navigator.push(
                 context,
@@ -80,7 +115,7 @@ class _HomePageState extends State<HomePage> {
             gradient: LinearGradient(
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
-              colors: <Color>[Colors.orange, Colors.deepOrange],
+              colors: <Color>[Color(0xFF819db5),Color(0xFF678094)],
             ),
           ),
         ),
@@ -91,8 +126,8 @@ class _HomePageState extends State<HomePage> {
             Container(
               height:100.0,
               decoration: const BoxDecoration(
-                color: Colors.blueAccent
-              ),
+                color: Color(0xFF678094)
+              )
             ),
             ListTile(
               leading: const Icon(Icons.home),

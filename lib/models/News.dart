@@ -5,12 +5,14 @@ class News {
   final String title;
   final String sub_title;
   final String news_image;
+  final String content;
 
   News({
     required this.id,
     required this.title,
     required this.sub_title,
     required this.news_image,
+    required this.content,
   });
 
   Map<String, dynamic> toJson() {
@@ -18,7 +20,8 @@ class News {
       'id' : id,
       'title' : title,
       'sub_title': sub_title,
-      'news_image': news_image
+      'news_image': news_image,
+      'content': content
     };
   }
 
@@ -36,7 +39,8 @@ class News {
         id: map['id'] ?? 0,
       title: map['title'] ?? '',
       sub_title: map['sub_title'] ?? '',
-      news_image: map['news_image'] ?? 'https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg'
+      news_image: map['news_image'] ?? 'https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg',
+      content: map['content'] ?? ''
     );
   }
 }

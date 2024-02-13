@@ -49,11 +49,18 @@ dependencies:
   flutter_spinkit: ^5.2.0
   carousel_slider: ^4.2.1
   image_picker: ^1.0.4
+  flutter_launcher_icons: ^0.13.1
+  flutter_widget_from_html: ^0.9.1
+  flutter_html: ^3.0.0-beta.2
+  firebase_storage: ^11.6.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
+flutter_icons:
+  android: true
+  image_path: "assets/images/coins.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -85,6 +92,14 @@ flutter:
     - assets/images/logo_avatar.jpg
     - assets/images/money.svg
     - assets/images/lock.svg
+    - assets/images/complexity.svg
+    - assets/images/skills_icon.svg
+    - assets/images/thinks_icon.svg
+    - assets/images/time_icon.svg
+    - assets/images/question_icon.svg
+    - assets/images/success_icon.svg
+    - assets/images/right_icon.svg
+    - assets/images/warning_icon.svg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

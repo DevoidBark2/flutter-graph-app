@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:test_project/models/DropDownItem.dart';
+
 class UserData {
   final String uid;
   final String email;
@@ -7,6 +9,7 @@ class UserData {
   final String second_name;
   final int total_user;
   final String profile_image;
+  final List<dynamic> skills;
 
   UserData({
     required this.uid,
@@ -15,6 +18,7 @@ class UserData {
     required this.second_name,
     required this.total_user,
     required this.profile_image,
+    required this.skills,
   });
 
   Map<String, dynamic> toJson() {
@@ -24,27 +28,25 @@ class UserData {
       'first_name': first_name,
       'second_name': second_name,
       'user_total' : total_user,
-      'profile_image' : profile_image
+      'profile_image' : profile_image,
+      'skills' : skills.map((skill) => skill.toJson()).toList(),
     };
   }
 
   factory UserData.fromMap(Map<String, dynamic> map) {
-    List<List<int>>? graph;
-
-
-    if (map['graph'] != null) {
-      graph = jsonDecode(map['graph']).cast<List<dynamic>>().map<List<int>>(
-              (row) => (row as List<dynamic>).cast<int>().toList()
-      ).toList();
+    List<DropDownItem> skills = [];
+    if (map['skills'] != null) {
+      skills = List<DropDownItem>.from(map['skills'].map((e) => DropDownItem.fromMap(e as Map<String, dynamic>)));
     }
-    print(graph);
+
     return UserData(
       uid: map['uid'] ?? '',
       email: map['email'] ?? '',
       first_name: map['first_name'] ?? '',
       second_name: map['second_name'] ?? '',
       total_user: map['total_user'] ?? 0,
-      profile_image: map['profile_image'] ?? 'https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg'
+      profile_image: map['profile_image'] ?? 'https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg',
+      skills: skills,
     );
   }
 }
