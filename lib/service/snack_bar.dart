@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class SnackBarService{
-  static const errorColor = Colors.red;
-  static const okColor = Colors.green;
+  static Color? errorColor = Colors.red[800];
+  static Color? okColor = Colors.green[900];
 
   static Future<void> showSnackBar(
     BuildContext context, String message,bool error) async {

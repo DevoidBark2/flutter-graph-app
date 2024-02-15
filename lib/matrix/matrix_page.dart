@@ -29,10 +29,11 @@ class _MatrixPageState extends State<MatrixPage> {
   final upper = TextEditingController();
   String errorMessage = "";
   var rulesFillMatrix = [
-    'Можно вводить веса графа ручным способом',
-    'Можно вводить веса графа автозаполнением',
-    'Если нажать один раз на кнопку \"Автозаполнение\", матрица заполнятся 0 и 1',
-    'Если зажать кнопку \"Автозаполнение\", Вы сможете выбрать маскимальное число для рандомных весов графа',
+    'Можно вводить веса графа ручным способом.',
+    'Можно вводить веса графа автозаполнением.',
+    'Если поставить галочку "Взвешенный граф", над ребрами подпишется вес графа.',
+    'Если нажать один раз на кнопку \"Автозаполнение\", матрица заполнятся 0 и 1.',
+    'Если зажать кнопку \"Автозаполнение\", Вы сможете выбрать маскимальное число для рандомных весов графа.',
   ];
 
   // Future<Map<String, dynamic>?> getCurrentUserData() async {
@@ -223,30 +224,31 @@ class _MatrixPageState extends State<MatrixPage> {
                                           context: context,
                                           builder: (BuildContext context) {
                                             return Container(
-                                              height: 200,
-                                              color: Colors.white,
+                                              height: 250,
+                                              color: const Color(0xffffffff),
                                               child: Center(
                                                 child: Padding(
-                                                  padding: const EdgeInsets.only(top: 10.0, bottom: 5.0),
+                                                  padding: const EdgeInsets.only(top: 30.0, bottom: 5),
                                                   child: Column(
                                                     mainAxisAlignment: MainAxisAlignment.start,
                                                     children: [
                                                       SvgPicture.asset(
                                                           'assets/images/error.svg',
-                                                          width: 50,
-                                                          height: 50
+                                                          width: 70,
+                                                          height: 70
                                                       ),
                                                       const SizedBox(height: 15.0),
                                                       Text(errorMessage),
                                                       const SizedBox(height: 35.0),
                                                       ElevatedButton(
-                                                        child: const Text('Закрыть'),
                                                         onPressed: () => {
                                                           Navigator.pop(context)
                                                         },
                                                         style: ButtonStyle(
-                                                          backgroundColor: MaterialStateProperty.all<Color>(Colors.deepOrangeAccent),
+                                                            backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                                                            foregroundColor: MaterialStateProperty.all<Color>(Colors.white)
                                                         ),
+                                                        child: const Text('Закрыть'),
                                                       ),
                                                     ],
                                                   ),
@@ -261,8 +263,7 @@ class _MatrixPageState extends State<MatrixPage> {
                                         ),
                                         child: const Text('Отобразить'),
                                       ),
-
-                                     Row(
+                                      Row(
                                        children: [
                                          ElevatedButton(
                                            onPressed: () {

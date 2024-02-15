@@ -114,9 +114,24 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                       keyboardType: TextInputType.text,
                       autocorrect: false,
                       controller: firstName,
-                      decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          hintText: 'Введите Имя'
+                      decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                              color: Color(0xFF678094),
+                              width: 2.0,
+                            ),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          focusedBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Color(0xFF678094),
+                                width: 2.0
+                            ),
+                          ),
+                          label: const Text('Введите имя'),
+                          labelStyle: const TextStyle(
+                              color: Color(0xFF678094)
+                          )
                       ),
                     ),
                     const SizedBox(
@@ -126,9 +141,24 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                       keyboardType: TextInputType.text,
                       autocorrect: false,
                       controller: secondName,
-                      decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          hintText: 'Введите E-mail'
+                      decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                              color: Color(0xFF678094),
+                              width: 2.0,
+                            ),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          focusedBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Color(0xFF678094),
+                                width: 2.0
+                            ),
+                          ),
+                          label: const Text('Введите фамилию'),
+                          labelStyle: const TextStyle(
+                              color: Color(0xFF678094)
+                          )
                       ),
                     ),
                     const SizedBox(
@@ -138,9 +168,24 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                       keyboardType: TextInputType.emailAddress,
                       autocorrect: false,
                       controller: emailController,
-                      decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          hintText: 'Введите E-mail'
+                      decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                              color: Color(0xFF678094),
+                              width: 2.0,
+                            ),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          focusedBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Color(0xFF678094),
+                                width: 2.0
+                            ),
+                          ),
+                          label: const Text('Введите E-mail'),
+                          labelStyle: const TextStyle(
+                              color: Color(0xFF678094)
+                          )
                       ),
                     ),
                     const SizedBox(
@@ -152,9 +197,24 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                       obscureText: isHiddenPassword,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       decoration: InputDecoration(
-                          border: const OutlineInputBorder(),
-                          hintText: 'Введите пароль',
-                          suffix: InkWell(
+                        border: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                            color: Color(0xFF678094),
+                            width: 2.0,
+                          ),
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        focusedBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Color(0xFF678094),
+                              width: 2.0
+                          ),
+                        ),
+                        label: const Text('Введите пароль'),
+                        labelStyle: const TextStyle(
+                            color: Color(0xFF678094)
+                        ),
+                        suffix: GestureDetector(
                             onTap: togglePasswordView,
                             child: Icon(
                                 isHiddenPassword
@@ -174,6 +234,10 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                         onPressed: (){
                           signup(context);
                         },
+                        style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                            foregroundColor: MaterialStateProperty.all<Color>(Colors.white)
+                        ),
                         child: const Center(child: Text('Зарегистрироваться'))
                     )
                   ]

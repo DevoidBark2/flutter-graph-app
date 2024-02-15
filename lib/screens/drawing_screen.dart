@@ -21,11 +21,16 @@ class DrawingScreen extends StatefulWidget {
   State<DrawingScreen> createState() => _DrawingScreenState();
 }
 
+enum FilterList {
+      All,
+      TypeOne,
+}
+
 class _DrawingScreenState extends State<DrawingScreen> {
   List<Offset> points = [];
   List<List<int>> edges = [];
   int activePointIndex = -1;
-  bool _showFrontSide = true;
+  FilterList valueFilter = FilterList.All;
 
   final adjacencyMatrix = [
     [0, 1, 1, 1, 1],
@@ -100,10 +105,12 @@ class _DrawingScreenState extends State<DrawingScreen> {
       }
     }
   }
-
+  double _currentValue = 20;
+  bool showFilterBlock = false;
   Future<void> _refreshData() async {
     getUserData();
   }
+  final ValueNotifier<bool> _showFrontSide = ValueNotifier<bool>(true);
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +125,11 @@ class _DrawingScreenState extends State<DrawingScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       GestureDetector(
-                        onTap: () => setState(() =>_showFrontSide = !_showFrontSide),
+                        onTap: (){
+                          setState(() {
+                            _showFrontSide.value = !_showFrontSide.value;
+                          });
+                        },
                         child:  AnimatedSwitcher(
                           duration: const Duration(milliseconds: 300),
                           transitionBuilder: (Widget child, Animation<double> animation) {
@@ -127,7 +138,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
                               child: child,
                             );
                           },
-                          child: _showFrontSide ? Container(
+                          child: _showFrontSide.value ? Container(
                             key: const ValueKey<int>(0),
                             height: 150.0,
                             width: double.infinity,
@@ -163,7 +174,47 @@ class _DrawingScreenState extends State<DrawingScreen> {
                                       // )
                                     ],
                                   ),
-                                  Container()
+                                  Row(
+                                    children: [
+                                      GestureDetector(
+                                        onTap: (){
+                                          Navigator.push(context, MaterialPageRoute<void>(
+                                            builder: (BuildContext context) => Scaffold(
+                                              appBar: AppBar(
+                                                title: const Text('Навыки'),
+                                              ),
+                                              body: const DropDownScreen(type:'skills-list'),
+                                            ),
+                                          ),
+                                          );
+                                        },
+                                        child: SvgPicture.asset(
+                                          'assets/images/skills_icon.svg',
+                                          height: 40.0,
+                                          width: 40.0,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 5),
+                                      GestureDetector(
+                                        onTap: (){
+                                          Navigator.push(context, MaterialPageRoute<void>(
+                                            builder: (BuildContext context) => Scaffold(
+                                              appBar: AppBar(
+                                                title: const Text('Подсказки'),
+                                              ),
+                                              body: DropDownScreen(type: 'tips-list'),
+                                            ),
+                                          ),
+                                          );
+                                        },
+                                        child: SvgPicture.asset(
+                                          'assets/images/thinks_icon.svg',
+                                          height: 50.0,
+                                          width: 40.0,
+                                        ),
+                                      ),
+                                    ],
+                                  )
                                 ],
                               ),
                             ),
@@ -214,64 +265,112 @@ class _DrawingScreenState extends State<DrawingScreen> {
                                 )
                             )
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Padding(
-                              padding: EdgeInsets.all(10.0),
-                              child: Text(
+                        child: Padding(
+                          padding: EdgeInsets.only(bottom: 10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
                                   'Задания',
                                   style: TextStyle(
                                       fontSize: 25.0
                                   )
                               ),
-                            ),
-                            Row(
-                              children: [
-                                GestureDetector(
-                                  onTap: (){
-                                    Navigator.push(context, MaterialPageRoute<void>(
-                                      builder: (BuildContext context) => Scaffold(
-                                        appBar: AppBar(
-                                          title: const Text('Навыки'),
-                                        ),
-                                        body: const DropDownScreen(type:'skills-list'),
+                              GestureDetector(
+                                onTap: () {
+                                  // showDialog(
+                                  //   context: context,
+                                  //   builder: (BuildContext context) {
+                                  //     return AlertDialog(
+                                  //       title: Text("Фильтр"),
+                                  //       content: Column(
+                                  //         children: [
+                                  //           Slider(
+                                  //             value: _currentValue,
+                                  //             max: 100,
+                                  //             divisions: 5,
+                                  //             label: _currentValue.round().toString(),
+                                  //             onChanged: (double value) {
+                                  //               setState(() {
+                                  //                 _currentValue = value;
+                                  //               });
+                                  //             },
+                                  //           ),
+                                  //           // RadioListTile<FilterList>(
+                                  //           //   title: const Text('Все'),
+                                  //           //   value: FilterList.All,
+                                  //           //   groupValue: valueFilter,
+                                  //           //   onChanged: (FilterList? value) {
+                                  //           //     setState(() {
+                                  //           //       valueFilter = value!;
+                                  //           //     });
+                                  //           //   },
+                                  //           // ),
+                                  //           // RadioListTile<FilterList>(
+                                  //           //   title: const Text('Тип 1'),
+                                  //           //   value: FilterList.TypeOne,
+                                  //           //   groupValue: valueFilter,
+                                  //           //   onChanged: (FilterList? value) {
+                                  //           //     setState(() {
+                                  //           //       valueFilter = value!;
+                                  //           //     });
+                                  //           //   },
+                                  //           // ),
+                                  //         ],
+                                  //       ),
+                                  //     );
+                                  //   },
+                                  // );
+                                  setState(() {
+                                    showFilterBlock = !showFilterBlock;
+                                  });
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF678094),
+                                    borderRadius: BorderRadius.circular(5),
+                                  ),
+                                  child: Padding(
+                                    padding: EdgeInsets.all(10),
+                                    child: Text(
+                                      'Фильтр',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
                                       ),
                                     ),
-                                    );
-                                  },
-                                  child: SvgPicture.asset(
-                                    'assets/images/skills_icon.svg',
-                                    height: 40.0,
-                                    width: 40.0,
                                   ),
                                 ),
-                                const SizedBox(width: 10),
-                                GestureDetector(
-                                  onTap: (){
-                                    Navigator.push(context, MaterialPageRoute<void>(
-                                      builder: (BuildContext context) => Scaffold(
-                                        appBar: AppBar(
-                                          title: const Text('Подсказки'),
-                                        ),
-                                        body: DropDownScreen(type: 'tips-list'),
-                                      ),
-                                    ),
-                                    );
-                                  },
-                                  child: SvgPicture.asset(
-                                    'assets/images/thinks_icon.svg',
-                                    height: 50.0,
-                                    width: 40.0,
-                                  ),
-                                ),
-                              ],
-                            )
-                          ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       const SizedBox(
                         height: 30.0,
+                      ),
+                      Transform(
+                        alignment: Alignment.center,
+                        transform: Matrix4.rotationX(0),
+                        child: Container(
+                          color: const Color(0xFFE8581C),
+                          child: showFilterBlock ? Column(
+                            children: [
+                              Text('Фильтры'),
+                              Slider(
+                                value: _currentValue,
+                                max: 100,
+                                divisions: 5,
+                                label: _currentValue.round().toString(),
+                                onChanged: (double value) {
+                                  setState(() {
+                                    _currentValue = value;
+                                  });
+                                },
+                              ),
+                            ],
+                          ) : const SizedBox(),
+                        )
                       ),
                       StreamBuilder<QuerySnapshot>(
                         stream: _collectionRef.snapshots(),
@@ -435,13 +534,14 @@ class _DrawingScreenState extends State<DrawingScreen> {
               height: 120,
               width: 120,
             ),
-            Center(
+            const Center(
               child: Text('Доступ к игре ограничен!'),
             ),
             Center(
               child: Column(
                 children: [
-                  Text('Войдите в свой аккаунт'),
+                  const Text('Войдите в свой аккаунт.'),
+                  const SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: (){
                       Navigator.pushReplacement(
@@ -451,7 +551,11 @@ class _DrawingScreenState extends State<DrawingScreen> {
                         })
                       );
                     },
-                    child: Text('Войти'),
+                    style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                        foregroundColor: MaterialStateProperty.all<Color>(Colors.white)
+                    ),
+                    child: const Text('Войти'),
                   )
                 ],
               ),

@@ -21,8 +21,9 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
   List<Offset> points = [];
   int? selectedVertexIndex;
   int? selectedVertexOffset;
-  int time = 0;
-  bool isTimeEnd = false;
+  ValueNotifier<int> time = ValueNotifier<int>(0);
+  ValueNotifier<bool> isTimeEnd = ValueNotifier<bool>(false);
+  Timer? _timer;
 
   final CollectionReference usersRef = FirebaseFirestore.instance.collection('users-list');
   final String currentUserUid = FirebaseAuth.instance.currentUser!.uid;
@@ -36,7 +37,7 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
     super.initState();
     initializePoints();
     _startTimer();
-    time = widget.task.time_level;
+    time.value = widget.task.time_level;
   }
 
   void initializePoints() {
@@ -62,15 +63,16 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
   }
 
   void _startTimer(){
-    Timer.periodic(Duration(seconds: 1), (timer) {
-      if(time > 0 && isTimeEnd == false){
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if(time.value > 0 && !isTimeEnd.value){
         setState(() {
-          time--;
+          time.value--;
         });
       }else{
-        isTimeEnd = true;
-        setState(() {});
-        time++;
+        isTimeEnd.value = true;
+       setState(() {
+         time.value++;
+       });
       }
     });
   }
@@ -105,6 +107,12 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
   }
 
   @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(10),
@@ -112,14 +120,14 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
         fit: StackFit.expand,
         children: [
           Container(
-            child: isTimeEnd != false
+            child: isTimeEnd.value
                 ? Text(
-                "$time",
+                "${time.value}",
               style: const TextStyle(
                   color: Colors.red
               )
             )
-                : Text("$time")
+                : Text( "${time.value}")
           ),
           GestureDetector(
             onLongPressStart: (details) {

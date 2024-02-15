@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:test_project/models/User.dart';
@@ -216,9 +217,11 @@ class _TheoryScreenState extends State<TheoryScreen> {
                           const Text(
                             'ТОП игроков',
                             style: TextStyle(
-                                fontSize: 25.0
+                                fontSize: 25.0,
+                              fontWeight: FontWeight.w500
                             ),
                           ),
+                          const SizedBox(height: 10),
                           StreamBuilder<QuerySnapshot>(
                             stream: _collectionRef.snapshots(),
                             builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -250,7 +253,8 @@ class _TheoryScreenState extends State<TheoryScreen> {
                               final top5Users = sortedUsers.take(5).toList();
 
                               return Container(
-                                height: MediaQuery.of(context).size.height / 3,
+                                height:150,
+                                width: double.infinity,
                                 child: ListView.builder(
                                   itemCount: top5Users.length,
                                   itemBuilder: (BuildContext context, int index) {
@@ -260,17 +264,50 @@ class _TheoryScreenState extends State<TheoryScreen> {
                                       width: double.infinity,
                                       child: Row(
                                         children: [
+                                          Container(
+                                            width: 40,
+                                            height: 40,
+                                            padding: const EdgeInsets.all(5),
+                                            margin: const EdgeInsets.only(left: 5),
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: index == 0 ? Colors.amber : const Color(0xFF678094),
+                                            ),
+                                            child: Center(
+                                              child: Text(
+                                                (index + 1).toString(),
+                                                style: const TextStyle(color: Colors.white),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 15),
                                           CircleAvatar(
-                                            radius: 25,
+                                            radius: 27,
                                             backgroundImage: NetworkImage(user.profile_image),
                                           ),
-                                          const SizedBox(width: 10,),
-                                          Text('${user.second_name} ${user.first_name}'),
-                                          const SizedBox(width: 40,),
-                                          Align(
-                                            alignment: Alignment.centerRight,
-                                            child:  Text('${user.total_user}'),
-                                          )
+                                          const SizedBox(width: 15),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  '${user.second_name} ${user.first_name}',
+                                                  style: const TextStyle(fontSize: 18),
+                                                ),
+                                                const SizedBox(height: 5),
+                                                Row(
+                                                  children: [
+                                                    Icon(Icons.star, color: Colors.amber),
+                                                    const SizedBox(width: 5),
+                                                    Text(
+                                                      '${user.total_user} очков',
+                                                      style: TextStyle(color: Colors.black),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                         ],
                                       ),
                                     );
@@ -317,7 +354,7 @@ class _TheoryScreenState extends State<TheoryScreen> {
     child: Container(
       width: double.infinity,
       decoration: BoxDecoration(
-          color: const Color(0xFF678094),
+          color: const Color(0xFF819db5),
           borderRadius: BorderRadius.circular(10)
       ),
       margin: const EdgeInsets.symmetric(horizontal: 5),
@@ -356,11 +393,16 @@ class _TheoryScreenState extends State<TheoryScreen> {
                       fontSize: 15
                     ),
                   ),
-                  Align(
+                  const Align(
                     alignment: Alignment.bottomRight,
-                    child: const Padding(
+                    child: Padding(
                       padding: EdgeInsets.all(10.0),
-                      child: Text('Читать подробнее'),
+                      child: Text(
+                          'Читать подробнее',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500
+                        ),
+                      ),
                     ),
                   ),
                 ],

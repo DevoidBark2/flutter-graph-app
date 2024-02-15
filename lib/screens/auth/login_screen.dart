@@ -124,9 +124,24 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                     keyboardType: TextInputType.emailAddress,
                     autocorrect: false,
                     controller: emailController,
-                    decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: 'Введите E-mail'
+                    decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                            color: Color(0xFF678094),
+                            width: 2.0,
+                          ),
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        focusedBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Color(0xFF678094),
+                              width: 2.0
+                          ),
+                        ),
+                        label: const Text('Введите E-mail'),
+                        labelStyle: const TextStyle(
+                            color: Color(0xFF678094)
+                        )
                     ),
                   ),
                   const SizedBox(
@@ -138,9 +153,25 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                     obscureText: isHiddenPassword,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     decoration: InputDecoration(
-                        border: const OutlineInputBorder(),
+                        border: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                            color: Color(0xFF678094),
+                            width: 2.0,
+                          ),
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        focusedBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Color(0xFF678094),
+                              width: 2.0
+                          ),
+                        ),
+                        label: const Text('Введите пароль'),
+                        labelStyle: const TextStyle(
+                            color: Color(0xFF678094)
+                        ),
                         hintText: 'Введите пароль',
-                        suffix: InkWell(
+                        suffix: GestureDetector(
                           onTap: togglePasswordView,
                           child: Icon(
                               isHiddenPassword
@@ -157,6 +188,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       onPressed: (){
                         login(context);
                       },
+                      style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                          foregroundColor: MaterialStateProperty.all<Color>(Colors.white)
+                      ),
                       child: const Center(child: Text('Войти'))
                   ),
                   const SizedBox(
@@ -175,7 +210,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                     gradient: LinearGradient(
                                       begin: Alignment.centerLeft,
                                       end: Alignment.centerRight,
-                                      colors: <Color>[Colors.orange, Colors.deepOrange],
+                                      colors: <Color>[Color(0xFF819db5),Color(0xFF678094)],
                                     ),
                                   ),
                                 ),
@@ -185,6 +220,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           ),
                         );
                       },
+                      style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                          foregroundColor: MaterialStateProperty.all<Color>(Colors.white)
+                      ),
                       child: const Center(child: Text('Регистрация'))
                   )
                 ]
