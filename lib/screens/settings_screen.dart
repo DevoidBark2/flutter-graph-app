@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:test_project/theme/theme_manager.dart';
 
 enum TypeEdges { Digit, Letter }
 
@@ -79,8 +78,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
-  final ThemeManger _themeManger = ThemeManger();
-
   @override
   Widget build(BuildContext context) {
     return  Padding(
@@ -133,6 +130,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       },
                     );
                   },
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                      foregroundColor: MaterialStateProperty.all<Color>(Colors.white)
+                  ),
                   child: const Text('Выбрать цвет'),
                 ),
               ],
@@ -181,6 +182,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       },
                     );
                   },
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                      foregroundColor: MaterialStateProperty.all<Color>(Colors.white)
+                  ),
                   child: const Text('Выбрать цвет'),
                 ),
               ],
@@ -222,9 +227,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 )
               ],
             ),
-            Switch(value: true, onChanged:(newValue){
-              _themeManger.toggleTheme(newValue);
-            })
           ]
         ),
       )

@@ -6,6 +6,7 @@ class DropDownItem {
   final String sub_title;
   final int price;
   final String image_item;
+  final int total_time;
 
   DropDownItem({
     required this.id,
@@ -13,6 +14,7 @@ class DropDownItem {
     required this.sub_title,
     required this.price,
     required this.image_item,
+    required this.total_time,
   });
 
   Map<String, dynamic> toJson() {
@@ -22,6 +24,7 @@ class DropDownItem {
       'sub_title': sub_title,
       'price': price,
       'image_item': image_item,
+      'total_time': total_time,
     };
   }
 
@@ -40,7 +43,8 @@ class DropDownItem {
         title: map['title'] ?? '',
         sub_title: map['sub_title'] ?? '',
         price: map['price'] ?? 0,
-        image_item: map['image_item'] ?? ''
+        image_item: map['image_item'] ?? '',
+      total_time: map['total_time'] ?? 0
     );
   }
 }

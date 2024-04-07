@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:test_project/models/Task.dart';
@@ -32,10 +33,13 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
   int? draggingVertexIndex;
   Offset? lastDragOffset;
 
+  int? selectedColor;
+
   @override
   void initState() {
     super.initState();
     initializePoints();
+    getUserData();
     _startTimer();
     time.value = widget.task.time_level;
   }
@@ -71,7 +75,7 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
       }else{
         isTimeEnd.value = true;
        setState(() {
-         time.value++;
+         time.value--;
        });
       }
     });
@@ -88,6 +92,26 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
     return null;
   }
 
+  late List skills = [];
+  final _userData = FirebaseFirestore.instance.collection('users-list');
+
+
+
+  Future<void> getUserData() async{
+    try {
+      QuerySnapshot _user = await _userData.where('uid', isEqualTo: currentUserUid ?? '').get();
+      final userData = _user.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+
+      if (userData.isNotEmpty) {
+        skills = userData[0]['skills'];
+        print("UPDATE SKILLS STATE ${skills}");
+        setState(() {});
+      }
+
+    } catch (e) {
+      print('Exception occurred: $e');
+    }
+  }
   void updateEdgePositions() {
     for (int i = 0; i < widget.task.graph.length; i++) {
       for (int j = 0; j < widget.task.graph.length; j++) {
@@ -106,6 +130,20 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
     Navigator.pop(context);
   }
 
+  final colors = [
+    const Color(0xffe8e809),
+    const Color(0xff1fde4c),
+    const Color(0xff2d3fc0),
+    const Color(0xffed1a44),
+    const Color(0xffb642f5),
+    const Color(0xff4287f5),
+    const Color(0xff24d2c3),
+    const Color(0xffc58d15),
+    const Color(0xffef6317),
+    const Color(0xffc71b71),
+    
+  ];
+
   @override
   void dispose() {
     _timer?.cancel();
@@ -120,14 +158,14 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
         fit: StackFit.expand,
         children: [
           Container(
-            child: isTimeEnd.value
-                ? Text(
-                "${time.value}",
-              style: const TextStyle(
-                  color: Colors.red
+              child: isTimeEnd.value
+                  ? Text(
+                  "${time.value}",
+                  style: const TextStyle(
+                      color: Colors.red
+                  )
               )
-            )
-                : Text( "${time.value}")
+                  : Text( "${time.value}")
           ),
           GestureDetector(
             onLongPressStart: (details) {
@@ -137,7 +175,7 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
                 if ((tapPosition.dx - points[i].dx).abs() < 30.0) {
                   selectedVertexOffset = i;
                   setState(() {});
-                  print('Good - Tapped Vertex: $i'); // Выводим сообщение с индексом вершины
+                  print('Good - Tapped Vertex: $i');
                   break;
                 } else {
                   print('Bad');
@@ -158,77 +196,173 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
                 });
               }
             },
+             onDoubleTapDown: (details){
+               final tapPosition = details.localPosition;
+               final vertexIndex = getTappedVertexIndex(tapPosition);
+               for (int i = 0; i < points.length; i++) {
+                 if ((tapPosition.dx - points[i].dx).abs() < 30.0) {
+                   print('Change color vertex: $i');
+                   showDialog(
+                     context: context,
+                     builder: (BuildContext context) {
+                       return AlertDialog(
+                       title: const Text('Цвета'),
+                       content: SingleChildScrollView(
+                         child: SizedBox(
+                           child: Wrap(
+                             spacing: 8.0, // gap between adjacent chips
+                             runSpacing: 4.0,
+                             children: [
+                               GridView.builder(
+                                 shrinkWrap: true,
+                                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                   crossAxisCount: 2,
+                                   crossAxisSpacing: 10.0,
+                                   mainAxisSpacing: 10.0,
+                                   childAspectRatio: 1.0,
+                                 ),
+                                 itemCount: colors.length,
+                                 itemBuilder: (BuildContext context, int index) {
+                                   final color = colors[index];
+                                   return Padding(
+                                     padding: const EdgeInsets.all(5),
+                                     child: ElevatedButton(
+                                       onPressed: () {
+                                         print('Selected Color: $index');
+                                         selectedVertexOffset = i;
+                                         selectedColor = color.value;
+                                         setState(() {});
+                                         Navigator.pop(context);
+                                       },
+                                       style: ElevatedButton.styleFrom(
+                                         backgroundColor: color,
+                                         shape: const StadiumBorder(),
+                                         padding: const EdgeInsets.all(12),
+                                       ),
+                                       child: const SizedBox(),
+                                     ),
+                                   );
+                                 },
+                               )
+                             ],
+                           ),
+                         ),
+                       ),
+                       );
+                     },
+                   );
+                 } else {
+                   print('No Change vertex');
+                 }
+               }
+             },
             child: CustomPaint(
               painter: OpenPainter(
                   matrix: widget.task.graph,
                   selectedIndex: selectedVertexOffset,
+                  color: selectedColor,
                   points:points
               ),
             ),
           ),
-          StreamBuilder<QuerySnapshot>(
-            stream: usersRef.where('id', isEqualTo: currentUserUid).snapshots(),
-            builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.hasError) {
-                return Text('Ошибка получения данных: ${snapshot.error}');
-              }
+          Positioned( bottom: 0,
+            left:0,child:  ElevatedButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Все навыки'),
+                    content: SizedBox(
+                      child: Wrap(
+                        spacing: 8.0, // gap between adjacent chips
+                        runSpacing: 4.0,
+                        children: skills.isNotEmpty ? List.generate(
+                        skills.length,
+                            (index) => ElevatedButton(
+                          onPressed: () {
+                            print(index);
+                            if (skills[index]['total_time'] != null) {
+                              time.value = time.value + int.parse(skills[index]['total_time'].toString());
+                              if(time.value > 0){
+                                isTimeEnd.value = false;
+                                setState(() {});
+                              }
+                              Navigator.pop(context);
 
-              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                return Center(
-                  child:  Text('Нет доступных у вас навыков!'),
-                );
-              }
 
-              final userSkillsRef = snapshot.data!.docs[0].reference.collection('skills');
+                              
+                              final CollectionReference userListRef = FirebaseFirestore.instance.collection('users-list');
+                              final userDocument = userListRef.doc(currentUserUid);
 
-              return StreamBuilder<QuerySnapshot>(
-                stream: userSkillsRef.snapshots(),
-                builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> skillsSnapshot) {
-                  if (skillsSnapshot.hasError) {
-                    return Text('Ошибка получения данных о навыках: ${skillsSnapshot.error}');
-                  }
+                              userDocument.get().then((userListDoc) {
+                                if (userListDoc.exists) {
+                                  final userListData = userListDoc.data() as Map<String, dynamic>;
+                                  final skillsList = userListData['skills'];
+                                  final removedSkill = skillsList.removeAt(index);
+                                  if (removedSkill != null) {
+                                    userListData['skills'] = skillsList;
+                                    final updatedUserListData = {...userListData};
+                                    userDocument.update(updatedUserListData);
+                                  }
+                                  setState(() {
+                                    getUserData();
+                                  });
+                                }
+                              }).catchError((error) {
+                                print('Error removing skill from user-list: $error');
+                              });
 
-                  if (!skillsSnapshot.hasData || skillsSnapshot.data!.docs.isEmpty) {
-                    return Center(
-                      child: Text('Нет доступных у вас навыков!'),
-                    );
-                  }
 
-                  final skills = snapshot.data!.docs
-                      .map((doc) => DropDownItem.fromMap(doc.data() as Map<String, dynamic>))
-                      .toList();
-
-                  return ListView.builder(
-                    itemCount: skills.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final skill = skills[index];
-                      return Positioned(
-                        top:0,
-                        right:0,
-                        child: Row(
-                          children: [
-                            SvgPicture.network(
-                              skill.image_item,
-                              width: 40,
-                              height: 40,
+                            }
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(5),
+                            child: Column(
+                              children: [
+                                SvgPicture.network(
+                                  skills[index]['image_item'],
+                                  width: 20,
+                                  height: 20,
+                                ),
+                                Text(skills[index]['title'].toString())
+                              ],
                             ),
-                          ],
+                          ),
                         ),
-                      );
-                    },
+                      ) :
+                        [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              SvgPicture.asset(
+                                'assets/images/empty_icon.svg',
+                                height: 70.0,
+                                width: 70.0,
+                              ),
+                              Text("Список пуст!")
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
                   );
                 },
               );
             },
+            style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                foregroundColor: MaterialStateProperty.all<Color>(Colors.white)
+            ),
+            child: const Text('Навыки и подсказки'),
+          ),
           ),
           Positioned(
             bottom: 0,
             right:0,
-            child: Container(
-                child: ElevatedButton(
-                  onPressed: _checkPlangraph,
-                  child: Text('Закончить'),
-                )
+            child: ElevatedButton(
+              onPressed: _checkPlangraph,
+              child: const Text('Закончить'),
             ),
           )
         ],
@@ -241,11 +375,13 @@ class OpenPainter extends CustomPainter {
   final List<List<int?>> matrix;
   final int? selectedIndex;
   final List<Offset> points;
+  final int? color;
   OpenPainter({
     Key? key,
     required this.matrix,
     required this.selectedIndex,
-    required this.points
+    required this.points,
+    required this.color
   });
   @override
   @override
@@ -258,7 +394,7 @@ class OpenPainter extends CustomPainter {
     var paint3 =  Paint()..color = const Color(0xffb69d9d)..strokeWidth = 1..style = PaintingStyle.stroke;
     var paint4 =  Paint()..color = const Color(0xff000000)..strokeWidth = 10..style = PaintingStyle.stroke;
 
-    var selectedIndexPaint =  Paint()..color = const Color(0xffcd4527)..strokeWidth = 10..style = PaintingStyle.stroke;
+    var selectedIndexPaint =  Paint()..color = Color(color != null ? color as int : 0xffb69d9d)..strokeCap = StrokeCap.round..strokeWidth = 20;
 
     var radius = 140;
     if (matrix.length > 10) {
@@ -267,7 +403,6 @@ class OpenPainter extends CustomPainter {
       radius = 1000;
     }
 
-    // основной цикл полного рисования (петли, веса и направления т.д.)
     for (var i = 0; i < matrix.length; i++) {
       for (var j = 0; j < matrix.length; j++) {
         if (matrix[i][j] != 0) {
@@ -275,9 +410,9 @@ class OpenPainter extends CustomPainter {
           final endPoint = this.points[j];
 
           if (i == selectedIndex || j == selectedIndex) {
-            drawLines.color = Colors.red; // Изменяем цвет связи выбранной вершины и ребра
+            drawLines.color = Colors.red;
           } else {
-            drawLines.color = Colors.black; // Используем исходный цвет связи и ребра для остальных вершин
+            drawLines.color = Colors.black;
           }
 
           canvas.drawLine(startPoint, endPoint, drawLines);
@@ -285,12 +420,11 @@ class OpenPainter extends CustomPainter {
       }
     }
 
-    // рисование вершин и индекса вершины
     for (var i = 0; i < matrix.length; i++) {
-      canvas.drawCircle(this.points[i], 15, selectedIndex == i ? selectedIndexPaint : drawPoints);
+      canvas.drawCircle(points[i], 15, selectedIndex == i ? selectedIndexPaint : drawPoints);
       int letterIndex = i % 26;
       String letter = String.fromCharCode(65 + letterIndex);
-      TextSpan span = TextSpan(style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold), text:  (i + 1).toString());
+      TextSpan span = TextSpan(style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold), text:  (i + 1).toString());
       TextPainter tp = TextPainter(text: span, textAlign: TextAlign.left, textDirection: TextDirection.ltr);
       tp.layout();
       if (matrix.length > 9) {

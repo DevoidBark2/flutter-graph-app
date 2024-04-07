@@ -65,7 +65,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         email: emailController.text.trim(),
         first_name: firstName.text.trim(),
         second_name: secondName.text.trim(),
-        total_user: 0,
+          user_total: 0,
         profile_image: 'https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg',
         skills: []
       );

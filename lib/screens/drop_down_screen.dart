@@ -26,7 +26,14 @@ class _DropDownScreenState extends State<DropDownScreen>{
 
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('users-list').where('uid', isEqualTo: user?.uid ?? '').get();
     final userData = querySnapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
-    int totalCurrentUser = userData[0]['total_user'];
+
+    int totalCurrentUser = userData[0]['user_total'];
+
+    List skills = userData[0]['skills'];
+    print(userData[0]['skills']);
+    skills.add(item.toJson());
+    print("__________________________");
+    print(skills);
 
     if(totalCurrentUser < priceValue){
       return false;
@@ -35,8 +42,8 @@ class _DropDownScreenState extends State<DropDownScreen>{
     print(item.toJson());
 
     await FirebaseFirestore.instance.collection('users-list').doc(user?.uid).update({
-      'total_user': totalCurrentUser - priceValue,
-      'skills': FieldValue.arrayUnion([item.toJson()])
+      'user_total': totalCurrentUser - priceValue,
+      'skills':skills
     });
 
     return true;
@@ -244,10 +251,10 @@ class _DropDownScreenState extends State<DropDownScreen>{
                                             children: [
                                               Text(item.price.toString()),
                                               const SizedBox(width: 10,),
-                                              SvgPicture.network(
-                                                item.image_item,
-                                                width: 40,
-                                                height: 40,
+                                              SvgPicture.asset(
+                                                'assets/images/money.svg',
+                                                height: 40.0,
+                                                width: 40.0,
                                               ),
                                             ],
                                           ),
@@ -278,8 +285,8 @@ class _DropDownScreenState extends State<DropDownScreen>{
                             child: Column(
                               children: [
                                 const SizedBox(height: 20),
-                                SvgPicture.asset(
-                                  'assets/images/time_icon.svg',
+                                SvgPicture.network(
+                                  item.image_item,
                                   width: 75,
                                   height: 75,
                                 ),

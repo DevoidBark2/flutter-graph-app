@@ -246,9 +246,9 @@ class _TheoryScreenState extends State<TheoryScreen> {
                                   .toList();
 
                               final sortedUsers = users
-                                  .where((user) => user.total_user != null)
+                                  .where((user) => user.user_total != null)
                                   .toList()
-                                ..sort((a, b) => b.total_user.compareTo(a.total_user));
+                                ..sort((a, b) => b.user_total.compareTo(a.user_total));
 
                               final top5Users = sortedUsers.take(5).toList();
 
@@ -259,6 +259,8 @@ class _TheoryScreenState extends State<TheoryScreen> {
                                   itemCount: top5Users.length,
                                   itemBuilder: (BuildContext context, int index) {
                                     final user = top5Users[index];
+                                    print(user.uid);
+                                    print(user.second_name);
                                     return Container(
                                       margin: const EdgeInsets.only(bottom: 10.0),
                                       width: double.infinity,
@@ -297,11 +299,11 @@ class _TheoryScreenState extends State<TheoryScreen> {
                                                 const SizedBox(height: 5),
                                                 Row(
                                                   children: [
-                                                    Icon(Icons.star, color: Colors.amber),
+                                                    const Icon(Icons.star, color: Colors.amber),
                                                     const SizedBox(width: 5),
                                                     Text(
-                                                      '${user.total_user} очков',
-                                                      style: TextStyle(color: Colors.black),
+                                                      '${user.user_total} очков',
+                                                      style: const TextStyle(color: Colors.black),
                                                     ),
                                                   ],
                                                 ),

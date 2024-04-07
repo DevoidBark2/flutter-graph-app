@@ -10,6 +10,7 @@ import 'package:test_project/algorithms/kruskal_algorithm.dart';
 import 'package:test_project/home_page.dart';
 import 'package:test_project/screens/drop_down_screen.dart';
 
+import '../models/DropDownItem.dart';
 import '../models/Task.dart';
 import 'auth/login_screen.dart';
 import 'level_game_screen.dart';
@@ -44,8 +45,12 @@ class _DrawingScreenState extends State<DrawingScreen> {
   final _collectionRef = FirebaseFirestore.instance.collection('tasks');
   final _userData = FirebaseFirestore.instance.collection('users-list');
 
+
   final user = FirebaseAuth.instance.currentUser;
   int userTotalData = 0;
+  late List skills = [];
+
+
 
   Future<void> getUserData() async{
     try {
@@ -54,7 +59,9 @@ class _DrawingScreenState extends State<DrawingScreen> {
       final userData = _user.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
 
       if (userData.isNotEmpty) {
-        userTotalData = userData[0]['total_user'];
+        userTotalData = userData[0]['user_total'];
+        skills = userData[0]['skills'];
+        print(skills);
         setState(() {});
       }
 
@@ -120,405 +127,401 @@ class _DrawingScreenState extends State<DrawingScreen> {
         child: SingleChildScrollView(
             child: Padding(
                 padding: const EdgeInsets.only(top:5.0,right: 10.0,bottom: 5.0,left: 10.0),
-                child: Container(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      GestureDetector(
-                        onTap: (){
-                          setState(() {
-                            _showFrontSide.value = !_showFrontSide.value;
-                          });
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    GestureDetector(
+                      onTap: (){
+                        setState(() {
+                          _showFrontSide.value = !_showFrontSide.value;
+                        });
+                      },
+                      child:  AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        transitionBuilder: (Widget child, Animation<double> animation) {
+                          return ScaleTransition(
+                            scale: animation,
+                            child: child,
+                          );
                         },
-                        child:  AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 300),
-                          transitionBuilder: (Widget child, Animation<double> animation) {
-                            return ScaleTransition(
-                              scale: animation,
-                              child: child,
-                            );
-                          },
-                          child: _showFrontSide.value ? Container(
-                            key: const ValueKey<int>(0),
-                            height: 150.0,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                begin: Alignment.centerLeft,
-                                end: Alignment.centerRight,
-                                colors: <Color>[Color(0xFF819db5),Color(0xFF678094)],
-                              ),
-                              borderRadius: BorderRadius.circular(10.0),
+                        child: _showFrontSide.value ? Container(
+                          key: const ValueKey<int>(0),
+                          height: 150.0,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                              colors: <Color>[Color(0xFF819db5),Color(0xFF678094)],
                             ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: Row(
-                                children: [
-                                  Row(
-                                    children: [
-                                      SvgPicture.asset(
-                                        'assets/images/money.svg',
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    SvgPicture.asset(
+                                      'assets/images/money.svg',
+                                      height: 40.0,
+                                      width: 40.0,
+                                    ),
+                                    Text(
+                                      "$userTotalData",
+                                      style: const TextStyle(
+                                          fontSize: 30.0,
+                                          fontWeight: FontWeight.bold
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    GestureDetector(
+                                      onTap: (){
+                                        Navigator.push(context, MaterialPageRoute<void>(
+                                          builder: (BuildContext context) => Scaffold(
+                                            appBar: AppBar(
+                                              title: const Text('Навыки'),
+                                            ),
+                                            body: const DropDownScreen(type:'skills-list'),
+                                          ),
+                                        ),
+                                        );
+                                      },
+                                      child: SvgPicture.asset(
+                                        'assets/images/skills_icon.svg',
                                         height: 40.0,
                                         width: 40.0,
                                       ),
-                                      Text(
-                                        "$userTotalData",
-                                        style: const TextStyle(
-                                            fontSize: 30.0,
-                                            fontWeight: FontWeight.bold
-                                        ),
-                                      ),
-                                      // Container(
-                                      //   width: 200,
-                                      //   child: Text('Улучшения навыков и подсказки'),
-                                      // )
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      GestureDetector(
-                                        onTap: (){
-                                          Navigator.push(context, MaterialPageRoute<void>(
-                                            builder: (BuildContext context) => Scaffold(
-                                              appBar: AppBar(
-                                                title: const Text('Навыки'),
-                                              ),
-                                              body: const DropDownScreen(type:'skills-list'),
+                                    ),
+                                    const SizedBox(width: 5),
+                                    GestureDetector(
+                                      onTap: (){
+                                        Navigator.push(context, MaterialPageRoute<void>(
+                                          builder: (BuildContext context) => Scaffold(
+                                            appBar: AppBar(
+                                              title: const Text('Подсказки'),
                                             ),
+                                            body: const DropDownScreen(type: 'tips-list'),
                                           ),
-                                          );
-                                        },
-                                        child: SvgPicture.asset(
-                                          'assets/images/skills_icon.svg',
-                                          height: 40.0,
-                                          width: 40.0,
                                         ),
+                                        );
+                                      },
+                                      child: SvgPicture.asset(
+                                        'assets/images/thinks_icon.svg',
+                                        height: 50.0,
+                                        width: 40.0,
                                       ),
-                                      const SizedBox(width: 5),
-                                      GestureDetector(
-                                        onTap: (){
-                                          Navigator.push(context, MaterialPageRoute<void>(
-                                            builder: (BuildContext context) => Scaffold(
-                                              appBar: AppBar(
-                                                title: const Text('Подсказки'),
-                                              ),
-                                              body: DropDownScreen(type: 'tips-list'),
-                                            ),
-                                          ),
-                                          );
-                                        },
-                                        child: SvgPicture.asset(
-                                          'assets/images/thinks_icon.svg',
-                                          height: 50.0,
-                                          width: 40.0,
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                ],
-                              ),
-                            ),
-                          ) : Container(
-                            key: const ValueKey<int>(1),
-                            height: 150.0,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                begin: Alignment.centerLeft,
-                                end: Alignment.centerRight,
-                                colors: <Color>[Color(0xFF819db5),Color(0xFF678094)],
-                              ),
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: Row(
-                                children: [
-                                  const Row(
-                                    children: [
-                                      Text(
-                                        "asdasd",
-                                        style: TextStyle(
-                                            fontSize: 30.0,
-                                            fontWeight: FontWeight.bold
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Container()
-                                ],
-                              ),
+                                    ),
+                                  ],
+                                )
+                              ],
                             ),
                           ),
-                        )
-                      ),
-                      const SizedBox(
-                        height: 20.0,
-                      ),
-                      Container(
-                        width: double.infinity,
-                        decoration: const BoxDecoration(
-                            border: Border(
-                                bottom: BorderSide(
-                                    color:Colors.black,
-                                    width: 1.0
-                                )
+                        ) : Container(
+                          key: const ValueKey<int>(1),
+                          height: 150.0,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                              colors: <Color>[Color(0xFF819db5),Color(0xFF678094)],
+                            ),
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child:   ListView.builder(
+                              itemCount: skills.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                final skill = skills[index];
+                                return Column(
+                                  children: [
+                                    SvgPicture.network(
+                                      skill['image_item'],
+                                      width: 40,
+                                      height: 40,
+                                    ),
+                                    Text(skill['title'].toString()),
+                                  ],
+                                );
+                              }
                             )
+                          ),
                         ),
-                        child: Padding(
-                          padding: EdgeInsets.only(bottom: 10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                  'Задания',
-                                  style: TextStyle(
-                                      fontSize: 25.0
-                                  )
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  // showDialog(
-                                  //   context: context,
-                                  //   builder: (BuildContext context) {
-                                  //     return AlertDialog(
-                                  //       title: Text("Фильтр"),
-                                  //       content: Column(
-                                  //         children: [
-                                  //           Slider(
-                                  //             value: _currentValue,
-                                  //             max: 100,
-                                  //             divisions: 5,
-                                  //             label: _currentValue.round().toString(),
-                                  //             onChanged: (double value) {
-                                  //               setState(() {
-                                  //                 _currentValue = value;
-                                  //               });
-                                  //             },
-                                  //           ),
-                                  //           // RadioListTile<FilterList>(
-                                  //           //   title: const Text('Все'),
-                                  //           //   value: FilterList.All,
-                                  //           //   groupValue: valueFilter,
-                                  //           //   onChanged: (FilterList? value) {
-                                  //           //     setState(() {
-                                  //           //       valueFilter = value!;
-                                  //           //     });
-                                  //           //   },
-                                  //           // ),
-                                  //           // RadioListTile<FilterList>(
-                                  //           //   title: const Text('Тип 1'),
-                                  //           //   value: FilterList.TypeOne,
-                                  //           //   groupValue: valueFilter,
-                                  //           //   onChanged: (FilterList? value) {
-                                  //           //     setState(() {
-                                  //           //       valueFilter = value!;
-                                  //           //     });
-                                  //           //   },
-                                  //           // ),
-                                  //         ],
-                                  //       ),
-                                  //     );
-                                  //   },
-                                  // );
-                                  setState(() {
-                                    showFilterBlock = !showFilterBlock;
-                                  });
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF678094),
-                                    borderRadius: BorderRadius.circular(5),
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsets.all(10),
-                                    child: Text(
-                                      'Фильтр',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                      ),
+                      )
+                    ),
+                    const SizedBox(
+                      height: 20.0,
+                    ),
+                    Container(
+                      width: double.infinity,
+                      decoration: const BoxDecoration(
+                          border: Border(
+                              bottom: BorderSide(
+                                  color:Colors.black,
+                                  width: 1.0
+                              )
+                          )
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                                'Задания',
+                                style: TextStyle(
+                                    fontSize: 25.0
+                                )
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                // showDialog(
+                                //   context: context,
+                                //   builder: (BuildContext context) {
+                                //     return AlertDialog(
+                                //       title: Text("Фильтр"),
+                                //       content: Column(
+                                //         children: [
+                                //           Slider(
+                                //             value: _currentValue,
+                                //             max: 100,
+                                //             divisions: 5,
+                                //             label: _currentValue.round().toString(),
+                                //             onChanged: (double value) {
+                                //               setState(() {
+                                //                 _currentValue = value;
+                                //               });
+                                //             },
+                                //           ),
+                                //           // RadioListTile<FilterList>(
+                                //           //   title: const Text('Все'),
+                                //           //   value: FilterList.All,
+                                //           //   groupValue: valueFilter,
+                                //           //   onChanged: (FilterList? value) {
+                                //           //     setState(() {
+                                //           //       valueFilter = value!;
+                                //           //     });
+                                //           //   },
+                                //           // ),
+                                //           // RadioListTile<FilterList>(
+                                //           //   title: const Text('Тип 1'),
+                                //           //   value: FilterList.TypeOne,
+                                //           //   groupValue: valueFilter,
+                                //           //   onChanged: (FilterList? value) {
+                                //           //     setState(() {
+                                //           //       valueFilter = value!;
+                                //           //     });
+                                //           //   },
+                                //           // ),
+                                //         ],
+                                //       ),
+                                //     );
+                                //   },
+                                // );
+                                setState(() {
+                                  showFilterBlock = !showFilterBlock;
+                                });
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF678094),
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                                child: const Padding(
+                                  padding: EdgeInsets.all(10),
+                                  child: Text(
+                                    'Фильтр',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
                                     ),
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(
-                        height: 30.0,
-                      ),
-                      Transform(
-                        alignment: Alignment.center,
-                        transform: Matrix4.rotationX(0),
-                        child: Container(
-                          color: const Color(0xFFE8581C),
-                          child: showFilterBlock ? Column(
-                            children: [
-                              Text('Фильтры'),
-                              Slider(
-                                value: _currentValue,
-                                max: 100,
-                                divisions: 5,
-                                label: _currentValue.round().toString(),
-                                onChanged: (double value) {
-                                  setState(() {
-                                    _currentValue = value;
-                                  });
-                                },
-                              ),
-                            ],
-                          ) : const SizedBox(),
-                        )
-                      ),
-                      StreamBuilder<QuerySnapshot>(
-                        stream: _collectionRef.snapshots(),
-                        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                          if (snapshot.hasError) {
-                            return Text('Ошибка получения данных: ${snapshot.error}');
-                          }
-
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const SpinKitFadingCircle(
-                              color: Color(0xFF819db5),
-                              size: 100.0,
-                              duration: Duration(milliseconds: 3000),
-                            );
-                          }
-
-                          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                            return const Center(
-                              child:  Text('Нет доступных задач'),
-                            );
-                          }
-
-                          final tasks = snapshot.data!.docs
-                              .map((doc) => Task.fromMap(doc.data() as Map<String, dynamic>))
-                              .toList();
-
-                          return Container(
-                            width:MediaQuery.of(context).size.height / 2,
-                            height: MediaQuery.of(context).size.height / 2,
-                            child: ListView.builder(
-                              itemCount: tasks.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                final task = tasks[index];
-                                return GestureDetector(
-
-                                  onTap: (){
-                                    showDialog(
-                                        context: context,
-                                        builder: (BuildContext context){
-                                          return AlertDialog(
-                                              title: Text('Задание ${task.id}'),
-                                              content: Container(
-                                                height: 100.0,
-                                                child: Padding(
-                                                  padding: EdgeInsets.all((10.0)),
-                                                  child: Column(
-                                                    children: [
-                                                      Text('${task.description}'),
-                                                      Text('Время выполнения:${task.time_level} сек.')
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () {
-                                                    Navigator.of(context).pop();
-                                                  },
-                                                  child: Text('Закрыть'),
-                                                ),
-                                                TextButton(
-                                                  onPressed: () {
-                                                    Navigator.push(context, MaterialPageRoute<void>(
-                                                      builder: (BuildContext context) {
-                                                        return Scaffold(
-                                                            appBar: AppBar(
-                                                              title: Text('Уровень ${index + 1}'),
-                                                            ),
-                                                            body: LevelGameScreen(task:task)
-                                                        );
-                                                      },
-                                                    ));
-                                                  },
-                                                  child: Text('Начать'),
-                                                )
-                                              ]
-                                          );
-                                        }
-                                    );
-                                  },
-                                  child: Container(
-                                    height: 80.0,
-                                    margin: const EdgeInsets.only(bottom: 20.0),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF819db5),
-                                      borderRadius: BorderRadius.circular(10.0),
-                                    ),
-                                    child: Stack(
-                                      children: [
-                                        Align(
-                                          alignment: Alignment.topLeft,
-                                          child: Padding(
-                                            padding: EdgeInsets.all(10.0),
-                                            child: Text("${task.id}"),
-                                          ),
-                                        ),
-                                        Align(
-                                          alignment: Alignment.bottomLeft,
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(10.0),
-                                            child: Row(
-                                              children: <Widget>[
-                                                const Text('Сложность: '),
-                                                const SizedBox(width: 5.0),
-                                                ...List.generate(
-                                                  task.level,
-                                                      (index) => Padding(
-                                                    padding: const EdgeInsets.only(right: 5.0),
-                                                    child: SvgPicture.asset(
-                                                      'assets/images/complexity.svg',
-                                                      height: 20.0,
-                                                      width: 20.0,
-                                                    ),
-                                                  ),
-                                                ).toList(),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                        Align(
-                                          alignment: Alignment.bottomRight,
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(right: 10.0, bottom: 10.0),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                SvgPicture.asset(
-                                                  'assets/images/money.svg',
-                                                  height: 40.0,
-                                                  width: 40.0,
-                                                ),
-                                                const SizedBox(width: 5.0),
-                                                Text("${task.total}"),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
+                    ),
+                    const SizedBox(
+                      height: 30.0,
+                    ),
+                    Transform(
+                      alignment: Alignment.center,
+                      transform: Matrix4.rotationX(0),
+                      child: Container(
+                        color: const Color(0xFFE8581C),
+                        child: showFilterBlock ? Column(
+                          children: [
+                            Text('Фильтры'),
+                            Slider(
+                              value: _currentValue,
+                              max: 100,
+                              divisions: 5,
+                              label: _currentValue.round().toString(),
+                              onChanged: (double value) {
+                                setState(() {
+                                  _currentValue = value;
+                                });
                               },
                             ),
+                          ],
+                        ) : const SizedBox(),
+                      )
+                    ),
+                    StreamBuilder<QuerySnapshot>(
+                      stream: _collectionRef.snapshots(),
+                      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                        if (snapshot.hasError) {
+                          return Text('Ошибка получения данных: ${snapshot.error}');
+                        }
+
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const SpinKitFadingCircle(
+                            color: Color(0xFF819db5),
+                            size: 100.0,
+                            duration: Duration(milliseconds: 3000),
                           );
-                        },
-                      ),
-                    ],
-                  ),
+                        }
+
+                        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                          return const Center(
+                            child:  Text('Нет доступных задач'),
+                          );
+                        }
+
+                        final tasks = snapshot.data!.docs
+                            .map((doc) => Task.fromMap(doc.data() as Map<String, dynamic>))
+                            .toList();
+
+                        return Container(
+                          width:MediaQuery.of(context).size.height / 2,
+                          height: MediaQuery.of(context).size.height / 2,
+                          child: ListView.builder(
+                            itemCount: tasks.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              final task = tasks[index];
+                              return GestureDetector(
+
+                                onTap: (){
+                                  showDialog(
+                                      context: context,
+                                      builder: (BuildContext context){
+                                        return AlertDialog(
+                                            title: Text('Задание ${task.id}'),
+                                            content: Container(
+                                              height: 100.0,
+                                              child: Padding(
+                                                padding: EdgeInsets.all((10.0)),
+                                                child: Column(
+                                                  children: [
+                                                    Text('${task.description}'),
+                                                    Text('Время выполнения:${task.time_level} сек.')
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                                child: const Text('Закрыть'),
+                                              ),
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                  Navigator.push(context, MaterialPageRoute<void>(
+                                                    builder: (BuildContext context) {
+                                                      return Scaffold(
+                                                          appBar: AppBar(
+                                                            title: Text('Уровень ${index + 1}'),
+                                                          ),
+                                                          body: LevelGameScreen(task:task)
+                                                      );
+                                                    },
+                                                  ));
+                                                },
+                                                child: const Text('Начать'),
+                                              )
+                                            ]
+                                        );
+                                      }
+                                  );
+                                },
+                                child: Container(
+                                  height: 80.0,
+                                  margin: const EdgeInsets.only(bottom: 20.0),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF819db5),
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                  child: Stack(
+                                    children: [
+                                      Align(
+                                        alignment: Alignment.topLeft,
+                                        child: Padding(
+                                          padding: EdgeInsets.all(10.0),
+                                          child: Text("${task.id}"),
+                                        ),
+                                      ),
+                                      Align(
+                                        alignment: Alignment.bottomLeft,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(10.0),
+                                          child: Row(
+                                            children: <Widget>[
+                                              const Text('Сложность: '),
+                                              const SizedBox(width: 5.0),
+                                              ...List.generate(
+                                                task.level,
+                                                    (index) => Padding(
+                                                  padding: const EdgeInsets.only(right: 5.0),
+                                                  child: SvgPicture.asset(
+                                                    'assets/images/complexity.svg',
+                                                    height: 20.0,
+                                                    width: 20.0,
+                                                  ),
+                                                ),
+                                              ).toList(),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      Align(
+                                        alignment: Alignment.bottomRight,
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(right: 10.0, bottom: 10.0),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              SvgPicture.asset(
+                                                'assets/images/money.svg',
+                                                height: 40.0,
+                                                width: 40.0,
+                                              ),
+                                              const SizedBox(width: 5.0),
+                                              Text("${task.total}"),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 )
             )
         ),

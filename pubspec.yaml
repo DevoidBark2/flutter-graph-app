@@ -100,6 +100,7 @@ flutter:
     - assets/images/success_icon.svg
     - assets/images/right_icon.svg
     - assets/images/warning_icon.svg
+    - assets/images/empty_icon.svg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

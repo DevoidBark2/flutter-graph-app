@@ -132,7 +132,8 @@ class _InteractiveGameState extends State<InteractiveGame> {
                     ElevatedButton(
                       onPressed: saveUserData,
                       style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(Colors.deepOrangeAccent),
+                          backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                          foregroundColor: MaterialStateProperty.all<Color>(Colors.white)
                       ),
                       child: const Text('Сохранить'),
                     ),
@@ -308,21 +309,22 @@ class _InteractiveGameState extends State<InteractiveGame> {
                                   decoration: const BoxDecoration(
                                     border: Border(
                                         bottom: BorderSide(
-                                            color:Colors.black,
+                                            color:Colors.white38,
                                             width: 1.0
                                         )
                                     )
                                   ),
                                   child: Padding(
-                                    padding: EdgeInsets.only(bottom: 5),
+                                    padding: const EdgeInsets.only(bottom: 5),
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text("${firstName != null ? firstName : ""} ${secondName != null ? secondName : ""}"),
+                                        Text("${firstName ?? ""} ${secondName ?? ""}"),
                                         SvgPicture.asset(
                                           'assets/images/right_icon.svg',
                                           width: 15,
                                           height: 15,
+                                          color:Colors.white38,
                                         )
                                       ],
                                     ),
@@ -369,7 +371,7 @@ class _InteractiveGameState extends State<InteractiveGame> {
                             decoration: const BoxDecoration(
                                 border: Border(
                                     bottom: BorderSide(
-                                        color:Colors.black,
+                                        color:Colors.white38,
                                         width: 1.0
                                     )
                                 )
@@ -386,6 +388,7 @@ class _InteractiveGameState extends State<InteractiveGame> {
                                     'assets/images/right_icon.svg',
                                     width: 15,
                                     height: 15,
+                                    color:Colors.white38,
                                   )
                                 ],
                               ),
@@ -399,7 +402,7 @@ class _InteractiveGameState extends State<InteractiveGame> {
                           decoration: const BoxDecoration(
                               border: Border(
                                   bottom: BorderSide(
-                                      color:Colors.black,
+                                      color:Colors.white38,
                                       width: 1.0
                                   )
                               )
@@ -419,6 +422,7 @@ class _InteractiveGameState extends State<InteractiveGame> {
                                   'assets/images/right_icon.svg',
                                   width: 15,
                                   height: 15,
+                                  color:Colors.white38,
                                 )
                               ],
                             ),

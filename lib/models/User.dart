@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:test_project/models/DropDownItem.dart';
 
 class UserData {
@@ -7,7 +5,7 @@ class UserData {
   final String email;
   final String first_name;
   final String second_name;
-  final int total_user;
+  final int user_total;
   final String profile_image;
   final List<dynamic> skills;
 
@@ -16,7 +14,7 @@ class UserData {
     required this.email,
     required this.first_name,
     required this.second_name,
-    required this.total_user,
+    required this.user_total,
     required this.profile_image,
     required this.skills,
   });
@@ -27,7 +25,7 @@ class UserData {
       'email': email,
       'first_name': first_name,
       'second_name': second_name,
-      'user_total' : total_user,
+      'user_total' : user_total,
       'profile_image' : profile_image,
       'skills' : skills.map((skill) => skill.toJson()).toList(),
     };
@@ -44,9 +42,10 @@ class UserData {
       email: map['email'] ?? '',
       first_name: map['first_name'] ?? '',
       second_name: map['second_name'] ?? '',
-      total_user: map['total_user'] ?? 0,
+      user_total: map['user_total'] ?? 0,
       profile_image: map['profile_image'] ?? 'https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg',
       skills: skills,
+
     );
   }
 }
