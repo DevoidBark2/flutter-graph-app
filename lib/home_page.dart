@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:test_project/models/User.dart';
 import 'package:test_project/screens/auth/login_screen.dart';
 import 'package:test_project/screens/draw_screen.dart';
 import 'package:test_project/screens/drawing_screen.dart';
@@ -33,11 +35,6 @@ class _HomePageState extends State<HomePage> {
     SettingsScreen(),
     LoginScreen()
   ];
-  var rulesMatrix = [
-    'Размер матрицы должен быть задан.',
-    'Размер матрицы должен быть больше 0.',
-    'Размер матрицы должен представлять число.',
-  ];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -49,36 +46,26 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    getData();
     super.initState();
-  }
-  void getData() async {
-    final user = FirebaseAuth.instance.currentUser;
-
-    if (user != null) {
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-          .collection('users-list')
-          .where('uid', isEqualTo: user.uid)
-          .get();
-
-      if (querySnapshot.docs.isNotEmpty) {
+    FirebaseFirestore.instance
+        .collection('users-list')
+        .where('uid', isEqualTo: FirebaseAuth.instance.currentUser?.uid ?? '')
+        .snapshots()
+        .listen((snapshot) {
+      if (snapshot.docs.isNotEmpty) {
         setState(() {
-          data = querySnapshot.docs.first.data();
-          print('Данные пользователя: $data');
+          final userData = snapshot.docs.map((doc) => doc.data()).toList();
+
+          final userDetails = userData.map((doc) => UserData.fromMap(doc)).toList();
+
+          data = userDetails;
         });
-      } else {
-        print('Пользователь с UID ${user.uid} не найден в Firestore.');
       }
-    }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-
-    // if (data == null) {
-    //   return const Center(child: CircularProgressIndicator());
-    // }
-
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -124,10 +111,29 @@ class _HomePageState extends State<HomePage> {
         child: ListView(
           children: [
             Container(
-              height:100.0,
+              height:120.0,
               decoration: const BoxDecoration(
                 color: Color(0xFF678094)
-              )
+              ),
+              child: data != null && data.length > 0 ? Padding(
+                padding: const EdgeInsets.all(10),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    CircleAvatar(
+                      backgroundImage: NetworkImage(data[0].profile_image),
+                      radius: 30,
+                    ),
+                   const SizedBox(width: 10),
+                   Column(
+                     mainAxisAlignment: MainAxisAlignment.center,
+                     children: [
+                       Text(data[0].first_name + " " + (data[0].second_name)),
+                     ],
+                   )
+                  ],
+                ),
+              ) : const SizedBox()
             ),
             ListTile(
               leading: const Icon(Icons.home),
