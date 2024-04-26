@@ -147,8 +147,23 @@ class _DropDownScreenState extends State<DropDownScreen>{
               }
 
               if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                return const Center(
-                  child:  Text('Нет доступных навыков'),
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/images/empty_icon.svg',
+                        height: 100.0,
+                        width: 100.0,
+                      ),
+                      Text(
+                        'Нет доступных ${type == "skills-list" ? 'навыков' : 'подсказок'}',
+                        style: const TextStyle(
+                            fontSize: 16
+                        ),
+                      )
+                    ],
+                  ),
                 );
               }
 
@@ -194,8 +209,9 @@ class _DropDownScreenState extends State<DropDownScreen>{
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
                                           ElevatedButton(
-                                            style: ElevatedButton.styleFrom(
-                                                backgroundColor: Colors.lightGreen
+                                            style: ButtonStyle(
+                                                backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                                                foregroundColor: MaterialStateProperty.all<Color>(Colors.white)
                                             ),
                                             child: const Text('OK'),
                                             onPressed: () => Navigator.of(context).pop(),

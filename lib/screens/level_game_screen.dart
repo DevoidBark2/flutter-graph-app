@@ -2,13 +2,13 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:elegant_notification/elegant_notification.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:test_project/models/Task.dart';
 
-import '../models/DropDownItem.dart';
+import '../service/snack_bar.dart';
 
 class LevelGameScreen extends StatefulWidget {
   final Task task;
@@ -136,100 +136,186 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
 
 
   void _checkPlangraph(){
-    print(widget.task.graph);
-    print(points);
-    bool hasIntersections = checkForIntersections(widget.task.graph, points);
+    // final a = widget.task.answer;
+    // print(a);
+    // print(time.value);
 
-    if (hasIntersections) {
-      print('Граф имеет пересечения рёбер.');
+    double getPercentage(int timeLeft, int totalTime) {
+      if (timeLeft == 0) {
+        return 0.0;
+      }
+      return totalTime * 0.05;
+    }
+
+    double percentage = 0.0;
+    if (time.value > 0) {
+      // Игрок получает максимальное количество очков
+      print("Время не вышло,кол-во очков: ${widget.task.total}");
     } else {
-      print('Граф не имеет пересечений рёбер.');
+      final total = widget.task.total;
+      percentage = getPercentage(time.value, widget.task.time_level);
+      final deductedPoints = total * percentage;
+      final price = total - deductedPoints;
+      print("Время вышло,кол-во очков: ${price}");
     }
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Ответ"),
+          content: const Text("Граф можно быть расложен без пересечений ребер?"),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                    foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                  ),
+                  child: const Text('Да'),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                    // ScaffoldMessenger.of(context).showSnackBar(
+                    //   const SnackBar(
+                    //     content: Text('Вы вошли в профиль!'),
+                    //     duration: Duration(seconds: 3),
+                    //     backgroundColor: Colors.green,
+                    //     behavior: SnackBarBehavior.floating,
+                    //     shape: RoundedRectangleBorder(
+                    //       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                    //     ),
+                    //   ),
+                    // );
+
+                    final snackBar = SnackBar(
+                      content: Text("asdasdad"),
+                      backgroundColor: Colors.indigo
+                    );
+
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+                    // SnackBarService.showSnackBar(
+                    //     context,
+                    //     'Введите E-mail!',
+                    //     false
+                    // );
+                  },
+                ),
+                ElevatedButton(
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                      foregroundColor: MaterialStateProperty.all<Color>(Colors.white)
+                  ),
+                  child: const Text('Нет'),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            )
+          ],
+        );
+      },
+    );
+    // print(widget.task.graph);
+    // print(points);
+    // bool hasIntersections = checkForIntersections(widget.task.graph, points);
+    //
+    // if (hasIntersections) {
+    //   print('Граф имеет пересечения рёбер.');
+    // } else {
+    //   print('Граф не имеет пересечений рёбер.');
+    // }
   }
 
-  bool checkForIntersections(List<List<int>> adjacencyMatrix, List<Offset> points) {
-    for (int i = 0; i < adjacencyMatrix.length; i++) {
-      for (int j = i + 1; j < adjacencyMatrix[i].length; j++) {
-        if (adjacencyMatrix[i][j] == 1 && !haveCommonVertex(adjacencyMatrix, i, j)) {
-          if (doIntersectSimple(points[i], points[j], points[j], points[i])) {
-            return true; // Найдено пересечение
-          }
-        }
-      }
-    }
-
-    // Проверяем все возможные комбинации вершин на пересечение ребер
-    for (int i = 0; i < adjacencyMatrix.length; i++) {
-      for (int j = 0; j < adjacencyMatrix[i].length; j++) {
-        if (adjacencyMatrix[i][j] == 1) {
-          for (int k = 0; k < adjacencyMatrix.length; k++) {
-            if (k != i && adjacencyMatrix[k][j] == 1) {
-              if (doIntersectSimple(points[i], points[j], points[k], points[j])) {
-                return true; // Найдено пересечение
-              }
-            }
-          }
-        }
-      }
-    }
-
-    return false; // Пересечений не найдено
-  }
-
-  bool haveCommonVertex(List<List<int>> adjacencyMatrix, int vertex1, int vertex2) {
-    for (int k = 0; k < adjacencyMatrix[vertex1].length; k++) {
-      if (adjacencyMatrix[vertex1][k] == 1 && adjacencyMatrix[vertex2][k] == 1) {
-        return true; // Найдена общая вершина
-      }
-    }
-
-    return false; // Общей вершины нет
-  }
-
-  bool doIntersectSimple(Offset p1, Offset q1, Offset p2, Offset q2) {
-    int o1 = orientation(p1, q1, p2);
-    int o2 = orientation(p1, q1, q2);
-    int o3 = orientation(p2, q2, p1);
-    int o4 = orientation(p2, q2, q1);
-
-    if (o1 != o2 && o3 != o4) {
-      return true; // Отрезки пересекаются
-    }
-
-    // Проверяем, лежат ли точки на одной прямой
-    if (orientation(p1, p2, q1) == 0 && onSegment(p1, p2, q1)) {
-      return true;
-    }
-    if (orientation(p1, p2, q2) == 0 && onSegment(p1, p2, q2)) {
-      return true;
-    }
-    if (orientation(p2, q2, p1) == 0 && onSegment(p2, q2, p1)) {
-      return true;
-    }
-    if (orientation(p2, q2, q1) == 0 && onSegment(p2, q2, q1)) {
-      return true;
-    }
-
-    return false; // Отрезки не пересекаются
-  }
-
-
-  bool onSegment(Offset p, Offset q, Offset r) {
-    if (!((r.dx <= max(p.dx, q.dx)) && (r.dx >= min(p.dx, q.dx)) &&
-        (r.dy <= max(p.dy, q.dy)) && (r.dy >= min(p.dy, q.dy)))) {
-      return false;
-    }
-    double o1 = (q.dy - p.dy) * (r.dx - q.dx) - (q.dx - p.dx) * (r.dy - q.dy);
-    double o2 = (q.dy - r.dy) * (p.dx - q.dx) - (q.dx - r.dx) * (p.dy - q.dy);
-
-    return (o1 > 0) != (o2 > 0);
-  }
-
-  int orientation(Offset p, Offset q, Offset r) {
-    double val = (q.dy - p.dy) * (r.dx - q.dx) - (q.dx - p.dx) * (r.dy - q.dy);
-    if (val == 0) return 0;
-    return (val > 0) ? 1 : 2;
-  }
+  // bool checkForIntersections(List<List<int>> adjacencyMatrix, List<Offset> points) {
+  //   // for (int i = 0; i < adjacencyMatrix.length; i++) {
+  //   //   for (int j = i + 1; j < adjacencyMatrix[i].length; j++) {
+  //   //     if (adjacencyMatrix[i][j] == 1 && !haveCommonVertex(adjacencyMatrix, i, j)) {
+  //   //       if (doIntersectSimple(points[i], points[j], points[j], points[i])) {
+  //   //         return true; // Найдено пересечение
+  //   //       }
+  //   //     }
+  //   //   }
+  //   // }
+  //
+  //   // Проверяем все возможные комбинации вершин на пересечение ребер
+  //   for (int i = 0; i < adjacencyMatrix.length; i++) {
+  //     for (int j = 0; j < adjacencyMatrix[i].length; j++) {
+  //       if (adjacencyMatrix[i][j] == 1) {
+  //         for (int k = 0; k < adjacencyMatrix.length; k++) {
+  //           if (k != i && adjacencyMatrix[k][j] == 1) {
+  //             if (doIntersectSimple(points[i], points[j], points[k], points[i])) {
+  //               return true; // Найдено пересечение
+  //             }
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+  //
+  //   return false; // Пересечений не найдено
+  // }
+  //
+  // bool haveCommonVertex(List<List<int>> adjacencyMatrix, int vertex1, int vertex2) {
+  //   for (int k = 0; k < adjacencyMatrix[vertex1].length; k++) {
+  //     if (adjacencyMatrix[vertex1][k] == 1 && adjacencyMatrix[vertex2][k] == 1) {
+  //       return true; // Найдена общая вершина
+  //     }
+  //   }
+  //
+  //   return false; // Общей вершины нет
+  // }
+  //
+  // bool doIntersectSimple(Offset p1, Offset q1, Offset p2, Offset q2) {
+  //   int o1 = orientation(p1, q1, p2);
+  //   int o2 = orientation(p1, q1, q2);
+  //   int o3 = orientation(p2, q2, p1);
+  //   int o4 = orientation(p2, q2, q1);
+  //
+  //   if ((o1 < 0 && o2 >= 0) || (o1 >= 0 && o2 < 0)) {
+  //     return true; // Отрезки пересекаются
+  //   }
+  //   if ((o3 < 0 && o4 >= 0) || (o3 >= 0 && o4 < 0)) {
+  //     return true; // Отрезки пересекаются
+  //   }
+  //
+  //   // Проверяем, лежат ли точки на одной прямой
+  //   if (orientation(p1, p2, q1) == 0 && onSegment(p1, p2, q1)) {
+  //     return true;
+  //   }
+  //   if (orientation(p1, p2, q2) == 0 && onSegment(p1, p2, q2)) {
+  //     return true;
+  //   }
+  //   if (orientation(p2, q2, p1) == 0 && onSegment(p2, q2, p1)) {
+  //     return true;
+  //   }
+  //   if (orientation(p2, q2, q1) == 0 && onSegment(p2, q2, q1)) {
+  //     return true;
+  //   }
+  //
+  //   return false; // Отрезки не пересекаются
+  // }
+  //
+  //
+  // bool onSegment(Offset p, Offset q, Offset r) {
+  //   if (!((r.dx <= max(p.dx, q.dx)) && (r.dx >= min(p.dx, q.dx)) &&
+  //       (r.dy <= max(p.dy, q.dy)) && (r.dy >= min(p.dy, q.dy)))) {
+  //     return false;
+  //   }
+  //
+  //   double o1 = (q.dy - p.dy) * (r.dx - q.dx) - (q.dx - p.dx) * (r.dy - q.dy);
+  //   double o2 = (q.dy - r.dy) * (p.dx - q.dx) - (q.dx - r.dx) * (p.dy - q.dy);
+  //
+  //   return (o1 >= 0) == (o2 >= 0);
+  // }
+  //
+  // int orientation(Offset p, Offset q, Offset r) {
+  //   double val = (q.dy - p.dy) * (r.dx - q.dx) - (q.dx - p.dx) * (r.dy - q.dy);
+  //   if (val == 0) return 0;
+  //   return 1;
+  // }
   //
   // bool doIntersect(Offset p1, Offset q1, Offset p2, Offset q2) {
   //   int o1 = orientation(p1, q1, p2);
@@ -351,7 +437,7 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
                               Navigator.pop(context);
 
 
-                              
+
                               final CollectionReference userListRef = FirebaseFirestore.instance.collection('users-list');
                               final userDocument = userListRef.doc(currentUserUid);
 

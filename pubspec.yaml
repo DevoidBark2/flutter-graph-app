@@ -53,6 +53,7 @@ dependencies:
   flutter_widget_from_html: ^0.9.1
   flutter_html: ^3.0.0-beta.2
   firebase_storage: ^11.6.5
+  elegant_notification: ^2.1.2
 
 dev_dependencies:
   flutter_test:

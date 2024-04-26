@@ -7,6 +7,7 @@ class Task {
   final int time_level;
   final String description;
   final List<List<int>> graph;
+  final bool answer;
 
   Task({
     required this.id,
@@ -14,7 +15,8 @@ class Task {
     required this.total,
     required this.time_level,
     required this.description,
-    required this.graph
+    required this.graph,
+    required this.answer
   });
 
   factory Task.fromMap(Map<String, dynamic> map) {
@@ -34,6 +36,7 @@ class Task {
       time_level: map['time_level'] ?? 0,
       description: map['description'] ?? '',
       graph: graph ?? [],
+      answer: map['answer'] ?? false
     );
   }
 }
