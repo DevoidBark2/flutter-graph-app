@@ -18,8 +18,16 @@ class LevelGameScreen extends StatefulWidget {
   State<LevelGameScreen> createState() => _LevelGameScreenState();
 }
 
+class Vertex {
+  final int index;
+  final int color;
+
+  Vertex({required this.index, required this.color});
+}
+
 class _LevelGameScreenState extends State<LevelGameScreen> {
   List<Offset> points = [];
+  List<Vertex> colorsGraph = [];
   int? selectedVertexIndex;
   int? selectedVertexOffset;
   ValueNotifier<int> time = ValueNotifier<int>(0);
@@ -46,8 +54,8 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
 
   void initializePoints() {
     final matrix = widget.task.graph;
-    final double sizeWidth = 400;
-    final double sizeHeight = 400;
+    const double sizeWidth = 400;
+    const double sizeHeight = 400;
     final double radius = getRadius(matrix.length, sizeWidth);
 
     for (var i = 0; i < matrix.length; i++) {
@@ -95,8 +103,6 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
   late List skills = [];
   final _userData = FirebaseFirestore.instance.collection('users-list');
 
-
-
   Future<void> getUserData() async{
     try {
       QuerySnapshot _user = await _userData.where('uid', isEqualTo: currentUserUid ?? '').get();
@@ -112,6 +118,7 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
       print('Exception occurred: $e');
     }
   }
+
   void updateEdgePositions() {
     for (int i = 0; i < widget.task.graph.length; i++) {
       for (int j = 0; j < widget.task.graph.length; j++) {
@@ -126,9 +133,122 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
     }
   }
 
+
+
   void _checkPlangraph(){
-    Navigator.pop(context);
+    print(widget.task.graph);
+    print(points);
+    bool hasIntersections = checkForIntersections(widget.task.graph, points);
+
+    if (hasIntersections) {
+      print('Граф имеет пересечения рёбер.');
+    } else {
+      print('Граф не имеет пересечений рёбер.');
+    }
   }
+
+  bool checkForIntersections(List<List<int>> adjacencyMatrix, List<Offset> points) {
+    for (int i = 0; i < adjacencyMatrix.length; i++) {
+      for (int j = i + 1; j < adjacencyMatrix[i].length; j++) {
+        if (adjacencyMatrix[i][j] == 1 && !haveCommonVertex(adjacencyMatrix, i, j)) {
+          if (doIntersectSimple(points[i], points[j], points[j], points[i])) {
+            return true; // Найдено пересечение
+          }
+        }
+      }
+    }
+
+    // Проверяем все возможные комбинации вершин на пересечение ребер
+    for (int i = 0; i < adjacencyMatrix.length; i++) {
+      for (int j = 0; j < adjacencyMatrix[i].length; j++) {
+        if (adjacencyMatrix[i][j] == 1) {
+          for (int k = 0; k < adjacencyMatrix.length; k++) {
+            if (k != i && adjacencyMatrix[k][j] == 1) {
+              if (doIntersectSimple(points[i], points[j], points[k], points[j])) {
+                return true; // Найдено пересечение
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return false; // Пересечений не найдено
+  }
+
+  bool haveCommonVertex(List<List<int>> adjacencyMatrix, int vertex1, int vertex2) {
+    for (int k = 0; k < adjacencyMatrix[vertex1].length; k++) {
+      if (adjacencyMatrix[vertex1][k] == 1 && adjacencyMatrix[vertex2][k] == 1) {
+        return true; // Найдена общая вершина
+      }
+    }
+
+    return false; // Общей вершины нет
+  }
+
+  bool doIntersectSimple(Offset p1, Offset q1, Offset p2, Offset q2) {
+    int o1 = orientation(p1, q1, p2);
+    int o2 = orientation(p1, q1, q2);
+    int o3 = orientation(p2, q2, p1);
+    int o4 = orientation(p2, q2, q1);
+
+    if (o1 != o2 && o3 != o4) {
+      return true; // Отрезки пересекаются
+    }
+
+    // Проверяем, лежат ли точки на одной прямой
+    if (orientation(p1, p2, q1) == 0 && onSegment(p1, p2, q1)) {
+      return true;
+    }
+    if (orientation(p1, p2, q2) == 0 && onSegment(p1, p2, q2)) {
+      return true;
+    }
+    if (orientation(p2, q2, p1) == 0 && onSegment(p2, q2, p1)) {
+      return true;
+    }
+    if (orientation(p2, q2, q1) == 0 && onSegment(p2, q2, q1)) {
+      return true;
+    }
+
+    return false; // Отрезки не пересекаются
+  }
+
+
+  bool onSegment(Offset p, Offset q, Offset r) {
+    if (!((r.dx <= max(p.dx, q.dx)) && (r.dx >= min(p.dx, q.dx)) &&
+        (r.dy <= max(p.dy, q.dy)) && (r.dy >= min(p.dy, q.dy)))) {
+      return false;
+    }
+    double o1 = (q.dy - p.dy) * (r.dx - q.dx) - (q.dx - p.dx) * (r.dy - q.dy);
+    double o2 = (q.dy - r.dy) * (p.dx - q.dx) - (q.dx - r.dx) * (p.dy - q.dy);
+
+    return (o1 > 0) != (o2 > 0);
+  }
+
+  int orientation(Offset p, Offset q, Offset r) {
+    double val = (q.dy - p.dy) * (r.dx - q.dx) - (q.dx - p.dx) * (r.dy - q.dy);
+    if (val == 0) return 0;
+    return (val > 0) ? 1 : 2;
+  }
+  //
+  // bool doIntersect(Offset p1, Offset q1, Offset p2, Offset q2) {
+  //   int o1 = orientation(p1, q1, p2);
+  //   int o2 = orientation(p1, q1, q2);
+  //   int o3 = orientation(p2, q2, p1);
+  //   int o4 = orientation(p2, q2, q1);
+  //
+  //   if (o1 != o2 && o3 != o4) {
+  //     return true;
+  //   }
+  //
+  //   if (o1 == 0 && onSegment(p1, p2, q1)) return true;
+  //   if (o2 == 0 && onSegment(p1, q2, q1)) return true;
+  //   if (o3 == 0 && onSegment(p2, p1, q2)) return true;
+  //   if (o4 == 0 && onSegment(p2, q1, q2)) return true;
+  //
+  //   return false;
+  // }
+
 
   final colors = [
     const Color(0xffe8e809),
@@ -160,12 +280,12 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
           Container(
               child: isTimeEnd.value
                   ? Text(
-                  "${time.value}",
+                  "Оставшееся время: ${time.value}",
                   style: const TextStyle(
                       color: Colors.red
                   )
               )
-                  : Text( "${time.value}")
+                  : Text( "Оставшееся время: ${time.value}")
           ),
           GestureDetector(
             onLongPressStart: (details) {
@@ -196,72 +316,13 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
                 });
               }
             },
-             onDoubleTapDown: (details){
-               final tapPosition = details.localPosition;
-               final vertexIndex = getTappedVertexIndex(tapPosition);
-               for (int i = 0; i < points.length; i++) {
-                 if ((tapPosition.dx - points[i].dx).abs() < 30.0) {
-                   print('Change color vertex: $i');
-                   showDialog(
-                     context: context,
-                     builder: (BuildContext context) {
-                       return AlertDialog(
-                       title: const Text('Цвета'),
-                       content: SingleChildScrollView(
-                         child: SizedBox(
-                           child: Wrap(
-                             spacing: 8.0, // gap between adjacent chips
-                             runSpacing: 4.0,
-                             children: [
-                               GridView.builder(
-                                 shrinkWrap: true,
-                                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                   crossAxisCount: 2,
-                                   crossAxisSpacing: 10.0,
-                                   mainAxisSpacing: 10.0,
-                                   childAspectRatio: 1.0,
-                                 ),
-                                 itemCount: colors.length,
-                                 itemBuilder: (BuildContext context, int index) {
-                                   final color = colors[index];
-                                   return Padding(
-                                     padding: const EdgeInsets.all(5),
-                                     child: ElevatedButton(
-                                       onPressed: () {
-                                         print('Selected Color: $index');
-                                         selectedVertexOffset = i;
-                                         selectedColor = color.value;
-                                         setState(() {});
-                                         Navigator.pop(context);
-                                       },
-                                       style: ElevatedButton.styleFrom(
-                                         backgroundColor: color,
-                                         shape: const StadiumBorder(),
-                                         padding: const EdgeInsets.all(12),
-                                       ),
-                                       child: const SizedBox(),
-                                     ),
-                                   );
-                                 },
-                               )
-                             ],
-                           ),
-                         ),
-                       ),
-                       );
-                     },
-                   );
-                 } else {
-                   print('No Change vertex');
-                 }
-               }
-             },
             child: CustomPaint(
               painter: OpenPainter(
                   matrix: widget.task.graph,
                   selectedIndex: selectedVertexOffset,
                   color: selectedColor,
-                  points:points
+                  points:points,
+                  colorsVertex: colorsGraph
               ),
             ),
           ),
@@ -281,7 +342,6 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
                         skills.length,
                             (index) => ElevatedButton(
                           onPressed: () {
-                            print(index);
                             if (skills[index]['total_time'] != null) {
                               time.value = time.value + int.parse(skills[index]['total_time'].toString());
                               if(time.value > 0){
@@ -376,25 +436,31 @@ class OpenPainter extends CustomPainter {
   final int? selectedIndex;
   final List<Offset> points;
   final int? color;
+  final List<Vertex> colorsVertex;
   OpenPainter({
     Key? key,
     required this.matrix,
     required this.selectedIndex,
     required this.points,
-    required this.color
+    required this.color,
+    required this.colorsVertex
   });
   @override
   @override
   void paint(Canvas canvas, Size size) {
     var path = Path();
 
-    var drawPoints = Paint()..color = Color(0xffb69d9d)..strokeCap = StrokeCap.round..strokeWidth = 20;
-    var drawLines = Paint()..color = Color(0xffb69d9d)..strokeWidth = 2;
+    var drawPoints = Paint()..color = const Color(0xffb69d9d)..strokeCap = StrokeCap.round..strokeWidth = 20;
+    var drawLines = Paint()..color = const Color(0xffb69d9d)..strokeWidth = 2;
 
     var paint3 =  Paint()..color = const Color(0xffb69d9d)..strokeWidth = 1..style = PaintingStyle.stroke;
     var paint4 =  Paint()..color = const Color(0xff000000)..strokeWidth = 10..style = PaintingStyle.stroke;
 
-    var selectedIndexPaint =  Paint()..color = Color(color != null ? color as int : 0xffb69d9d)..strokeCap = StrokeCap.round..strokeWidth = 20;
+    int getVertexColor(List<Vertex> colorsGraph, int selectedIndex) {
+      return colorsGraph.firstWhere((Vertex vertex) => vertex.index == selectedIndex, ).color;
+    }
+
+    var selectedIndexPaint =  Paint()..color = Color(color != null ? getVertexColor(colorsVertex, selectedIndex!) : 0xffb69d9d)..strokeCap = StrokeCap.round..strokeWidth = 20;
 
     var radius = 140;
     if (matrix.length > 10) {
@@ -406,22 +472,33 @@ class OpenPainter extends CustomPainter {
     for (var i = 0; i < matrix.length; i++) {
       for (var j = 0; j < matrix.length; j++) {
         if (matrix[i][j] != 0) {
-          final startPoint = this.points[i];
-          final endPoint = this.points[j];
+          final startPoint = points[i];
+          final endPoint = points[j];
+
+          final offset = endPoint - startPoint;
+          final normalizedOffset = offset / offset.distance * 15; // Длина отступа
+
+          final adjustedStartPoint = startPoint + normalizedOffset;
+          final adjustedEndPoint = endPoint - normalizedOffset;
 
           if (i == selectedIndex || j == selectedIndex) {
-            drawLines.color = Colors.red;
+            drawLines.color = Colors.black;
           } else {
             drawLines.color = Colors.black;
           }
 
-          canvas.drawLine(startPoint, endPoint, drawLines);
+          canvas.drawLine(adjustedStartPoint, adjustedEndPoint, drawLines);
         }
       }
     }
 
     for (var i = 0; i < matrix.length; i++) {
-      canvas.drawCircle(points[i], 15, selectedIndex == i ? selectedIndexPaint : drawPoints);
+      selectedIndexPaint.color = Color(0xffb69d9d); // Set default color
+      if (selectedIndex != null && selectedIndex == i) {
+        selectedIndexPaint.color = Color(color != null ? getVertexColor(colorsVertex, selectedIndex!) : 0xffb69d9d);
+      }
+
+      canvas.drawCircle(points[i], 15, selectedIndexPaint);
       int letterIndex = i % 26;
       String letter = String.fromCharCode(65 + letterIndex);
       TextSpan span = TextSpan(style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold), text:  (i + 1).toString());
@@ -429,12 +506,12 @@ class OpenPainter extends CustomPainter {
       tp.layout();
       if (matrix.length > 9) {
         if (i < 9) {
-          tp.paint(canvas, Offset(this.points[i].dx -5.0, this.points[i].dy - 8.0));
+          tp.paint(canvas, Offset(points[i].dx -5.0, points[i].dy - 8.0));
         } else {
-          tp.paint(canvas, Offset(this.points[i].dx -9.0, this.points[i].dy - 8.0));
+          tp.paint(canvas, Offset(points[i].dx -9.0, points[i].dy - 8.0));
         }
       } else {
-        tp.paint(canvas, Offset(this.points[i].dx -5.0, this.points[i].dy - 8.0));
+        tp.paint(canvas, Offset(points[i].dx -5.0, points[i].dy - 8.0));
       }
     }
   }
