@@ -8,6 +8,7 @@ import 'package:test_project/models/User.dart';
 import 'package:test_project/screens/auth/login_screen.dart';
 import 'package:test_project/screens/draw_screen.dart';
 import 'package:test_project/screens/drawing_screen.dart';
+import 'package:test_project/screens/gamma_algoritm/gamma_algoritm.dart';
 import 'package:test_project/screens/interactive_game.dart';
 import 'package:test_project/screens/settings_screen.dart';
 import 'package:test_project/screens/theory_screen.dart';
@@ -32,6 +33,7 @@ class _HomePageState extends State<HomePage> {
     DrawScreen(),
     DrawingScreen(),
     InteractiveGame(),
+    GammaAlgoritm(),
     SettingsScreen(),
     LoginScreen()
   ];
@@ -160,10 +162,18 @@ class _HomePageState extends State<HomePage> {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.grain),
+              title: const Text('Алгоритм укладки графа'),
+              onTap: () {
+                _onItemTapped(4);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.settings),
               title: const Text('Настройки'),
               onTap: () {
-                _onItemTapped(4);
+                _onItemTapped(5);
                 Navigator.pop(context);
               },
             ),
@@ -178,7 +188,7 @@ class _HomePageState extends State<HomePage> {
               leading: const Icon(Icons.login_rounded),
               title: const Text('Войти'),
               onTap: () {
-                _onItemTapped(5);
+                _onItemTapped(6);
                 Navigator.pop(context);
               },
             )

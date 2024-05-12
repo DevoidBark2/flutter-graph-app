@@ -349,22 +349,29 @@ class _GraphViewState extends State<GraphView> {
                       builder: (BuildContext context) {
                         return Container(
                           height: 200,
-                          color: Colors.amber,
-                          child: Center(
-                              child: isCheckedWeight ? ListView.builder(
-                                itemCount: matrix.length,
-                                itemBuilder: (context, index) {
-                                  return ElevatedButton(
-                                    onPressed: () {
-                                      dijkstra(index);
-                                      Navigator.pop(context);
-                                      Navigator.pop(context);
-                                    },
-                                    child:Text("${index + 1}"),
-                                  );
-                                },
-                              ) : const Text('Граф должен быть взвешенный')
-                          ),
+                          color: const Color(0xffE8E8E8FF),
+                          child: Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Center(
+                                child: isCheckedWeight ? ListView.builder(
+                                  itemCount: matrix.length,
+                                  itemBuilder: (context, index) {
+                                    return ElevatedButton(
+                                      onPressed: () {
+                                        dijkstra(index);
+                                        Navigator.pop(context);
+                                        Navigator.pop(context);
+                                      },
+                                      style: ButtonStyle(
+                                          backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                                          foregroundColor: MaterialStateProperty.all<Color>(Colors.white)
+                                      ),
+                                      child:Text("${index + 1}"),
+                                    );
+                                  },
+                                ) : const Text('Граф должен быть взвешенный')
+                            ),
+                          )
                         );
                       },
                     );
@@ -378,22 +385,29 @@ class _GraphViewState extends State<GraphView> {
                       builder: (BuildContext context) {
                         return Container(
                           height: 200,
-                          color: Colors.amber,
-                          child: Center(
-                              child:ListView.builder(
-                                itemCount: matrix.length,
-                                itemBuilder: (context, index) {
-                                  return ElevatedButton(
-                                    onPressed: () {
-                                      bfs(index);
-                                      Navigator.pop(context);
-                                      Navigator.pop(context);
-                                    },
-                                    child:Text("${index + 1}"),
-                                  );
-                                },
-                              )
-                          ),
+                          color: const Color(0xffE8E8E8FF),
+                          child: Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Center(
+                                child:ListView.builder(
+                                  itemCount: matrix.length,
+                                  itemBuilder: (context, index) {
+                                    return ElevatedButton(
+                                      onPressed: () {
+                                        bfs(index);
+                                        Navigator.pop(context);
+                                        Navigator.pop(context);
+                                      },
+                                      child:Text("${index + 1}"),
+                                      style: ButtonStyle(
+                                          backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                                          foregroundColor: MaterialStateProperty.all<Color>(Colors.white)
+                                      ),
+                                    );
+                                  },
+                                )
+                            ),
+                          )
                         );
                       },
                     );

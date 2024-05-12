@@ -14,10 +14,10 @@ class _NewsScreenState extends State<NewsScreen> {
   @override
   Widget build(BuildContext context) {
     var html = widget.content;
-    return Container(
+    return SingleChildScrollView(
       child: Html(
         data: html,
-      ),
+      )
     );
   }
 }

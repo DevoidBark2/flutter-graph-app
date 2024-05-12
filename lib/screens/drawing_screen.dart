@@ -42,63 +42,43 @@ class _DrawingScreenState extends State<DrawingScreen> {
     [0, 1, 1, 1, 0]];
 
   final List<Task> tasks = [];
+  final user = FirebaseAuth.instance.currentUser;
 
   final _collectionRef = FirebaseFirestore.instance.collection('tasks');
-  final _userData = FirebaseFirestore.instance.collection('users-list');
+  var _userData;
 
 
-  final user = FirebaseAuth.instance.currentUser;
+
   int userTotalData = 0;
   late List skills = [];
+  late List skills1 = [];
 
 
 
-  Future<void> getUserData() async{
-    try {
-      // FirebaseFirestore.instance
-      //     .collection('users-list')
-      //     .where('uid', isEqualTo: FirebaseAuth.instance.currentUser?.uid ?? '')
-      //     .snapshots()
-      //     .listen((snapshot) {
-      //   if (snapshot.docs.isNotEmpty) {
-      //     setState(() {
-      //       final userData = snapshot.docs.map((doc) => doc.data()).toList();
-      //
-      //       final userDetails = userData.map((doc) => UserData.fromMap(doc)).toList();
-      //
-      //       userTotalData = userData[0]['user_total'];
-      //       skills = userData[0]['skills'];
-      //     });
-      //   }
-      // });
-      QuerySnapshot _user = await _userData.where('uid', isEqualTo: user?.uid ?? '').get();
-      final userData = _user.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+  void getUserData() {
+    _userData.get().then((value) {
+      userTotalData = value.data()!['user_total'];
+      skills = value.data()!['skills'];
+      // skills1 = value.data()!['skills'].where((element) => element['title'] == "Тайм-экстендер x2");
+      setState(() {});
+    });
 
-      if (userData.isNotEmpty) {
-        userTotalData = userData[0]['user_total'];
-        skills = userData[0]['skills'];
+    _userData.snapshots().listen((snapshot) {
+      if (snapshot.data() != null) {
+        userTotalData = snapshot.data()!['user_total'];
+        skills = snapshot.data()!['skills'];
         print(skills);
         setState(() {});
       }
-
-    } catch (e) {
-      print('Exception occurred: $e');
-    }
+    });
   }
-
-  // Future<void> getTasks() async{
-  //   QuerySnapshot querySnapshot = await _collectionRef.get();
-  //   final allTasks = querySnapshot.docs.map((doc) => tasks.from(doc)).toList();
-  //   allTasks.map((Task task){
-  //     tasks.add(task);
-  //   });
-  // }
 
   @override
   void initState() {
     super.initState();
     createVertices();
     createEdges();
+    _userData = FirebaseFirestore.instance.collection('users-list').doc(FirebaseAuth.instance.currentUser?.uid ?? '');
     getUserData();
     // getTasks();
   }
@@ -251,25 +231,53 @@ class _DrawingScreenState extends State<DrawingScreen> {
                               ),
                               borderRadius: BorderRadius.circular(10.0),
                             ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child:  skills.length > 0 ? ListView.builder(
-                                itemCount: skills.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  final skill = skills[index];
-                                  return Column(
-                                    children: [
-                                      SvgPicture.network(
-                                        skill['image_item'],
-                                        width: 40,
-                                        height: 40,
+                            child: SingleChildScrollView(
+                              child: Column(
+                                children: [
+                                  const SizedBox(height: 10),
+                                  const Text("Выши доступные навыки"),
+                                  Padding(
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: skills.where((element) => element['title'] == "Тайм-экстендер x1").isNotEmpty
+                                        ? ListTile(
+                                      title: Text(skills[0]['title'].toString()),
+                                      subtitle: Wrap(
+                                        children: [
+                                          SvgPicture.network(
+                                            skills[0]['image_item'],
+                                            width: 40,
+                                            height: 40,
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Text('Количество: ${skills.where((element) => element['title'] == "Тайм-экстендер x1").length}'),
+                                        ],
                                       ),
-                                      Text(skill['title'].toString()),
-                                    ],
-                                  );
-                                }
-                              ) : Text("Нет у вас навыков")
-                            ),
+                                    )
+                                        : const Text(""),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: skills.where((element) => element['title'] == "Тайм-экстендер x2").isNotEmpty
+                                        ? ListTile(
+                                        title: Text(
+                                          skills.firstWhere((element) => element['title'] == "Тайм-экстендер x2")['title'].toString()),
+                                      subtitle: Wrap(
+                                        children: [
+                                          SvgPicture.network(
+                                            skills[0]['image_item'],
+                                            width: 40,
+                                            height: 40,
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Text('Количество: ${skills.where((element) => element['title'] == "Тайм-экстендер x2").length}'),
+                                        ],
+                                      ),
+                                    )
+                                        : const Text(""),
+                                  ),
+                                ],
+                              ),
+                            )
                           ),
                         )
                       ),
@@ -466,13 +474,17 @@ class _DrawingScreenState extends State<DrawingScreen> {
                                                 ),
                                               ),
                                               actions: [
-                                                TextButton(
+                                                ElevatedButton(
                                                   onPressed: () {
                                                     Navigator.of(context).pop();
                                                   },
+                                                  style: ButtonStyle(
+                                                      backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                                                      foregroundColor: MaterialStateProperty.all<Color>(Colors.white)
+                                                  ),
                                                   child: const Text('Закрыть'),
                                                 ),
-                                                TextButton(
+                                                ElevatedButton(
                                                   onPressed: () {
                                                     Navigator.pop(context);
                                                     Navigator.push(context, MaterialPageRoute<void>(
@@ -486,6 +498,10 @@ class _DrawingScreenState extends State<DrawingScreen> {
                                                       },
                                                     ));
                                                   },
+                                                  style: ButtonStyle(
+                                                      backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                                                      foregroundColor: MaterialStateProperty.all<Color>(Colors.white)
+                                                  ),
                                                   child: const Text('Начать'),
                                                 )
                                               ]

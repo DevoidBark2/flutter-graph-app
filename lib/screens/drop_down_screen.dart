@@ -74,9 +74,11 @@ class _DropDownScreenState extends State<DropDownScreen>{
                 const SizedBox(height: 35.0),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context),
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(Colors.deepOrangeAccent),
-                  ),
+                    style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                        foregroundColor: MaterialStateProperty.all<Color>(Colors.white)
+                    ),
+
                   child: const Text('Закрыть')
                 ),
               ],
@@ -107,7 +109,8 @@ class _DropDownScreenState extends State<DropDownScreen>{
               ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(Colors.deepOrangeAccent),
+                      backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                      foregroundColor: MaterialStateProperty.all<Color>(Colors.white)
                   ),
                   child: const Text('Закрыть')
               ),
@@ -202,8 +205,8 @@ class _DropDownScreenState extends State<DropDownScreen>{
                                 context: context,
                                 builder: (BuildContext context) {
                                   return AlertDialog(
-                                    title: Text("Навык"),
-                                    content: Text("Навыки помогут помочь в выполнении задания"),
+                                    title: const Text("Навык"),
+                                    content: const Text("Навыки помогут помочь в выполнении задания"),
                                     actions: [
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -257,8 +260,9 @@ class _DropDownScreenState extends State<DropDownScreen>{
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.lightGreen
+                                          style: ButtonStyle(
+                                              backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                                              foregroundColor: MaterialStateProperty.all<Color>(Colors.white)
                                           ),
                                           onPressed: (){
                                             handleBuySkill(item);
@@ -276,8 +280,9 @@ class _DropDownScreenState extends State<DropDownScreen>{
                                           ),
                                         ),
                                         ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.lightGreen
+                                          style: ButtonStyle(
+                                              backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                                              foregroundColor: MaterialStateProperty.all<Color>(Colors.white)
                                           ),
                                           child: const Text('OK'),
                                           onPressed: () => Navigator.of(context).pop(),

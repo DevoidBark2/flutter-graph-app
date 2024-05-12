@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:elegant_notification/elegant_notification.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:test_project/models/Task.dart';
 
@@ -48,8 +49,8 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
     super.initState();
     initializePoints();
     getUserData();
-    _startTimer();
-    time.value = widget.task.time_level;
+    // _startTimer();
+    // time.value = widget.task.time_level;
   }
 
   void initializePoints() {
@@ -133,31 +134,43 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
     }
   }
 
-
-
-  void _checkPlangraph(){
-    // final a = widget.task.answer;
-    // print(a);
-    // print(time.value);
-
-    double getPercentage(int timeLeft, int totalTime) {
-      if (timeLeft == 0) {
-        return 0.0;
-      }
-      return totalTime * 0.05;
+  double getPercentage(int timeLeft, int totalPrice) {
+    if (timeLeft == 0) {
+      return 0;
     }
+    return (totalPrice * (timeLeft.toDouble() / widget.task.time_level.toDouble()));
+  }
 
+  int resultPrice(int price) {
     double percentage = 0.0;
     if (time.value > 0) {
-      // Игрок получает максимальное количество очков
-      print("Время не вышло,кол-во очков: ${widget.task.total}");
+      return price;
     } else {
       final total = widget.task.total;
-      percentage = getPercentage(time.value, widget.task.time_level);
-      final deductedPoints = total * percentage;
+      percentage = getPercentage(time.value.toInt(), total);
+      final deductedPoints = total * percentage ~/ 100;
       final price = total - deductedPoints;
-      print("Время вышло,кол-во очков: ${price}");
+      return price.toInt();
     }
+  }
+
+
+  Future<void> setNewPrice(int newPrice) async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('users-list').where('uid', isEqualTo: user?.uid ?? '').get();
+    final userData = querySnapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+
+    int totalCurrentUser = userData[0]['user_total'];
+
+    await FirebaseFirestore.instance.collection('users-list').doc(user?.uid).update({
+      'user_total': totalCurrentUser + newPrice,
+      'skills':skills
+    });
+  }
+
+  void _checkPlangraph(){
+    final a = widget.task.answer;
 
     showDialog(
       context: context,
@@ -176,32 +189,31 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
                   ),
                   child: const Text('Да'),
                   onPressed: () {
-                    Navigator.pop(context);
-                    Navigator.pop(context);
-                    // ScaffoldMessenger.of(context).showSnackBar(
-                    //   const SnackBar(
-                    //     content: Text('Вы вошли в профиль!'),
-                    //     duration: Duration(seconds: 3),
-                    //     backgroundColor: Colors.green,
-                    //     behavior: SnackBarBehavior.floating,
-                    //     shape: RoundedRectangleBorder(
-                    //       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                    //     ),
-                    //   ),
-                    // );
+                    final answer = widget.task.answer;
 
-                    final snackBar = SnackBar(
-                      content: Text("asdasdad"),
-                      backgroundColor: Colors.indigo
+                    if(answer){
+                      // final coins = resultPrice(widget.task.total);
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+
+                      setNewPrice(widget.task.total);
+
+                      final snackBar = SnackBar(
+                          content: Text("Молодец,ты выполнил задание! Получай ${widget.task.total} очков"),
+                          backgroundColor: Colors.green
+                      );
+
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      return;
+                    }
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                    const snackBar = SnackBar(
+                        content: Text("Задание выполнено неверно!"),
+                        backgroundColor: Colors.red
                     );
 
                     ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
-                    // SnackBarService.showSnackBar(
-                    //     context,
-                    //     'Введите E-mail!',
-                    //     false
-                    // );
                   },
                 ),
                 ElevatedButton(
@@ -210,7 +222,33 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
                       foregroundColor: MaterialStateProperty.all<Color>(Colors.white)
                   ),
                   child: const Text('Нет'),
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: () {
+                    final answer = widget.task.answer;
+                    // var price = widget.task.total;
+                    if(answer == false){
+                      // final coins = resultPrice(widget.task.total);
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                      setNewPrice(widget.task.total);
+
+                      final snackBar = SnackBar(
+                        content: Text('Молодец, ты выполнил задание! Получай ${widget.task.total} очков'),
+                        backgroundColor: Colors.green,
+                      );
+
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      return;
+                    }
+
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                    const snackBar = SnackBar(
+                        content: Text("Задание выполнено неверно!"),
+                        backgroundColor: Colors.red
+                    );
+
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  },
                 ),
               ],
             )
@@ -218,123 +256,8 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
         );
       },
     );
-    // print(widget.task.graph);
-    // print(points);
-    // bool hasIntersections = checkForIntersections(widget.task.graph, points);
-    //
-    // if (hasIntersections) {
-    //   print('Граф имеет пересечения рёбер.');
-    // } else {
-    //   print('Граф не имеет пересечений рёбер.');
-    // }
+
   }
-
-  // bool checkForIntersections(List<List<int>> adjacencyMatrix, List<Offset> points) {
-  //   // for (int i = 0; i < adjacencyMatrix.length; i++) {
-  //   //   for (int j = i + 1; j < adjacencyMatrix[i].length; j++) {
-  //   //     if (adjacencyMatrix[i][j] == 1 && !haveCommonVertex(adjacencyMatrix, i, j)) {
-  //   //       if (doIntersectSimple(points[i], points[j], points[j], points[i])) {
-  //   //         return true; // Найдено пересечение
-  //   //       }
-  //   //     }
-  //   //   }
-  //   // }
-  //
-  //   // Проверяем все возможные комбинации вершин на пересечение ребер
-  //   for (int i = 0; i < adjacencyMatrix.length; i++) {
-  //     for (int j = 0; j < adjacencyMatrix[i].length; j++) {
-  //       if (adjacencyMatrix[i][j] == 1) {
-  //         for (int k = 0; k < adjacencyMatrix.length; k++) {
-  //           if (k != i && adjacencyMatrix[k][j] == 1) {
-  //             if (doIntersectSimple(points[i], points[j], points[k], points[i])) {
-  //               return true; // Найдено пересечение
-  //             }
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
-  //
-  //   return false; // Пересечений не найдено
-  // }
-  //
-  // bool haveCommonVertex(List<List<int>> adjacencyMatrix, int vertex1, int vertex2) {
-  //   for (int k = 0; k < adjacencyMatrix[vertex1].length; k++) {
-  //     if (adjacencyMatrix[vertex1][k] == 1 && adjacencyMatrix[vertex2][k] == 1) {
-  //       return true; // Найдена общая вершина
-  //     }
-  //   }
-  //
-  //   return false; // Общей вершины нет
-  // }
-  //
-  // bool doIntersectSimple(Offset p1, Offset q1, Offset p2, Offset q2) {
-  //   int o1 = orientation(p1, q1, p2);
-  //   int o2 = orientation(p1, q1, q2);
-  //   int o3 = orientation(p2, q2, p1);
-  //   int o4 = orientation(p2, q2, q1);
-  //
-  //   if ((o1 < 0 && o2 >= 0) || (o1 >= 0 && o2 < 0)) {
-  //     return true; // Отрезки пересекаются
-  //   }
-  //   if ((o3 < 0 && o4 >= 0) || (o3 >= 0 && o4 < 0)) {
-  //     return true; // Отрезки пересекаются
-  //   }
-  //
-  //   // Проверяем, лежат ли точки на одной прямой
-  //   if (orientation(p1, p2, q1) == 0 && onSegment(p1, p2, q1)) {
-  //     return true;
-  //   }
-  //   if (orientation(p1, p2, q2) == 0 && onSegment(p1, p2, q2)) {
-  //     return true;
-  //   }
-  //   if (orientation(p2, q2, p1) == 0 && onSegment(p2, q2, p1)) {
-  //     return true;
-  //   }
-  //   if (orientation(p2, q2, q1) == 0 && onSegment(p2, q2, q1)) {
-  //     return true;
-  //   }
-  //
-  //   return false; // Отрезки не пересекаются
-  // }
-  //
-  //
-  // bool onSegment(Offset p, Offset q, Offset r) {
-  //   if (!((r.dx <= max(p.dx, q.dx)) && (r.dx >= min(p.dx, q.dx)) &&
-  //       (r.dy <= max(p.dy, q.dy)) && (r.dy >= min(p.dy, q.dy)))) {
-  //     return false;
-  //   }
-  //
-  //   double o1 = (q.dy - p.dy) * (r.dx - q.dx) - (q.dx - p.dx) * (r.dy - q.dy);
-  //   double o2 = (q.dy - r.dy) * (p.dx - q.dx) - (q.dx - r.dx) * (p.dy - q.dy);
-  //
-  //   return (o1 >= 0) == (o2 >= 0);
-  // }
-  //
-  // int orientation(Offset p, Offset q, Offset r) {
-  //   double val = (q.dy - p.dy) * (r.dx - q.dx) - (q.dx - p.dx) * (r.dy - q.dy);
-  //   if (val == 0) return 0;
-  //   return 1;
-  // }
-  //
-  // bool doIntersect(Offset p1, Offset q1, Offset p2, Offset q2) {
-  //   int o1 = orientation(p1, q1, p2);
-  //   int o2 = orientation(p1, q1, q2);
-  //   int o3 = orientation(p2, q2, p1);
-  //   int o4 = orientation(p2, q2, q1);
-  //
-  //   if (o1 != o2 && o3 != o4) {
-  //     return true;
-  //   }
-  //
-  //   if (o1 == 0 && onSegment(p1, p2, q1)) return true;
-  //   if (o2 == 0 && onSegment(p1, q2, q1)) return true;
-  //   if (o3 == 0 && onSegment(p2, p1, q2)) return true;
-  //   if (o4 == 0 && onSegment(p2, q1, q2)) return true;
-  //
-  //   return false;
-  // }
-
 
   final colors = [
     const Color(0xffe8e809),
@@ -363,16 +286,16 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Container(
-              child: isTimeEnd.value
-                  ? Text(
-                  "Оставшееся время: ${time.value}",
-                  style: const TextStyle(
-                      color: Colors.red
-                  )
-              )
-                  : Text( "Оставшееся время: ${time.value}")
-          ),
+          // Container(
+          //     child: isTimeEnd.value
+          //         ? Text(
+          //         "Оставшееся время: ${time.value}",
+          //         style: const TextStyle(
+          //             color: Colors.red
+          //         )
+          //     )
+          //         : Text( "Оставшееся время: ${time.value}")
+          // ),
           GestureDetector(
             onLongPressStart: (details) {
               final tapPosition = details.localPosition;
@@ -422,7 +345,7 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
                     title: const Text('Все навыки'),
                     content: SizedBox(
                       child: Wrap(
-                        spacing: 8.0, // gap between adjacent chips
+                        spacing: 8.0,
                         runSpacing: 4.0,
                         children: skills.isNotEmpty ? List.generate(
                         skills.length,
@@ -458,8 +381,6 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
                               }).catchError((error) {
                                 print('Error removing skill from user-list: $error');
                               });
-
-
                             }
                           },
                           child: Padding(
@@ -476,7 +397,8 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
                             ),
                           ),
                         ),
-                      ) :
+                      )
+                            :
                         [
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -486,7 +408,7 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
                                 height: 70.0,
                                 width: 70.0,
                               ),
-                              Text("Список пуст!")
+                              const Text("Список пуст!")
                             ],
                           )
                         ],
@@ -509,6 +431,10 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
             child: ElevatedButton(
               onPressed: _checkPlangraph,
               child: const Text('Закончить'),
+              style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                  foregroundColor: MaterialStateProperty.all<Color>(Colors.white)
+              ),
             ),
           )
         ],

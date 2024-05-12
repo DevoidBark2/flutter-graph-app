@@ -1,9 +1,5 @@
 import 'package:bulleted_list/bulleted_list.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:test_project/screens/instruction_screen.dart';
-import 'package:test_project/screens/rules_game.dart';
-import 'package:test_project/screens/settings_screen.dart';
 
 class TheoryScreen2 extends StatefulWidget {
   const TheoryScreen2({Key? key}) : super(key: key);

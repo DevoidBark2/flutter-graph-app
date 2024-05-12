@@ -119,8 +119,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           actions: [
                             ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.lightGreen
+                              style: ButtonStyle(
+                                  backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                                  foregroundColor: MaterialStateProperty.all<Color>(Colors.white)
                               ),
                               child: const Text('OK'),
                               onPressed: () => Navigator.of(context).pop(),
@@ -171,8 +172,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           actions: [
                             ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.lightGreen
+                              style: ButtonStyle(
+                                  backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                                  foregroundColor: MaterialStateProperty.all<Color>(Colors.white)
                               ),
                               child: const Text('OK'),
                               onPressed: () => Navigator.of(context).pop(),
