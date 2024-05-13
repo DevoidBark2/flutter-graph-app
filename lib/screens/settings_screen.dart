@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+// import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 enum TypeEdges { Digit, Letter }
 
@@ -111,11 +111,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         return AlertDialog(
                           title: const Text('Выберите цвет'),
                           content: SingleChildScrollView(
-                            child: ColorPicker(
-                              pickerColor: Color(selectedColorEdges),
-                              onColorChanged: changeColorEdges,
-                              pickerAreaHeightPercent: 0.5,
-                            ),
+                            child: Text('asd')
                           ),
                           actions: [
                             ElevatedButton(
@@ -164,11 +160,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         return AlertDialog(
                           title: const Text('Выберите цвет'),
                           content: SingleChildScrollView(
-                            child: ColorPicker(
-                              pickerColor: Color(selectedColorVertices),
-                              onColorChanged: changeColorVertices,
-                              pickerAreaHeightPercent: 0.5,
-                            ),
+                            child: Text('asdasd')
                           ),
                           actions: [
                             ElevatedButton(

@@ -30,7 +30,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_lints: ^2.0.1
+  flutter_lints: ^4.0.0
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -44,16 +44,17 @@ dependencies:
   flutter_colorpicker: ^1.0.3
   bulleted_list: ^0.0.1+0.1a
   flutter_easyloading: ^3.0.5
-  postgres: ^2.6.2
-  flutter_svg: ^1.0.0
+  postgres: ^3.2.0
+  flutter_svg:  ^2.0.10+1
   flutter_spinkit: ^5.2.0
   carousel_slider: ^4.2.1
   image_picker: ^1.0.4
   flutter_launcher_icons: ^0.13.1
-  flutter_widget_from_html: ^0.9.1
+  flutter_widget_from_html: ^0.15.0
   flutter_html: ^3.0.0-beta.2
   firebase_storage: ^11.6.5
   elegant_notification: ^2.1.2
+  tutorial_coach_mark: ^1.2.11
 
 dev_dependencies:
   flutter_test:

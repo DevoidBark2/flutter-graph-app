@@ -461,14 +461,18 @@ class _DrawingScreenState extends State<DrawingScreen> {
                                         builder: (BuildContext context){
                                           return AlertDialog(
                                               title: Text('Задание ${task.id}'),
-                                              content: Container(
+                                              content: SizedBox(
                                                 height: 100.0,
                                                 child: Padding(
-                                                  padding: EdgeInsets.all((10.0)),
+                                                  padding: const EdgeInsets.all((10.0)),
                                                   child: Column(
                                                     children: [
-                                                      Text('${task.description}'),
-                                                      Text('Время выполнения:${task.time_level} сек.')
+                                                      // Text('${task.description}'),
+                                                      Text('Время выполнения:${task.time_level} сек.',
+                                                        style: const TextStyle(
+                                                          fontSize: 16
+                                                        ),
+                                                      )
                                                     ],
                                                   ),
                                                 ),
