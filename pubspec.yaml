@@ -55,6 +55,7 @@ dependencies:
   firebase_storage: ^11.6.5
   elegant_notification: ^2.1.2
   tutorial_coach_mark: ^1.2.11
+  fl_chart: ^0.68.0
 
 dev_dependencies:
   flutter_test:
@@ -103,6 +104,13 @@ flutter:
     - assets/images/right_icon.svg
     - assets/images/warning_icon.svg
     - assets/images/empty_icon.svg
+    - assets/images/demo-gamma/gamma_alg_1.png
+    - assets/images/demo-gamma/gamma_alg_2.png
+    - assets/images/demo-gamma/gamma_alg_3.png
+    - assets/images/demo-gamma/gamma_alg_4.png
+    - assets/images/demo-gamma/gamma_alg_5.png
+    - assets/images/demo-gamma/gamma_alg_6.png
+    - assets/images/demo-gamma/gamma_alg_7.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

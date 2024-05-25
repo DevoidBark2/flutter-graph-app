@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -17,7 +18,7 @@ import 'auth/login_screen.dart';
 import 'level_game_screen.dart';
 
 class DrawingScreen extends StatefulWidget {
-  const DrawingScreen({Key? key}) : super(key: key);
+  const DrawingScreen({super.key});
 
   @override
   State<DrawingScreen> createState() => _DrawingScreenState();
@@ -51,7 +52,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
 
   int userTotalData = 0;
   late List skills = [];
-  late List skills1 = [];
+  late List tips = [];
 
 
 
@@ -59,7 +60,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
     _userData.get().then((value) {
       userTotalData = value.data()!['user_total'];
       skills = value.data()!['skills'];
-      // skills1 = value.data()!['skills'].where((element) => element['title'] == "Тайм-экстендер x2");
+      tips = value.data()!['tips'];
       setState(() {});
     });
 
@@ -67,6 +68,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
       if (snapshot.data() != null) {
         userTotalData = snapshot.data()!['user_total'];
         skills = snapshot.data()!['skills'];
+        tips = snapshot.data()!['tips'];
         print(skills);
         setState(() {});
       }
@@ -78,9 +80,11 @@ class _DrawingScreenState extends State<DrawingScreen> {
     super.initState();
     createVertices();
     createEdges();
-    _userData = FirebaseFirestore.instance.collection('users-list').doc(FirebaseAuth.instance.currentUser?.uid ?? '');
-    getUserData();
-    // getTasks();
+
+    if(user != null){
+      _userData = FirebaseFirestore.instance.collection('users-list').doc(FirebaseAuth.instance.currentUser?.uid ?? '');
+      getUserData();
+    }
   }
 
   void createVertices() {
@@ -108,6 +112,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
       }
     }
   }
+
   double _currentValue = 20;
   bool showFilterBlock = false;
   Future<void> _refreshData() async {
@@ -235,7 +240,13 @@ class _DrawingScreenState extends State<DrawingScreen> {
                               child: Column(
                                 children: [
                                   const SizedBox(height: 10),
-                                  const Text("Выши доступные навыки"),
+                                  const Text(
+                                      "Ваши доступные навыки",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 16
+                                    ),
+                                  ),
                                   Padding(
                                     padding: const EdgeInsets.all(10.0),
                                     child: skills.where((element) => element['title'] == "Тайм-экстендер x1").isNotEmpty
@@ -270,6 +281,56 @@ class _DrawingScreenState extends State<DrawingScreen> {
                                           ),
                                           const SizedBox(width: 10),
                                           Text('Количество: ${skills.where((element) => element['title'] == "Тайм-экстендер x2").length}'),
+                                        ],
+                                      ),
+                                    )
+                                        : const Text(""),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  const Text(
+                                    "Ваши доступные подсказки",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 16
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: tips.where((element) => element['title'] == "Помощь зала").isNotEmpty
+                                        ? ListTile(
+                                      title: Text(
+                                          tips.where((element) => element['title'] == "Помощь зала").first['title'].toString()
+                                      ),
+                                      subtitle: Wrap(
+                                        children: [
+                                          SvgPicture.network(
+                                            tips.firstWhere((element) => element['title'] == "Помощь зала")['image_item'],
+                                            width: 40,
+                                            height: 40,
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Text('Количество: ${tips.where((element) => element['title'] == "Помощь зала").length}'),
+                                        ],
+                                      ),
+                                    )
+                                        : const Text(""),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: tips.where((element) => element['title'] == "50 / 50").isNotEmpty
+                                        ? ListTile(
+                                      title: Text(
+                                          tips.where((element) => element['title'] == "50 / 50").first['title'].toString()),
+                                      subtitle: Wrap(
+                                        children: [
+                                          SvgPicture.network(
+                                            tips.firstWhere((element) => element['title'] == "50 / 50")['image_item'],
+                                            width: 40,
+                                            height: 40,
+
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Text('Количество: ${tips.where((element) => element['title'] == "50 / 50").length}'),
                                         ],
                                       ),
                                     )
@@ -609,7 +670,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) {
-                          return HomePage(selectedIndex: 5);
+                          return HomePage(selectedIndex: 6);
                         })
                       );
                     },

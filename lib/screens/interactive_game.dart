@@ -148,6 +148,28 @@ class _InteractiveGameState extends State<InteractiveGame> {
   }
 
   Future<void> saveUserData() async {
+    if(firstNameController.text.trim() == ""){
+      Navigator.of(context).pop();
+      firstNameController.text = firstName!;
+      secondNameController.text = secondName!;
+      SnackBarService.showSnackBar(
+          context,
+          'Имя не может быть пустым,попробуйте еще раз!',
+          true
+      );
+      return;
+    }
+    if(secondNameController.text.trim() == ""){
+      Navigator.of(context).pop();
+      firstNameController.text = firstName!;
+      secondNameController.text = secondName!;
+      SnackBarService.showSnackBar(
+          context,
+          'Фамилия не может быть пустым,попробуйте еще раз!',
+          true
+      );
+      return;
+    }
     await FirebaseFirestore.instance.collection('users-list').doc(user?.uid).update({
       'first_name': firstNameController.text.trim(),
       'second_name': secondNameController.text.trim(),
@@ -164,12 +186,28 @@ class _InteractiveGameState extends State<InteractiveGame> {
     );
   }
 
+  Future<void> _deleteAccountHandler() async {
+    var user = FirebaseAuth.instance.currentUser!;
+    FirebaseFirestore.instance.collection('users-list').doc(user.uid).delete();
+    await user.delete();
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => HomePage(selectedIndex: 0)),
+    );
+    SnackBarService.showSnackBar(
+        context,
+        'Вы успешно удалили аккаунт!',
+        false
+    );
+  }
+
   Future<void> deleteAccount() async {
     showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          content: Container(
+          content: SizedBox(
             height: 100,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -190,7 +228,7 @@ class _InteractiveGameState extends State<InteractiveGame> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: _deleteAccountHandler,
               child: const Text('Удалить'),
             ),
             TextButton(

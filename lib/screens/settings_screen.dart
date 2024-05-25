@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
@@ -111,7 +112,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         return AlertDialog(
                           title: const Text('Выберите цвет'),
                           content: SingleChildScrollView(
-                            child: Text('asd')
+                            child: ColorPicker(
+                              pickerColor: Color(selectedColorEdges),
+                              onColorChanged: changeColorEdges,
+                              pickerAreaHeightPercent: 0.5,
+                            ),
                           ),
                           actions: [
                             ElevatedButton(
@@ -160,7 +165,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         return AlertDialog(
                           title: const Text('Выберите цвет'),
                           content: SingleChildScrollView(
-                            child: Text('asdasd')
+                            child: ColorPicker(
+                              pickerColor: Color(selectedColorVertices),
+                              onColorChanged: changeColorVertices,
+                              pickerAreaHeightPercent: 0.5,
+                            ),
                           ),
                           actions: [
                             ElevatedButton(

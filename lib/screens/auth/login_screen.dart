@@ -46,14 +46,22 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
   Future<void> login (BuildContext context) async {
     final navigaor = Navigator.of(context);
-    final isValid = formKey.currentState!.validate();
-
-    if(!isValid) return;
 
     if(emailController.text.trim() == ""){
       SnackBarService.showSnackBar(
           context,
-          'Введите E-mail!',
+          'E-mail не может быть пустым!',
+          true
+      );
+      return;
+    }
+
+    final regex = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+$");
+
+    if (!regex.hasMatch(emailController.text.trim())) {
+      SnackBarService.showSnackBar(
+          context,
+          'Неверный формат email!',
           true
       );
       return;

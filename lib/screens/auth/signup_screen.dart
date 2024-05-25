@@ -50,7 +50,52 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     final navigator = Navigator.of(context);
     final isValid = formKey.currentState!.validate();
 
-    if(!isValid) return;
+    if(firstName.text.trim() == ""){
+      SnackBarService.showSnackBar(
+          context,
+          'Имя не может быть пустым!',
+          true
+      );
+      return;
+    }
+
+    if(secondName.text.trim() == ""){
+      SnackBarService.showSnackBar(
+          context,
+          'Фамилия не может быть пустым!',
+          true
+      );
+      return;
+    }
+
+    if(emailController.text.trim() == ""){
+      SnackBarService.showSnackBar(
+          context,
+          'E-mail не может быть пустым!',
+          true
+      );
+      return;
+    }
+
+    final regex = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+$");
+
+    if (!regex.hasMatch(emailController.text.trim())) {
+      SnackBarService.showSnackBar(
+          context,
+          'Неверный формат email!',
+          true
+      );
+      return;
+    }
+
+    if(passwordController.text.trim() == ""){
+      SnackBarService.showSnackBar(
+          context,
+          'Пароль не может быть пустым!',
+          true
+      );
+      return;
+    }
 
     try {
       UserCredential user = await FirebaseAuth.instance.createUserWithEmailAndPassword(
@@ -67,7 +112,8 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         second_name: secondName.text.trim(),
           user_total: 0,
         profile_image: 'https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg',
-        skills: []
+        skills: [],
+        tips: []
       );
 
       FirebaseFirestore.instance.collection('users-list').doc(userID).set(userData.toJson());
@@ -76,6 +122,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       Navigator.of(context).pop();
 
     } on FirebaseAuthException catch (e) {
+      print(e.code);
       if (e.code == 'email-already-in-use') {
         SnackBarService.showSnackBar(
             context,
@@ -83,8 +130,12 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
             true
         );
         return;
-      } else {
-        // Обработка других возможных исключений FirebaseAuthException
+      }  else if (e.code == 'weak-password') {
+        SnackBarService.showSnackBar(
+            context,
+            'Пароль должен быть длиной не менее 6 символов!',
+            true
+        );
       }
     }
   }

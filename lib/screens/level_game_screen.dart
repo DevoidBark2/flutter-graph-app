@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:test_project/models/Task.dart';
 
 class LevelGameScreen extends StatefulWidget {
@@ -36,9 +37,28 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
 
   int? selectedColor;
 
+  int colorVertices = 0;
+  int colorEdges = 0;
+
+  void getColorVertices() async{
+    var storage = await SharedPreferences.getInstance();
+    setState(() {
+      colorVertices = storage.getInt("indexColorVertices") ?? Colors.red.value;
+    });
+  }
+  void getColorEdges() async{
+    var storage = await SharedPreferences.getInstance();
+    setState(() {
+      colorEdges = storage.getInt("indexColorEdges") ?? Colors.red.value;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+    getColorEdges();
+    getColorVertices();
+
     initializePoints();
     getUserData();
     _startTimer();
@@ -274,7 +294,9 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
                     selectedIndex: selectedVertexOffset,
                     color: selectedColor,
                     points:points,
-                    colorsVertex: colorsGraph
+                    colorsVertex: colorsGraph,
+                    colorVertices:colorVertices,
+                    colorEdges:colorEdges,
                 ),
               ),
             ),
@@ -365,8 +387,8 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
               );
             },
             style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all<Color>(const Color(0xFF678094)),
-                foregroundColor: WidgetStateProperty.all<Color>(Colors.white)
+                backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                foregroundColor: MaterialStateProperty.all<Color>(Colors.white)
             ),
             child: const Text('Навыки'),
           ),
@@ -377,8 +399,8 @@ class _LevelGameScreenState extends State<LevelGameScreen> {
             child: ElevatedButton(
               onPressed: _checkPlanGraph,
               style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all<Color>(const Color(0xFF678094)),
-                  foregroundColor: WidgetStateProperty.all<Color>(Colors.white)
+                  backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF678094)),
+                  foregroundColor: MaterialStateProperty.all<Color>(Colors.white)
               ),
               child: const Text('Проверить'),
             ),
@@ -395,25 +417,29 @@ class OpenPainter extends CustomPainter {
   final List<Offset> points;
   final int? color;
   final List<Vertex> colorsVertex;
+  final int colorVertices;
+  final int colorEdges;
   OpenPainter({
     Key? key,
     required this.matrix,
     required this.selectedIndex,
     required this.points,
     required this.color,
-    required this.colorsVertex
+    required this.colorsVertex,
+    required this.colorVertices,
+    required this.colorEdges
   });
   @override
   @override
   void paint(Canvas canvas, Size size) {
 
-    var drawLines = Paint()..color = const Color(0xffb69d9d)..strokeWidth = 2;
+    var drawLines = Paint()..color = Color(colorEdges)..strokeWidth = 2;
 
     int getVertexColor(List<Vertex> colorsGraph, int selectedIndex) {
       return colorsGraph.firstWhere((Vertex vertex) => vertex.index == selectedIndex, ).color;
     }
 
-    var selectedIndexPaint =  Paint()..color = Color(color != null ? getVertexColor(colorsVertex, selectedIndex!) : 0xffb69d9d)..strokeCap = StrokeCap.round..strokeWidth = 20;
+    var selectedIndexPaint =  Paint()..color = Color(colorVertices)..strokeCap = StrokeCap.round..strokeWidth = 20;
 
     for (var i = 0; i < matrix.length; i++) {
       for (var j = 0; j < matrix.length; j++) {

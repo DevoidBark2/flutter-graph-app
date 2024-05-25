@@ -29,17 +29,23 @@ class _DropDownScreenState extends State<DropDownScreen>{
 
     int totalCurrentUser = userData[0]['user_total'];
 
-    List skills = userData[0]['skills'];
-    print(userData[0]['skills']);
-    skills.add(item.toJson());
-    print("__________________________");
-    print(skills);
-
     if(totalCurrentUser < priceValue){
       return false;
     }
 
-    print(item.toJson());
+    if(type == "tips-list"){
+      List tips = userData[0]['tips'];
+      tips.add(item.toJson());
+
+      await FirebaseFirestore.instance.collection('users-list').doc(user?.uid).update({
+        'user_total': totalCurrentUser - priceValue,
+        'tips':tips
+      });
+      return true;
+    }
+
+    List skills = userData[0]['skills'];
+    skills.add(item.toJson());
 
     await FirebaseFirestore.instance.collection('users-list').doc(user?.uid).update({
       'user_total': totalCurrentUser - priceValue,
@@ -104,7 +110,7 @@ class _DropDownScreenState extends State<DropDownScreen>{
                 height: 50,
               ),
               const SizedBox(height: 15.0),
-              const Text("Вы добавили новый навык!"),
+              Text(type == "skills-list" ? "Вы добавили новый навык!" : "Вы добавили новую подсказку"),
               const SizedBox(height: 35.0),
               ElevatedButton(
                   onPressed: () => Navigator.pop(context),
@@ -205,8 +211,12 @@ class _DropDownScreenState extends State<DropDownScreen>{
                                 context: context,
                                 builder: (BuildContext context) {
                                   return AlertDialog(
-                                    title: const Text("Навык"),
-                                    content: const Text("Навыки помогут помочь в выполнении задания"),
+                                    title: Text(type == "skills-list" ? "Навык" : "Подсказка"),
+                                    content: Text(
+                                        type == "skills-list" ?
+                                        "Навыки помогут помочь в выполнении задания" :
+                                        "Подсказки помогут в ответе на вопросы"
+                                    ),
                                     actions: [
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
